@@ -1,0 +1,142 @@
+<main class="invitation-page">
+  <article class="invitation-card">
+    <a class="invitation-brand" routerLink="/" aria-label="Return to Wedding Event"
+      >wedding event<span>.</span></a
+    >
+    @if (guest(); as invitedGuest) {
+      <span class="invitation-flower" aria-hidden="true">✳</span>
+      <p class="invitation-kicker">WITH JOY IN OUR HEARTS</p>
+      <h1>Chanthy <span>&amp;</span> Koko</h1>
+      <p class="invitation-intro">
+        would love for you to join them as they celebrate their wedding
+      </p>
+      <div class="invitation-event">
+        <strong>Saturday, October 24, 2026</strong>
+        <span>Rosewood Garden · Phnom Penh</span>
+      </div>
+      <div class="invitation-divider"><span>♡</span></div>
+
+      <section class="invitation-story" aria-labelledby="story-title">
+        <p class="invitation-section-kicker">A LITTLE SNEAK PEEK</p>
+        <h2 id="story-title">Our story in photos</h2>
+        @if (photos().length) {
+          <div class="invitation-gallery">
+            @for (photo of photos(); track photo.id) {
+              <figure>
+                <img [src]="photo.url" [alt]="'Pre-wedding photo: ' + photo.name" />
+              </figure>
+            }
+          </div>
+        } @else {
+          <p class="invitation-note">A few favorite moments will be shared here soon.</p>
+        }
+      </section>
+
+      <section class="invitation-schedule" aria-labelledby="timeline-title">
+        <p class="invitation-section-kicker">CELEBRATE WITH US</p>
+        <h2 id="timeline-title">The day, at a glance</h2>
+        @for (day of scheduleDays(); track day.date) {
+          <div class="invite-day">
+            <h3>{{ day.date + 'T12:00:00Z' | date: 'EEEE, MMMM d, y' : '+0000' }}</h3>
+            @for (item of day.items; track item.id) {
+              <article class="invite-timeline-item">
+                <time [attr.datetime]="day.date + 'T' + item.time">
+                  <strong>{{ item.time }}</strong>
+                  <span>{{ item.endTime }}</span>
+                </time>
+                <div>
+                  <strong class="invite-event-title">{{ item.title }}</strong>
+                  <span class="invite-event-location">{{ item.location }}</span>
+                </div>
+              </article>
+            }
+          </div>
+        } @empty {
+          <p class="invitation-note">The day's schedule will be shared soon.</p>
+        }
+      </section>
+
+      <section class="invitation-menu" aria-labelledby="menu-title">
+        <p class="invitation-section-kicker">SOMETHING DELICIOUS AWAITS</p>
+        <h2 id="menu-title">A taste of the celebration</h2>
+        <p class="menu-intro">
+          Choose a meal when you RSVP. Please share any additional dietary needs with the couple.
+        </p>
+        <div class="invitation-meals">
+          @for (meal of meals; track meal.name) {
+            <article class="invitation-meal">
+              <span class="meal-flower" aria-hidden="true">✳</span>
+              <h3>{{ meal.name }}</h3>
+              <p>{{ meal.description }}</p>
+              <span class="meal-dietary">{{ meal.dietary }}</span>
+            </article>
+          }
+        </div>
+        <p class="menu-note">Menu preview — final selections subject to venue confirmation.</p>
+      </section>
+      <div class="invitation-divider"><span>♡</span></div>
+
+      @if (submitted()) {
+        <div class="rsvp-success" role="status">
+          <span aria-hidden="true">✓</span>
+          <h2>Thank you, {{ invitedGuest.name }}!</h2>
+          <p>Your response has been recorded. We can't wait to celebrate with you.</p>
+          <button class="invitation-edit" type="button" (click)="submitted.set(false)">
+            Update your response
+          </button>
+        </div>
+      } @else {
+        <section class="invitation-rsvp" aria-labelledby="rsvp-title">
+          <p class="invitation-greeting">
+            A seat is saved for <strong>{{ invitedGuest.name }}</strong>
+          </p>
+          <h2 id="rsvp-title">Will you join us?</h2>
+          <label class="invitation-label" for="attendees"
+            >Number attending <span>Up to {{ invitedGuest.partySize }}</span></label
+          >
+          <select
+            id="attendees"
+            class="invitation-input"
+            [ngModel]="attendees()"
+            (ngModelChange)="attendees.set(+$event)"
+            name="attendees"
+          >
+            @for (count of attendeeOptions(); track count) {
+              <option [value]="count">{{ count }} {{ count === 1 ? 'guest' : 'guests' }}</option>
+            }
+          </select>
+          <label class="invitation-label" for="meal">Meal preference</label>
+          <select
+            id="meal"
+            class="invitation-input"
+            [ngModel]="mealChoice()"
+            (ngModelChange)="mealChoice.set($event)"
+            name="meal"
+          >
+            <option>Chicken</option>
+            <option>Fish</option>
+            <option>Vegetarian</option>
+            <option>Vegan</option>
+          </select>
+          @if (error()) {
+            <p class="invitation-error" role="alert">{{ error() }}</p>
+          }
+          <button class="invitation-submit" type="button" (click)="respond('Confirmed')">
+            Joyfully accepts
+          </button>
+          <button class="invitation-decline" type="button" (click)="respond('Declined')">
+            Regretfully declines
+          </button>
+        </section>
+      }
+      <p class="invitation-footer">Kindly reply by October 1, 2026</p>
+    } @else {
+      <span class="invitation-flower" aria-hidden="true">✳</span>
+      <h1>Invitation not found</h1>
+      <p class="invitation-intro">
+        This invitation link may be invalid. Please contact the couple for a new link.
+      </p>
+      <a class="invitation-submit invitation-return" routerLink="/">Return to the planner</a>
+    }
+  </article>
+</main>

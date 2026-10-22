@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Pre-wedding photo preview</title>
+  <desc id="desc">An original, warm-toned illustration of a couple beneath a flowering garden arch at sunset.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dfb8aa"/>
+      <stop offset=".55" stop-color="#f4d8bf"/>
+      <stop offset="1" stop-color="#f2e3cc"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7f8a69"/>
+      <stop offset="1" stop-color="#4e695b"/>
+    </linearGradient>
+    <linearGradient id="dress" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff8eb"/>
+      <stop offset="1" stop-color="#dfd0bb"/>
+    </linearGradient>
+    <filter id="soft">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <circle cx="890" cy="245" r="105" fill="#fff0cf" opacity=".8"/>
+  <ellipse cx="850" cy="690" rx="490" ry="115" fill="#e7b6a7" opacity=".45" filter="url(#soft)"/>
+  <path d="M0 560Q160 440 340 535T700 505T1200 470V900H0Z" fill="#a58c75" opacity=".46"/>
+  <path d="M0 640Q185 545 380 625T750 600T1200 550V900H0Z" fill="url(#ground)"/>
+  <path d="M0 755Q205 690 423 752T870 716T1200 695V900H0Z" fill="#566c59"/>
+  <path d="M86 640Q113 285 382 245Q624 209 660 585" fill="none" stroke="#536b58" stroke-width="42" stroke-linecap="round"/>
+  <path d="M92 615Q130 337 382 294Q574 267 620 574" fill="none" stroke="#c3a17e" stroke-width="10" opacity=".75"/>
+  <g fill="#fff2dc">
+    <circle cx="129" cy="555" r="29"/><circle cx="178" cy="436" r="22"/><circle cx="249" cy="340" r="27"/>
+    <circle cx="351" cy="286" r="21"/><circle cx="461" cy="297" r="26"/><circle cx="550" cy="368" r="23"/>
+    <circle cx="603" cy="482" r="30"/><circle cx="624" cy="575" r="22"/>
+  </g>
+  <g fill="#a86e70">
+    <circle cx="125" cy="551" r="10"/><circle cx="174" cy="432" r="8"/><circle cx="245" cy="336" r="9"/>
+    <circle cx="347" cy="282" r="8"/><circle cx="457" cy="293" r="9"/><circle cx="546" cy="364" r="8"/>
+    <circle cx="599" cy="478" r="10"/><circle cx="620" cy="571" r="8"/>
+  </g>
+  <g fill="#e9c6a8">
+    <circle cx="150" cy="590" r="17"/><circle cx="213" cy="390" r="14"/><circle cx="302" cy="310" r="17"/>
+    <circle cx="405" cy="278" r="13"/><circle cx="508" cy="329" r="17"/><circle cx="580" cy="417" r="14"/>
+    <circle cx="625" cy="529" r="16"/>
+  </g>
+  <path d="M0 835Q128 735 282 817T578 819T850 803T1200 774V900H0Z" fill="#425d4e"/>
+  <g fill="#e8d0a8" opacity=".9">
+    <circle cx="80" cy="781" r="6"/><circle cx="172" cy="830" r="5"/><circle cx="278" cy="780" r="7"/>
+    <circle cx="910" cy="811" r="6"/><circle cx="1027" cy="775" r="5"/><circle cx="1138" cy="829" r="7"/>
+  </g>
+  <g>
+    <path d="M543 522Q537 478 563 453Q594 440 615 467Q627 496 611 530Z" fill="#694d45"/>
+    <path d="M537 512Q510 528 502 580Q485 655 460 735Q498 770 570 759Q600 683 609 603Q624 540 594 514Z" fill="url(#dress)"/>
+    <path d="M524 540Q557 561 603 535" fill="none" stroke="#c9a8a0" stroke-width="8"/>
+    <path d="M575 522Q617 515 638 560L628 603Q603 585 590 574" fill="#f3e8d7"/>
+    <path d="M487 738L473 831" fill="none" stroke="#d9c9b2" stroke-width="13" stroke-linecap="round"/>
+    <path d="M535 749L532 834" fill="none" stroke="#d9c9b2" stroke-width="13" stroke-linecap="round"/>
+    <path d="M515 832h-48M544 833h-40" fill="none" stroke="#704e48" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g>
+    <path d="M641 491Q644 447 676 431Q712 433 721 470L710 512L653 516Z" fill="#51413b"/>
+    <path d="M644 505Q665 488 704 504Q735 527 743 617L771 736Q730 764 665 752Q636 683 627 603Q619 542 644 505Z" fill="#53675d"/>
+    <path d="M630 517Q674 548 715 515" fill="none" stroke="#e4cfb4" stroke-width="9"/>
+    <path d="M648 738L660 831M730 741L744 831" fill="none" stroke="#463c37" stroke-width="14" stroke-linecap="round"/>
+    <path d="M644 832h39M728 832h39" fill="none" stroke="#302d2b" stroke-width="11" stroke-linecap="round"/>
+  </g>
+  <path d="M610 571Q627 580 641 568" fill="none" stroke="#d1a292" stroke-width="8" stroke-linecap="round"/>
+  <g fill="#fff2dc" opacity=".72">
+    <circle cx="760" cy="282" r="4"/><circle cx="828" cy="355" r="5"/><circle cx="983" cy="300" r="4"/>
+    <circle cx="1007" cy="442" r="5"/><circle cx="735" cy="416" r="4"/><circle cx="1095" cy="370" r="4"/>
+  </g>
+</svg>

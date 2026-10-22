@@ -1,0 +1,978 @@
+@if (isInvitationRoute()) {
+  <router-outlet />
+} @else {
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="Wedding Event home">
+        <span class="brand-mark" aria-hidden="true">w</span>
+        <span>wedding planning<span class="brand-period">.</span></span>
+      </a>
+
+      <div class="event-switcher">
+        <span class="eyebrow">CURRENT EVENT</span>
+        <strong>Thy &amp; James</strong>
+        <span class="event-date">October 24, 2026</span>
+        <span class="event-status"><span></span> Planning in progress</span>
+      </div>
+
+      <span class="eyebrow nav-heading">WORKSPACE</span>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button
+          class="nav-link"
+          [class.active]="activeView() === 'overview'"
+          type="button"
+          (click)="selectView('overview')"
+        >
+          <span class="nav-icon" aria-hidden="true">⌂</span> Overview
+        </button>
+        <button
+          class="nav-link"
+          [class.active]="activeView() === 'schedule'"
+          type="button"
+          (click)="selectView('schedule')"
+        >
+          <span class="nav-icon" aria-hidden="true">◷</span> Schedule
+          <span class="nav-count">{{ schedule().length }}</span>
+        </button>
+        <button
+          class="nav-link"
+          [class.active]="activeView() === 'guests'"
+          type="button"
+          (click)="selectView('guests')"
+        >
+          <span class="nav-icon" aria-hidden="true">♧</span> Guest list
+          <span class="nav-count">{{ invitedCount() }}</span>
+        </button>
+        <button
+          class="nav-link"
+          [class.active]="activeView() === 'invitations'"
+          type="button"
+          (click)="selectView('invitations')"
+        >
+          <span class="nav-icon" aria-hidden="true">♡</span> Invitations &amp; RSVP
+        </button>
+        <button
+          class="nav-link"
+          [class.active]="activeView() === 'overview'"
+          type="button"
+          (click)="openBudget()"
+        >
+          <span class="nav-icon" aria-hidden="true">$</span> Budget
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="help-card">
+          <span class="help-sparkle" aria-hidden="true">✳</span>
+          <strong>Need a hand?</strong>
+          <p>Your big day is coming together. We're here if you need us.</p>
+          <a href="mailto:hello@everly.example">Get in touch <span aria-hidden="true">→</span></a>
+        </div>
+        <button class="profile-button" type="button" aria-label="Signed in as Sophia Bennett">
+          <span class="avatar">SB</span>
+          <span class="profile-copy"
+            ><strong>Sophia Bennett</strong><small>Couple account</small></span
+          >
+          <span class="profile-menu" aria-hidden="true">···</span>
+        </button>
+      </div>
+    </aside>
+
+    <main id="overview" class="main-content">
+      <header class="topbar">
+        <div class="breadcrumb">
+          Workspace <span>/</span> <strong>{{ pageTitle() }}</strong>
+        </div>
+        <div class="topbar-actions">
+          <span class="today-label">SATURDAY, OCTOBER 24, 2026</span>
+          <span class="topbar-avatar" aria-hidden="true">SB</span>
+        </div>
+      </header>
+
+      @if (activeView() === 'overview') {
+        <section class="page-heading">
+          <div>
+            <p class="overline">YOUR DAY, BEAUTIFULLY ORGANIZED</p>
+            <h1>Good morning, Sophia <span aria-hidden="true">✳</span></h1>
+            <p class="heading-copy">Here’s a little look at how everything is coming together.</p>
+          </div>
+          <button class="button button-primary" type="button" (click)="openGuestForm()">
+            <span aria-hidden="true">+</span> Add a guest
+          </button>
+        </section>
+
+        <section class="countdown-banner" aria-label="Wedding countdown">
+          <div class="countdown-copy">
+            <span class="countdown-icon" aria-hidden="true">♡</span>
+            <div>
+              <span class="eyebrow">THE COUNTDOWN IS ON</span>
+              <h2>Just 2 days to go!</h2>
+              <p>Saturday, October 24 · Rosewood Garden, Phnom Penh</p>
+            </div>
+          </div>
+          <div class="countdown-date">
+            <strong>24</strong>
+            <span>OCT</span>
+          </div>
+          <div class="banner-decoration" aria-hidden="true">✳</div>
+        </section>
+
+        <section class="stats-grid" aria-label="Wedding overview">
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-icon blush" aria-hidden="true">♧</span
+              ><span class="stat-trend">Guest list</span>
+            </div>
+            <strong class="stat-value">{{ invitedCount() }}</strong>
+            <span class="stat-label">Guests invited</span>
+            <div class="stat-footnote">
+              <span class="dot dot-green"></span> {{ confirmedCount() }} confirmed so far
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-icon lilac" aria-hidden="true">✓</span
+              ><span class="stat-trend">RSVPs</span>
+            </div>
+            <strong class="stat-value">{{ confirmedCount() }}</strong>
+            <span class="stat-label">Guests attending</span>
+            <div class="stat-footnote">
+              <span class="dot dot-amber"></span> {{ pendingCount() }} still to hear from
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-icon mint" aria-hidden="true">↗</span
+              ><span class="stat-trend">Check-in</span>
+            </div>
+            <strong class="stat-value"
+              >{{ checkedInCount() }}<small> / {{ confirmedCount() }}</small></strong
+            >
+            <span class="stat-label">Guests checked in</span>
+            <div class="stat-footnote">
+              <span class="dot dot-green"></span> Ready for the big day
+            </div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-card-top">
+              <span class="stat-icon sand" aria-hidden="true">$</span
+              ><span class="stat-trend">Budget</span>
+            </div>
+            <strong class="stat-value">$8,450</strong>
+            <span class="stat-label">of $12,000 planned</span>
+            <div class="stat-progress"><span></span></div>
+          </article>
+        </section>
+
+        <div class="content-grid">
+          <section id="guests" class="panel guest-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">YOUR PEOPLE</span>
+                <h2>Guest list</h2>
+              </div>
+              <a class="text-link" href="#guests">View all <span aria-hidden="true">→</span></a>
+            </div>
+
+            <div class="guest-tools">
+              <label class="search-field">
+                <span aria-hidden="true">⌕</span>
+                <input
+                  type="search"
+                  aria-label="Search guests"
+                  placeholder="Search guests..."
+                  [ngModel]="searchTerm()"
+                  (ngModelChange)="searchTerm.set($event)"
+                />
+              </label>
+              <div class="filter-tabs" aria-label="Filter guests">
+                <button
+                  type="button"
+                  [class.selected]="statusFilter() === 'all'"
+                  (click)="statusFilter.set('all')"
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  [class.selected]="statusFilter() === 'Confirmed'"
+                  (click)="statusFilter.set('Confirmed')"
+                >
+                  Going
+                </button>
+                <button
+                  type="button"
+                  [class.selected]="statusFilter() === 'Pending'"
+                  (click)="statusFilter.set('Pending')"
+                >
+                  Pending
+                </button>
+                <button
+                  type="button"
+                  [class.selected]="statusFilter() === 'Declined'"
+                  (click)="statusFilter.set('Declined')"
+                >
+                  Declined
+                </button>
+              </div>
+            </div>
+
+            <div class="guest-table-wrap">
+              <table class="guest-table">
+                <thead>
+                  <tr>
+                    <th scope="col">GUEST / PARTY</th>
+                    <th scope="col">PARTY SIZE</th>
+                    <th scope="col">RSVP</th>
+                    <th scope="col">CHECK-IN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (guest of filteredGuests(); track guest.id) {
+                    <tr>
+                      <td>
+                        <div class="guest-name-cell">
+                          <span [class]="'guest-avatar ' + guest.avatarClass">{{
+                            guest.initials
+                          }}</span>
+                          <span
+                            ><strong>{{ guest.name }}</strong
+                            ><small>{{ guest.group }}</small></span
+                          >
+                        </div>
+                      </td>
+                      <td class="party-size">
+                        {{ guest.partySize }} {{ guest.partySize === 1 ? 'guest' : 'guests' }}
+                      </td>
+                      <td>
+                        <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{
+                          guest.rsvp
+                        }}</span>
+                      </td>
+                      <td>
+                        @if (guest.rsvp === 'Confirmed') {
+                          <button
+                            class="checkin-button"
+                            [class.checked-in]="guest.checkedIn"
+                            type="button"
+                            [attr.aria-label]="
+                              guest.checkedIn
+                                ? 'Mark ' + guest.name + ' as not checked in'
+                                : 'Check in ' + guest.name
+                            "
+                            (click)="toggleCheckIn(guest.id)"
+                          >
+                            <span aria-hidden="true">{{ guest.checkedIn ? '✓' : '+' }}</span>
+                            {{ guest.checkedIn ? 'Arrived' : 'Check in' }}
+                          </button>
+                        } @else {
+                          <span class="not-applicable">—</span>
+                        }
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td class="empty-state" colspan="4">No guests match your search.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <span>Showing {{ filteredGuests().length }} of {{ guests().length }} parties</span
+              ><span class="preview-indicator">Interactive preview · resets on refresh</span>
+            </div>
+          </section>
+
+          <section id="budget" class="panel budget-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">KEEPING IT ON TRACK</span>
+                <h2>Wedding budget</h2>
+              </div>
+              <button class="icon-button" type="button" aria-label="Budget options">···</button>
+            </div>
+            <div class="budget-total-row"><strong>$8,450</strong><span>of $12,000</span></div>
+            <div
+              class="budget-progress"
+              role="progressbar"
+              aria-label="Budget spent"
+              aria-valuemin="0"
+              aria-valuemax="25000"
+              aria-valuenow="18450"
+            >
+              <span></span>
+            </div>
+            <div class="budget-remaining">
+              <span>You've spent 74% of your budget</span><strong>$6,550 left</strong>
+            </div>
+            <div class="budget-breakdown">
+              <div class="budget-category">
+                <span class="category-dot category-venue"></span><span>Venue &amp; catering</span
+                ><strong>$9,200</strong>
+              </div>
+              <div class="budget-category">
+                <span class="category-dot category-florals"></span><span>Flowers &amp; decor</span
+                ><strong>$3,450</strong>
+              </div>
+              <div class="budget-category">
+                <span class="category-dot category-photo"></span><span>Photography</span
+                ><strong>$2,800</strong>
+              </div>
+              <div class="budget-category">
+                <span class="category-dot category-other"></span><span>Other expenses</span
+                ><strong>$3,000</strong>
+              </div>
+            </div>
+            <button class="button button-secondary" type="button">
+              View budget details <span aria-hidden="true">→</span>
+            </button>
+          </section>
+        </div>
+
+        <footer class="page-footer">
+          Sample wedding dashboard · Connect a backend to save changes.
+        </footer>
+      }
+
+      @if (activeView() === 'schedule') {
+        <section class="page-heading">
+          <div>
+            <p class="overline">EVERY MOMENT, THOUGHTFULLY PLANNED</p>
+            <h1>Your wedding timeline</h1>
+            <p class="heading-copy">Ceremonies, celebrations, and the people making it happen.</p>
+          </div>
+          <button class="button button-primary" type="button" (click)="openScheduleForm()">
+            <span>+</span> Add event
+          </button>
+        </section>
+        <section class="schedule-toolbar">
+          <div><span class="eyebrow">RUN OF SHOW</span><strong>Wedding-day timeline</strong></div>
+          <span class="schedule-event-count"
+            >{{ orderedSchedule().length }} moments across {{ scheduleDays().length }}
+            {{ scheduleDays().length === 1 ? 'day' : 'days' }}</span
+          >
+        </section>
+        <section class="schedule-panel panel" aria-label="Wedding day schedule">
+          @for (day of scheduleDays(); track day.date; let dayIndex = $index) {
+            <section class="timeline-day" [attr.aria-label]="'Day ' + (dayIndex + 1) + ' schedule'">
+              <header class="timeline-day-heading">
+                <span class="eyebrow">DAY {{ dayIndex + 1 }}</span>
+                <time [attr.datetime]="day.date">{{
+                  day.date + 'T12:00:00Z' | date: 'EEEE, MMMM d, y' : '+0000'
+                }}</time>
+              </header>
+              @for (item of day.items; track item.id) {
+                <article class="timeline-event">
+                  <div class="timeline-time">
+                    <strong>{{ item.time }}</strong>
+                    <span>{{ item.endTime }}</span>
+                  </div>
+                  <div class="timeline-rail"><span></span></div>
+                  <div class="timeline-details">
+                    <span class="event-type">{{ item.type }}</span>
+                    <h2>{{ item.title }}</h2>
+                    <div class="event-meta">
+                      <span aria-hidden="true">⌖</span> {{ item.location }}
+                    </div>
+                    <div class="event-meta">
+                      <span aria-hidden="true">♙</span> Responsible: {{ item.responsible }}
+                    </div>
+                  </div>
+                </article>
+              }
+            </section>
+          } @empty {
+            <p class="empty-state schedule-empty">
+              No events yet. Add a ceremony or timeline item to get started.
+            </p>
+          }
+        </section>
+        <footer class="page-footer">
+          Run of show · Confirm event times and responsibilities with your venue.
+        </footer>
+      }
+
+      @if (activeView() === 'guests') {
+        <section class="page-heading">
+          <div>
+            <p class="overline">EVERYONE WHO MAKES YOUR DAY SPECIAL</p>
+            <h1>Guest management</h1>
+            <p class="heading-copy">
+              Organize families, contact details, plus-ones, and guest needs.
+            </p>
+          </div>
+          <button class="button button-primary" type="button" (click)="openGuestForm()">
+            <span>+</span> Add a guest
+          </button>
+        </section>
+        <section class="import-panel panel">
+          <div>
+            <span class="eyebrow">START FROM A SPREADSHEET</span>
+            <h2>Import guests from CSV</h2>
+            <p>
+              Headers:
+              <code
+                >name, group, side, relationship, email, phone, partySize, plusOnes, children,
+                tags</code
+              >. Separate multiple tags with semicolons.
+            </p>
+            @if (csvMessage()) {
+              <span class="csv-message" role="status">{{ csvMessage() }}</span>
+            }
+          </div>
+          <label class="button button-secondary csv-button">
+            Import CSV
+            <input
+              class="visually-hidden"
+              type="file"
+              accept=".csv,text/csv"
+              aria-label="Import guest list CSV"
+              (change)="importCsv($event)"
+            />
+          </label>
+        </section>
+        <section class="panel guest-management-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">YOUR PEOPLE</span>
+              <h2>{{ invitedCount() }} invited guests</h2>
+            </div>
+            <div class="filter-tabs" aria-label="Filter guests">
+              <button
+                type="button"
+                [class.selected]="statusFilter() === 'all'"
+                (click)="statusFilter.set('all')"
+              >
+                All
+              </button>
+              <button
+                type="button"
+                [class.selected]="statusFilter() === 'Confirmed'"
+                (click)="statusFilter.set('Confirmed')"
+              >
+                Going
+              </button>
+              <button
+                type="button"
+                [class.selected]="statusFilter() === 'Pending'"
+                (click)="statusFilter.set('Pending')"
+              >
+                Pending
+              </button>
+              <button
+                type="button"
+                [class.selected]="statusFilter() === 'Declined'"
+                (click)="statusFilter.set('Declined')"
+              >
+                Declined
+              </button>
+            </div>
+          </div>
+          <label class="search-field guest-search">
+            <span aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              aria-label="Search all guest details"
+              placeholder="Search name, family, relationship, or tag..."
+              [ngModel]="searchTerm()"
+              (ngModelChange)="searchTerm.set($event)"
+            />
+          </label>
+          <div class="management-table-wrap">
+            <table class="management-table">
+              <thead>
+                <tr>
+                  <th scope="col">GUEST / FAMILY</th>
+                  <th scope="col">SIDE &amp; RELATIONSHIP</th>
+                  <th scope="col">CONTACT</th>
+                  <th scope="col">PARTY</th>
+                  <th scope="col">NEEDS &amp; TAGS</th>
+                  <th scope="col">RSVP</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (guest of filteredGuests(); track guest.id) {
+                  <tr>
+                    <td>
+                      <strong>{{ guest.name }}</strong
+                      ><small>{{ guest.group }}</small>
+                    </td>
+                    <td>
+                      {{ guest.side }} side<small>{{ guest.relationship || '—' }}</small>
+                    </td>
+                    <td>
+                      {{ guest.email || '—' }}<small>{{ guest.phone || 'No phone added' }}</small>
+                    </td>
+                    <td>
+                      {{ guest.partySize }} invited<small
+                        >{{ guest.plusOnes }} plus-ones · {{ guest.children }} children</small
+                      >
+                    </td>
+                    <td>
+                      <div class="tag-list">
+                        @for (tag of guest.tags; track tag) {
+                          <span class="guest-tag">{{ tag }}</span>
+                        } @empty {
+                          <span class="muted-value">No tags</span>
+                        }
+                      </div>
+                    </td>
+                    <td>
+                      <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{
+                        guest.rsvp
+                      }}</span>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td class="empty-state" colspan="6">No guests match your filters.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+
+      @if (activeView() === 'invitations') {
+        <section class="page-heading">
+          <div>
+            <p class="overline">A PERSONAL INVITATION FOR EVERY PARTY</p>
+            <h1>Invitations &amp; RSVP</h1>
+            <p class="heading-copy">
+              Share private links and keep every reply in one live dashboard.
+            </p>
+          </div>
+        </section>
+        <section class="rsvp-summary-grid">
+          <article class="stat-card">
+            <span class="eyebrow">INVITED</span
+            ><strong class="stat-value">{{ invitedCount() }}</strong
+            ><span class="stat-label">People on the guest list</span>
+          </article>
+          <article class="stat-card">
+            <span class="eyebrow">ACCEPTED</span
+            ><strong class="stat-value">{{ confirmedCount() }}</strong
+            ><span class="stat-label">Guests attending</span>
+          </article>
+          <article class="stat-card">
+            <span class="eyebrow">AWAITING REPLY</span
+            ><strong class="stat-value">{{ pendingCount() }}</strong
+            ><span class="stat-label">Guests still to hear from</span>
+          </article>
+          <article class="stat-card">
+            <span class="eyebrow">REPLIED</span
+            ><strong class="stat-value">{{ invitedCount() - pendingCount() }}</strong
+            ><span class="stat-label">Confirmed or declined</span>
+          </article>
+        </section>
+        <section class="panel photo-manager">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">MAKE IT PERSONAL</span>
+              <h2>Pre-wedding photos</h2>
+            </div>
+            <label class="button button-secondary photo-upload-button">
+              Add photos
+              <input
+                class="visually-hidden"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                aria-label="Add pre-wedding photos to the invitation"
+                (change)="uploadPhotos($event)"
+              />
+            </label>
+          </div>
+          <p class="invitation-help">
+            Upload up to {{ 6 - photos().length }} JPG, PNG, or WebP photos (8 MB max each). These
+            are shown in the invitation preview.
+          </p>
+          <p class="photo-preview-note">
+            The preview illustration shows the gallery frame size. Remove it when you upload your
+            own pre-wedding photos.
+          </p>
+          @if (photoMessage()) {
+            <p class="copy-message" role="status">{{ photoMessage() }}</p>
+          }
+          @if (photos().length) {
+            <div class="photo-manager-grid">
+              @for (photo of photos(); track photo.id) {
+                <figure class="photo-manager-item">
+                  <img [src]="photo.url" [alt]="'Pre-wedding photo: ' + photo.name" />
+                  <figcaption>
+                    <span>{{ photo.name }}</span>
+                    <button
+                      type="button"
+                      [attr.aria-label]="'Remove ' + photo.name"
+                      (click)="removePhoto(photo.id)"
+                    >
+                      Remove
+                    </button>
+                  </figcaption>
+                </figure>
+              }
+            </div>
+          } @else {
+            <p class="photo-empty-state">
+              Your invitation will show its photo gallery here after you add photos.
+            </p>
+          }
+        </section>
+        <section class="panel invitation-management-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">INDIVIDUAL INVITATION LINKS</span>
+              <h2>Share &amp; follow up</h2>
+            </div>
+            <span class="live-rsvp-label"><span></span> RSVP updates live</span>
+          </div>
+          <p class="invitation-help">
+            Each link opens a private invitation and RSVP form. Reminder buttons open your email,
+            SMS, WhatsApp, or Telegram app so you can review and send the message.
+          </p>
+          @if (copyMessage()) {
+            <p class="copy-message" role="status">{{ copyMessage() }}</p>
+          }
+          <div class="management-table-wrap">
+            <table class="management-table invitations-table">
+              <thead>
+                <tr>
+                  <th scope="col">GUEST / PARTY</th>
+                  <th scope="col">INVITATION LINK</th>
+                  <th scope="col">RSVP</th>
+                  <th scope="col">REMIND VIA</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (guest of guests(); track guest.id) {
+                  <tr>
+                    <td>
+                      <strong>{{ guest.name }}</strong
+                      ><small>{{ guest.email || guest.phone || guest.group }}</small>
+                    </td>
+                    <td>
+                      <div class="link-actions">
+                        <a class="open-invite-link" [routerLink]="invitePath(guest.invitationToken)"
+                          >Open invite <span aria-hidden="true">↗</span></a
+                        ><button
+                          class="copy-link-button"
+                          type="button"
+                          (click)="copyInvite(guest.invitationToken)"
+                        >
+                          Copy link
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{
+                        guest.rsvp
+                      }}</span>
+                    </td>
+                    <td>
+                      <div class="reminder-actions">
+                        <a
+                          [href]="reminderHref(guest, 'email')"
+                          [attr.aria-label]="'Prepare email reminder for ' + guest.name"
+                          title="Email"
+                          >Email</a
+                        >
+                        <a
+                          [href]="reminderHref(guest, 'sms')"
+                          [attr.aria-label]="'Prepare SMS reminder for ' + guest.name"
+                          title="SMS"
+                          >SMS</a
+                        >
+                        <a
+                          [href]="reminderHref(guest, 'whatsapp')"
+                          [attr.aria-label]="'Share WhatsApp reminder with ' + guest.name"
+                          title="WhatsApp"
+                          >WhatsApp</a
+                        >
+                        <a
+                          [href]="reminderHref(guest, 'telegram')"
+                          [attr.aria-label]="'Share Telegram reminder with ' + guest.name"
+                          title="Telegram"
+                          >Telegram</a
+                        >
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+    </main>
+  </div>
+
+  @if (isGuestFormOpen()) {
+    <div class="modal-backdrop" (click)="closeGuestForm()">
+      <section
+        class="guest-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="guest-modal-title"
+        (click)="$event.stopPropagation()"
+      >
+        <button class="modal-close" type="button" aria-label="Close" (click)="closeGuestForm()">
+          ×
+        </button>
+        <span class="eyebrow">ADD TO YOUR CELEBRATION</span>
+        <h2 id="guest-modal-title">Add a guest</h2>
+        <p class="modal-copy">Invite someone special to celebrate with you.</p>
+        <form (ngSubmit)="addGuest()">
+          <label class="form-label" for="guest-name">Guest or party name</label>
+          <input
+            id="guest-name"
+            class="form-input"
+            type="text"
+            [value]="guestDraft().name"
+            (input)="updateGuestField('name', $event)"
+            required
+            maxlength="80"
+            placeholder="e.g. Alex Morgan"
+          />
+          <div class="form-grid">
+            <div>
+              <label class="form-label" for="guest-group">Family or group</label
+              ><input
+                id="guest-group"
+                class="form-input"
+                type="text"
+                [value]="guestDraft().group"
+                (input)="updateGuestField('group', $event)"
+                placeholder="Bride’s family"
+              />
+            </div>
+            <div>
+              <label class="form-label" for="guest-side">Wedding side</label
+              ><select
+                id="guest-side"
+                class="form-input"
+                [value]="guestDraft().side"
+                (change)="updateGuestField('side', $event)"
+              >
+                <option>Shared</option>
+                <option>Bride</option>
+                <option>Groom</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="party-size">Invited guests</label
+              ><input
+                id="party-size"
+                class="form-input"
+                type="number"
+                [value]="guestDraft().partySize"
+                (input)="updateGuestField('partySize', $event)"
+                min="1"
+                max="20"
+              />
+            </div>
+            <div>
+              <label class="form-label" for="plus-ones">Plus-ones</label
+              ><input
+                id="plus-ones"
+                class="form-input"
+                type="number"
+                [value]="guestDraft().plusOnes"
+                (input)="updateGuestField('plusOnes', $event)"
+                min="0"
+                max="20"
+              />
+            </div>
+            <div>
+              <label class="form-label" for="children">Children</label
+              ><input
+                id="children"
+                class="form-input"
+                type="number"
+                [value]="guestDraft().children"
+                (input)="updateGuestField('children', $event)"
+                min="0"
+                max="20"
+              />
+            </div>
+            <div>
+              <label class="form-label" for="relationship">Relationship</label
+              ><input
+                id="relationship"
+                class="form-input"
+                type="text"
+                [value]="guestDraft().relationship"
+                (input)="updateGuestField('relationship', $event)"
+                placeholder="Friend, cousin..."
+              />
+            </div>
+            <div>
+              <label class="form-label" for="guest-email">Email</label
+              ><input
+                id="guest-email"
+                class="form-input"
+                type="email"
+                [value]="guestDraft().email"
+                (input)="updateGuestField('email', $event)"
+              />
+            </div>
+            <div>
+              <label class="form-label" for="guest-phone">Phone</label
+              ><input
+                id="guest-phone"
+                class="form-input"
+                type="tel"
+                [value]="guestDraft().phone"
+                (input)="updateGuestField('phone', $event)"
+              />
+            </div>
+          </div>
+          <label class="form-label" for="guest-tags">Tags</label>
+          <input
+            id="guest-tags"
+            class="form-input"
+            type="text"
+            [value]="guestDraft().tags.join(', ')"
+            (input)="updateGuestField('tags', $event)"
+            placeholder="VIP, dietary needs, transport..."
+          />
+          @if (guestDraft().plusOnes + guestDraft().children > guestDraft().partySize) {
+            <p class="invitation-error" role="alert">
+              Plus-ones and children can't exceed the invited guest count.
+            </p>
+          }
+          <div class="modal-actions">
+            <button class="button button-secondary" type="button" (click)="closeGuestForm()">
+              Cancel
+            </button>
+            <button
+              class="button button-primary"
+              type="submit"
+              [disabled]="
+                !guestDraft().name.trim() ||
+                guestDraft().partySize < 1 ||
+                guestDraft().plusOnes + guestDraft().children > guestDraft().partySize
+              "
+            >
+              Add guest
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+  @if (isScheduleFormOpen()) {
+    <div class="modal-backdrop" (click)="closeScheduleForm()">
+      <section
+        class="guest-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="schedule-modal-title"
+        (click)="$event.stopPropagation()"
+      >
+        <button class="modal-close" type="button" aria-label="Close" (click)="closeScheduleForm()">
+          ×
+        </button>
+        <span class="eyebrow">ADD A MOMENT TO THE DAY</span>
+        <h2 id="schedule-modal-title">Schedule an event</h2>
+        <form (ngSubmit)="addScheduleItem()">
+          <label class="form-label" for="event-title">Event name</label>
+          <input
+            id="event-title"
+            class="form-input"
+            type="text"
+            [value]="scheduleDraft().title"
+            (input)="updateScheduleField('title', $event)"
+            required
+          />
+          <div class="form-grid">
+            <div>
+              <label class="form-label" for="event-type">Type</label
+              ><select
+                id="event-type"
+                class="form-input"
+                [value]="scheduleDraft().type"
+                (change)="updateScheduleField('type', $event)"
+              >
+                <option>Ceremony</option>
+                <option>Reception</option>
+                <option>Ritual</option>
+                <option>Travel</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="event-date">Date</label
+              ><input
+                id="event-date"
+                class="form-input"
+                type="date"
+                [value]="scheduleDraft().date"
+                (input)="updateScheduleField('date', $event)"
+                required
+              />
+            </div>
+            <div>
+              <label class="form-label" for="event-start">Start time</label
+              ><input
+                id="event-start"
+                class="form-input"
+                type="time"
+                [value]="scheduleDraft().time"
+                (input)="updateScheduleField('time', $event)"
+                required
+              />
+            </div>
+            <div>
+              <label class="form-label" for="event-end">End time</label
+              ><input
+                id="event-end"
+                class="form-input"
+                type="time"
+                [value]="scheduleDraft().endTime"
+                (input)="updateScheduleField('endTime', $event)"
+                required
+              />
+            </div>
+          </div>
+          <label class="form-label" for="event-location">Location</label>
+          <input
+            id="event-location"
+            class="form-input"
+            type="text"
+            [value]="scheduleDraft().location"
+            (input)="updateScheduleField('location', $event)"
+            required
+          />
+          <label class="form-label" for="event-owner">Responsible person</label>
+          <input
+            id="event-owner"
+            class="form-input"
+            type="text"
+            [value]="scheduleDraft().responsible"
+            (input)="updateScheduleField('responsible', $event)"
+            required
+          />
+          <div class="modal-actions">
+            <button class="button button-secondary" type="button" (click)="closeScheduleForm()">
+              Cancel
+            </button>
+            <button
+              class="button button-primary"
+              type="submit"
+              [disabled]="
+                !scheduleDraft().title.trim() ||
+                !scheduleDraft().location.trim() ||
+                !scheduleDraft().responsible.trim() ||
+                scheduleDraft().endTime <= scheduleDraft().time
+              "
+            >
+              Add to timeline
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+}
