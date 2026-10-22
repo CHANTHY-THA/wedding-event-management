@@ -1,0 +1,87 @@
+<header class="page-heading">
+  <div>
+    <p class="overline">On the day</p>
+    <h1>Guest check-in</h1>
+    <p class="heading-copy">Mark parties as they arrive. Only confirmed guests are listed.</p>
+  </div>
+</header>
+
+<section class="stats-grid check-in-stats" aria-label="Check-in summary">
+  <article class="stat-card">
+    <span class="stat-label">Guests checked in</span>
+    <strong class="stat-value"
+      >{{ checkedInCount() }}<small> / {{ confirmedCount() }}</small></strong
+    >
+    <span class="stat-note">Confirmed guests who have arrived</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">Parties arrived</span>
+    <strong class="stat-value">{{ arrivedParties() }}</strong>
+    <span class="stat-note">Families or groups</span>
+  </article>
+</section>
+
+<section class="panel" aria-labelledby="check-in-title">
+  <div class="panel-heading">
+    <h2 id="check-in-title">Confirmed parties</h2>
+    <label class="search-field">
+      <span aria-hidden="true">⌕</span>
+      <input
+        type="search"
+        aria-label="Search confirmed guests"
+        placeholder="Search name, family or tag…"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+      />
+    </label>
+  </div>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Guest / party</th>
+          <th scope="col">Attending</th>
+          <th scope="col">Meal</th>
+          <th scope="col">Check-in</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (guest of confirmedParties(); track guest.id) {
+          <tr>
+            <td>
+              <div class="guest-cell">
+                <span class="avatar" aria-hidden="true">{{ guest.initials }}</span>
+                <span
+                  ><strong>{{ guest.name }}</strong
+                  ><small>{{ guest.group }}</small></span
+                >
+              </div>
+            </td>
+            <td>{{ guest.attendingCount }} of {{ guest.partySize }}</td>
+            <td>{{ guest.mealChoice || '—' }}</td>
+            <td>
+              <button
+                class="checkin-button"
+                [class.checked-in]="guest.checkedIn"
+                type="button"
+                [attr.aria-pressed]="guest.checkedIn"
+                [attr.aria-label]="
+                  guest.checkedIn
+                    ? 'Mark ' + guest.name + ' as not checked in'
+                    : 'Check in ' + guest.name
+                "
+                (click)="toggleCheckIn(guest.id)"
+              >
+                {{ guest.checkedIn ? '✓ Arrived' : 'Check in' }}
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty-state" colspan="4">No confirmed guests match your search.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

@@ -6,13 +6,13 @@
     @if (guest(); as invitedGuest) {
       <span class="invitation-flower" aria-hidden="true">✳</span>
       <p class="invitation-kicker">WITH JOY IN OUR HEARTS</p>
-      <h1>Chanthy <span>&amp;</span> Koko</h1>
+      <h1>{{ details.partnerOne }} <span>&amp;</span> {{ details.partnerTwo }}</h1>
       <p class="invitation-intro">
         would love for you to join them as they celebrate their wedding
       </p>
       <div class="invitation-event">
-        <strong>Saturday, October 24, 2026</strong>
-        <span>Rosewood Garden · Phnom Penh</span>
+        <strong>{{ details.date + 'T12:00:00Z' | date: 'EEEE, MMMM d, y' : '+0000' }}</strong>
+        <span>{{ details.venue }} · {{ details.city }}</span>
       </div>
       <div class="invitation-divider"><span>♡</span></div>
 
@@ -113,10 +113,9 @@
             (ngModelChange)="mealChoice.set($event)"
             name="meal"
           >
-            <option>Chicken</option>
-            <option>Fish</option>
-            <option>Vegetarian</option>
-            <option>Vegan</option>
+            @for (meal of meals; track meal.name) {
+              <option>{{ meal.name }}</option>
+            }
           </select>
           @if (error()) {
             <p class="invitation-error" role="alert">{{ error() }}</p>
@@ -129,7 +128,9 @@
           </button>
         </section>
       }
-      <p class="invitation-footer">Kindly reply by October 1, 2026</p>
+      <p class="invitation-footer">
+        Kindly reply by {{ details.rsvpDeadline + 'T12:00:00Z' | date: 'MMMM d, y' : '+0000' }}
+      </p>
     } @else {
       <span class="invitation-flower" aria-hidden="true">✳</span>
       <h1>Invitation not found</h1>

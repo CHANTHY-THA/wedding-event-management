@@ -1,0 +1,150 @@
+<div class="modal-backdrop" (click)="closed.emit()">
+  <section
+    class="modal-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-panel-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
+    <span class="eyebrow">ADD TO YOUR CELEBRATION</span>
+    <h2 id="modal-panel-title">Add a guest</h2>
+    <p class="modal-copy">Invite someone special to celebrate with you.</p>
+    <form (ngSubmit)="submit()">
+      <label class="form-label" for="guest-name">Guest or party name</label>
+      <input
+        id="guest-name"
+        class="form-input"
+        type="text"
+        [value]="draft().name"
+        (input)="updateField('name', $event)"
+        required
+        maxlength="80"
+        placeholder="e.g. Alex Morgan"
+      />
+      <div class="form-grid">
+        <div>
+          <label class="form-label" for="guest-group">Family or group</label
+          ><input
+            id="guest-group"
+            class="form-input"
+            type="text"
+            [value]="draft().group"
+            (input)="updateField('group', $event)"
+            placeholder="Bride’s family"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="guest-side">Wedding side</label
+          ><select
+            id="guest-side"
+            class="form-input"
+            [value]="draft().side"
+            (change)="updateField('side', $event)"
+          >
+            <option>Shared</option>
+            <option>Bride</option>
+            <option>Groom</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="party-size">Invited guests</label
+          ><input
+            id="party-size"
+            class="form-input"
+            type="number"
+            [value]="draft().partySize"
+            (input)="updateField('partySize', $event)"
+            min="1"
+            max="20"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="plus-ones">Plus-ones</label
+          ><input
+            id="plus-ones"
+            class="form-input"
+            type="number"
+            [value]="draft().plusOnes"
+            (input)="updateField('plusOnes', $event)"
+            min="0"
+            max="20"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="children">Children</label
+          ><input
+            id="children"
+            class="form-input"
+            type="number"
+            [value]="draft().children"
+            (input)="updateField('children', $event)"
+            min="0"
+            max="20"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="relationship">Relationship</label
+          ><input
+            id="relationship"
+            class="form-input"
+            type="text"
+            [value]="draft().relationship"
+            (input)="updateField('relationship', $event)"
+            placeholder="Friend, cousin..."
+          />
+        </div>
+        <div>
+          <label class="form-label" for="guest-email">Email</label
+          ><input
+            id="guest-email"
+            class="form-input"
+            type="email"
+            [value]="draft().email"
+            (input)="updateField('email', $event)"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="guest-phone">Phone</label
+          ><input
+            id="guest-phone"
+            class="form-input"
+            type="tel"
+            [value]="draft().phone"
+            (input)="updateField('phone', $event)"
+          />
+        </div>
+      </div>
+      <label class="form-label" for="guest-tags">Tags</label>
+      <input
+        id="guest-tags"
+        class="form-input"
+        type="text"
+        [value]="draft().tags.join(', ')"
+        (input)="updateField('tags', $event)"
+        placeholder="VIP, dietary needs, transport..."
+      />
+      @if (draft().plusOnes + draft().children > draft().partySize) {
+        <p class="form-error" role="alert">
+          Plus-ones and children can't exceed the invited guest count.
+        </p>
+      }
+      <div class="modal-actions">
+        <button class="button button-secondary" type="button" (click)="closed.emit()">
+          Cancel
+        </button>
+        <button
+          class="button button-primary"
+          type="submit"
+          [disabled]="
+            !draft().name.trim() ||
+            draft().partySize < 1 ||
+            draft().plusOnes + draft().children > draft().partySize
+          "
+        >
+          Add guest
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

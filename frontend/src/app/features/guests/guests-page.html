@@ -1,0 +1,108 @@
+<section class="page-heading">
+  <div>
+    <p class="overline">EVERYONE WHO MAKES YOUR DAY SPECIAL</p>
+    <h1>Guest management</h1>
+    <p class="heading-copy">Organize families, contact details, plus-ones, and guest needs.</p>
+  </div>
+  <button class="button button-primary" type="button" (click)="isGuestFormOpen.set(true)">
+    <span>+</span> Add a guest
+  </button>
+</section>
+<section class="import-panel panel">
+  <div>
+    <span class="eyebrow">START FROM A SPREADSHEET</span>
+    <h2>Import guests from CSV</h2>
+    <p>
+      Headers:
+      <code>name, group, side, relationship, email, phone, partySize, plusOnes, children, tags</code
+      >. Separate multiple tags with semicolons.
+    </p>
+    @if (csvMessage()) {
+      <span class="status-message csv-message" role="status">{{ csvMessage() }}</span>
+    }
+  </div>
+  <label class="button button-secondary csv-button">
+    Import CSV
+    <input
+      class="visually-hidden"
+      type="file"
+      accept=".csv,text/csv"
+      aria-label="Import guest list CSV"
+      (change)="importCsv($event)"
+    />
+  </label>
+</section>
+<section class="panel guest-management-panel">
+  <div class="panel-heading">
+    <div>
+      <span class="eyebrow">YOUR PEOPLE</span>
+      <h2>{{ invitedCount() }} invited guests</h2>
+    </div>
+    <app-rsvp-filter-tabs [(value)]="statusFilter" />
+  </div>
+  <label class="search-field guest-search">
+    <span aria-hidden="true">⌕</span>
+    <input
+      type="search"
+      aria-label="Search all guest details"
+      placeholder="Search name, family, relationship, or tag..."
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)"
+    />
+  </label>
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">GUEST / FAMILY</th>
+          <th scope="col">SIDE &amp; RELATIONSHIP</th>
+          <th scope="col">CONTACT</th>
+          <th scope="col">PARTY</th>
+          <th scope="col">NEEDS &amp; TAGS</th>
+          <th scope="col">RSVP</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (guest of filteredGuests(); track guest.id) {
+          <tr>
+            <td>
+              <strong>{{ guest.name }}</strong
+              ><small>{{ guest.group }}</small>
+            </td>
+            <td>
+              {{ guest.side }} side<small>{{ guest.relationship || '—' }}</small>
+            </td>
+            <td>
+              {{ guest.email || '—' }}<small>{{ guest.phone || 'No phone added' }}</small>
+            </td>
+            <td>
+              {{ guest.partySize }} invited<small
+                >{{ guest.plusOnes }} plus-ones · {{ guest.children }} children</small
+              >
+            </td>
+            <td>
+              <div class="tag-list">
+                @for (tag of guest.tags; track tag) {
+                  <span class="guest-tag">{{ tag }}</span>
+                } @empty {
+                  <span class="muted-value">No tags</span>
+                }
+              </div>
+            </td>
+            <td>
+              <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{ guest.rsvp }}</span>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td class="empty-state" colspan="6">No guests match your filters.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+@if (isGuestFormOpen()) {
+  <app-guest-form-dialog (closed)="isGuestFormOpen.set(false)" (added)="resetFilters()" />
+}

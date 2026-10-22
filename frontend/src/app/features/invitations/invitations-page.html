@@ -1,0 +1,164 @@
+<section class="page-heading">
+  <div>
+    <p class="overline">A PERSONAL INVITATION FOR EVERY PARTY</p>
+    <h1>Invitations &amp; RSVP</h1>
+    <p class="heading-copy">Share private links and keep every reply in one live dashboard.</p>
+  </div>
+</section>
+<section class="stats-grid" aria-label="RSVP summary">
+  <article class="stat-card">
+    <span class="stat-label">Invited</span>
+    <strong class="stat-value">{{ invitedCount() }}</strong>
+    <span class="stat-note">People on the guest list</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">Accepted</span>
+    <strong class="stat-value">{{ confirmedCount() }}</strong>
+    <span class="stat-note">Guests attending</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">Awaiting reply</span>
+    <strong class="stat-value">{{ pendingCount() }}</strong>
+    <span class="stat-note">Guests still to hear from</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">Replied</span>
+    <strong class="stat-value">{{ invitedCount() - pendingCount() }}</strong>
+    <span class="stat-note">Confirmed or declined</span>
+  </article>
+</section>
+<section class="panel photo-manager">
+  <div class="panel-heading">
+    <div>
+      <span class="eyebrow">MAKE IT PERSONAL</span>
+      <h2>Pre-wedding photos</h2>
+    </div>
+    <label class="button button-secondary photo-upload-button">
+      Add photos
+      <input
+        class="visually-hidden"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+        aria-label="Add pre-wedding photos to the invitation"
+        (change)="uploadPhotos($event)"
+      />
+    </label>
+  </div>
+  <p class="invitation-help">
+    Upload up to {{ remainingPhotoSlots() }} JPG, PNG, or WebP photos (8 MB max each). These are
+    shown in the invitation preview.
+  </p>
+  <p class="photo-preview-note">
+    The preview illustration shows the gallery frame size. Remove it when you upload your own
+    pre-wedding photos.
+  </p>
+  @if (photoMessage()) {
+    <p class="status-message" role="status">{{ photoMessage() }}</p>
+  }
+  @if (photos().length) {
+    <div class="photo-manager-grid">
+      @for (photo of photos(); track photo.id) {
+        <figure class="photo-manager-item">
+          <img [src]="photo.url" [alt]="'Pre-wedding photo: ' + photo.name" />
+          <figcaption>
+            <span>{{ photo.name }}</span>
+            <button
+              type="button"
+              [attr.aria-label]="'Remove ' + photo.name"
+              (click)="removePhoto(photo.id)"
+            >
+              Remove
+            </button>
+          </figcaption>
+        </figure>
+      }
+    </div>
+  } @else {
+    <p class="photo-empty-state">
+      Your invitation will show its photo gallery here after you add photos.
+    </p>
+  }
+</section>
+<section class="panel invitation-management-panel">
+  <div class="panel-heading">
+    <div>
+      <span class="eyebrow">INDIVIDUAL INVITATION LINKS</span>
+      <h2>Share &amp; follow up</h2>
+    </div>
+    <span class="live-rsvp-label"><span></span> RSVP updates live</span>
+  </div>
+  <p class="invitation-help">
+    Each link opens a private invitation and RSVP form. Reminder buttons open your email, SMS,
+    WhatsApp, or Telegram app so you can review and send the message.
+  </p>
+  @if (copyMessage()) {
+    <p class="status-message" role="status">{{ copyMessage() }}</p>
+  }
+  <div class="table-wrap">
+    <table class="data-table invitations-table">
+      <thead>
+        <tr>
+          <th scope="col">GUEST / PARTY</th>
+          <th scope="col">INVITATION LINK</th>
+          <th scope="col">RSVP</th>
+          <th scope="col">REMIND VIA</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (guest of guests(); track guest.id) {
+          <tr>
+            <td>
+              <strong>{{ guest.name }}</strong
+              ><small>{{ guest.email || guest.phone || guest.group }}</small>
+            </td>
+            <td>
+              <div class="link-actions">
+                <a class="open-invite-link" [routerLink]="invitePath(guest.invitationToken)"
+                  >Open invite <span aria-hidden="true">↗</span></a
+                ><button
+                  class="copy-link-button"
+                  type="button"
+                  (click)="copyInvite(guest.invitationToken)"
+                >
+                  Copy link
+                </button>
+              </div>
+            </td>
+            <td>
+              <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{ guest.rsvp }}</span>
+            </td>
+            <td>
+              <div class="reminder-actions">
+                <a
+                  [href]="reminderHref(guest, 'email')"
+                  [attr.aria-label]="'Prepare email reminder for ' + guest.name"
+                  title="Email"
+                  >Email</a
+                >
+                <a
+                  [href]="reminderHref(guest, 'sms')"
+                  [attr.aria-label]="'Prepare SMS reminder for ' + guest.name"
+                  title="SMS"
+                  >SMS</a
+                >
+                <a
+                  [href]="reminderHref(guest, 'whatsapp')"
+                  [attr.aria-label]="'Share WhatsApp reminder with ' + guest.name"
+                  title="WhatsApp"
+                  >WhatsApp</a
+                >
+                <a
+                  [href]="reminderHref(guest, 'telegram')"
+                  [attr.aria-label]="'Share Telegram reminder with ' + guest.name"
+                  title="Telegram"
+                  >Telegram</a
+                >
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

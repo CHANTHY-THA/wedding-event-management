@@ -1,0 +1,45 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <a class="brand" routerLink="/" aria-label="Vows dashboard">
+      <svg class="brand-mark" viewBox="0 0 26 18" aria-hidden="true">
+        <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <circle cx="17" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.6" />
+      </svg>
+      Vows
+    </a>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      @for (item of navItems; track item.label) {
+        @if (item.fragment) {
+          <a class="nav-link" [routerLink]="item.path" [fragment]="item.fragment">
+            {{ item.label }}
+          </a>
+        } @else {
+          <a
+            class="nav-link"
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+            ariaCurrentWhenActive="page"
+          >
+            {{ item.label }}
+            @if (item.count) {
+              <span class="nav-count">{{ item.count() }}</span>
+            }
+          </a>
+        }
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <strong>Planner access</strong>
+      <small>{{ coupleNames }} · Couple account</small>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="main-inner">
+      <router-outlet />
+    </div>
+  </main>
+</div>

@@ -1,0 +1,57 @@
+<section class="page-heading">
+  <div>
+    <p class="overline">EVERY MOMENT, THOUGHTFULLY PLANNED</p>
+    <h1>Your wedding timeline</h1>
+    <p class="heading-copy">Ceremonies, celebrations, and the people making it happen.</p>
+  </div>
+  <button class="button button-primary" type="button" (click)="isFormOpen.set(true)">
+    <span>+</span> Add event
+  </button>
+</section>
+<section class="schedule-toolbar">
+  <div><span class="eyebrow">RUN OF SHOW</span><strong>Wedding-day timeline</strong></div>
+  <span class="schedule-event-count"
+    >{{ eventCount() }} moments across {{ scheduleDays().length }}
+    {{ scheduleDays().length === 1 ? 'day' : 'days' }}</span
+  >
+</section>
+<section class="schedule-panel panel" aria-label="Wedding day schedule">
+  @for (day of scheduleDays(); track day.date; let dayIndex = $index) {
+    <section class="timeline-day" [attr.aria-label]="'Day ' + (dayIndex + 1) + ' schedule'">
+      <header class="timeline-day-heading">
+        <span class="eyebrow">DAY {{ dayIndex + 1 }}</span>
+        <time [attr.datetime]="day.date">{{
+          day.date + 'T12:00:00Z' | date: 'EEEE, MMMM d, y' : '+0000'
+        }}</time>
+      </header>
+      @for (item of day.items; track item.id) {
+        <article class="timeline-event">
+          <div class="timeline-time">
+            <strong>{{ item.time }}</strong>
+            <span>{{ item.endTime }}</span>
+          </div>
+          <div class="timeline-rail"><span></span></div>
+          <div class="timeline-details">
+            <span class="event-type">{{ item.type }}</span>
+            <h2>{{ item.title }}</h2>
+            <div class="event-meta"><span aria-hidden="true">⌖</span> {{ item.location }}</div>
+            <div class="event-meta">
+              <span aria-hidden="true">♙</span> Responsible: {{ item.responsible }}
+            </div>
+          </div>
+        </article>
+      }
+    </section>
+  } @empty {
+    <p class="empty-state schedule-empty">
+      No events yet. Add a ceremony or timeline item to get started.
+    </p>
+  }
+</section>
+<footer class="page-footer">
+  Run of show · Confirm event times and responsibilities with your venue.
+</footer>
+
+@if (isFormOpen()) {
+  <app-schedule-form-dialog (closed)="isFormOpen.set(false)" />
+}

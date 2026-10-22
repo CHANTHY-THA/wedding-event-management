@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
+import { Title } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { App } from './app';
 import { routes } from './app.routes';
-import { WeddingDataService } from './wedding-data.service';
+import { WeddingDataService } from './core/wedding-data.service';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -12,97 +13,113 @@ describe('App', () => {
     }).compileComponents();
   });
 
+  async function render(url: string) {
+    const fixture = TestBed.createComponent(App);
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl(url);
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    const settle = async () => {
+      await fixture.whenStable();
+      fixture.detectChanges();
+    };
+    const dispatch = (element: Element, type: string) =>
+      element.dispatchEvent(new root.ownerDocument.defaultView!.Event(type, { bubbles: true }));
+    return { fixture, router, root, settle, dispatch };
+  }
+
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should render the wedding overview and MVP sections', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Good morning, Sophia');
-    expect(compiled.querySelector('#guests h2')?.textContent).toContain('Guest list');
-    expect(compiled.querySelector('#budget h2')?.textContent).toContain('Wedding budget');
+  const statValue = (root: HTMLElement, index: number) =>
+    root.querySelector(`.stat-card:nth-child(${index}) .stat-value`)?.textContent?.trim();
+
+  it('should render the dashboard from live data', async () => {
+    const { root } = await render('/');
+    expect(root.querySelector('h1')?.textContent).toContain('Sophea & Dara');
+    expect(TestBed.inject(Title).getTitle()).toBe('Dashboard · Vows');
+    expect(statValue(root, 1)).toBe('17');
+    expect(statValue(root, 2)).toBe('10');
+    expect(statValue(root, 3)).toBe('5');
+    expect(statValue(root, 4)).toBe('2');
+    expect(root.querySelector('#budget .budget-total')?.textContent).toContain('$18,400');
+    expect(root.querySelector('.reply-row strong')?.textContent).toContain('Emma & James');
+  });
+
+  it('should tick off a task', async () => {
+    const { root, settle, dispatch } = await render('/');
+    const checkbox = root.querySelector('#tasks input[type="checkbox"]') as HTMLInputElement;
+
+    checkbox.checked = true;
+    dispatch(checkbox, 'change');
+    await settle();
+
+    expect(root.querySelector('#tasks .task-row')?.classList).toContain('done');
   });
 
   it('should check in a confirmed party', async () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-    const checkInButton = fixture.nativeElement.querySelector(
-      '.checkin-button',
-    ) as HTMLButtonElement;
+    const { root, settle } = await render('/check-in');
+    const checkInButton = root.querySelector('.checkin-button') as HTMLButtonElement;
 
     checkInButton.click();
-    fixture.detectChanges();
+    await settle();
 
     expect(checkInButton.textContent).toContain('Arrived');
-    expect(
-      (fixture.nativeElement as HTMLElement).querySelector('.stat-card:nth-child(3) .stat-value')
-        ?.textContent,
-    ).toContain('4');
+    expect(statValue(root, 1)).toContain('4');
   });
 
   it('should add a new guest party', async () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-    const root = fixture.nativeElement as HTMLElement;
+    const { root, settle, dispatch } = await render('/');
 
-    (root.querySelector('.page-heading .button-primary') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    (root.querySelector('.page-actions .button-primary') as HTMLButtonElement).click();
+    await settle();
 
     const nameInput = root.querySelector('#guest-name') as HTMLInputElement;
     nameInput.value = 'Alex Morgan';
-    nameInput.dispatchEvent(new root.ownerDocument.defaultView!.Event('input', { bubbles: true }));
-    await fixture.whenStable();
-    fixture.detectChanges();
+    dispatch(nameInput, 'input');
+    await settle();
     const submitButton = root.querySelector('.modal-actions .button-primary') as HTMLButtonElement;
     expect(submitButton.disabled).toBe(false);
     submitButton.click();
-    await fixture.whenStable();
-    fixture.detectChanges();
+    await settle();
 
-    expect(root.querySelector('.guest-name-cell strong')?.textContent).toContain('Alex Morgan');
     expect(root.querySelector('#guest-name')).toBeNull();
+    expect(statValue(root, 1)).toBe('18');
+    expect(TestBed.inject(WeddingDataService).guests()[0].name).toBe('Alex Morgan');
   });
 
   it('should add an event to the run of show', async () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-    const root = fixture.nativeElement as HTMLElement;
-    (root.querySelector('.main-nav button:nth-child(2)') as HTMLButtonElement).click();
-    fixture.detectChanges();
-    (root.querySelector('.page-heading .button-primary') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    const { root, router, settle, dispatch } = await render('/');
+    (root.querySelector('.main-nav a[href="/schedule"]') as HTMLAnchorElement).click();
+    await settle();
+    expect(router.url).toBe('/schedule');
+    expect(TestBed.inject(Title).getTitle()).toBe('Event schedule · Vows');
 
-    const title = root.querySelector('#event-title') as HTMLInputElement;
-    title.value = 'Garden photos';
-    title.dispatchEvent(new root.ownerDocument.defaultView!.Event('input', { bubbles: true }));
-    const location = root.querySelector('#event-location') as HTMLInputElement;
-    location.value = 'Rosewood Garden';
-    location.dispatchEvent(new root.ownerDocument.defaultView!.Event('input', { bubbles: true }));
-    const owner = root.querySelector('#event-owner') as HTMLInputElement;
-    owner.value = 'Dara Sok';
-    owner.dispatchEvent(new root.ownerDocument.defaultView!.Event('input', { bubbles: true }));
-    const date = root.querySelector('#event-date') as HTMLInputElement;
-    date.value = '2026-10-25';
-    date.dispatchEvent(new root.ownerDocument.defaultView!.Event('input', { bubbles: true }));
-    fixture.detectChanges();
+    (root.querySelector('.page-heading .button-primary') as HTMLButtonElement).click();
+    await settle();
+
+    const fill = (selector: string, value: string) => {
+      const input = root.querySelector(selector) as HTMLInputElement;
+      input.value = value;
+      dispatch(input, 'input');
+    };
+    fill('#event-title', 'Garden photos');
+    fill('#event-location', 'Rosewood Garden');
+    fill('#event-owner', 'Dara Sok');
+    fill('#event-date', '2026-10-25');
+    await settle();
 
     (root.querySelector('.modal-actions .button-primary') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    await settle();
     expect(root.textContent).toContain('Garden photos');
     expect(root.querySelectorAll('.timeline-day')).toHaveLength(2);
     expect(root.textContent).toContain('Sunday, October 25, 2026');
   });
 
   it('should import guest details from CSV', async () => {
-    const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-    const root = fixture.nativeElement as HTMLElement;
-    (root.querySelector('.main-nav button:nth-child(3)') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    const { root, settle, dispatch } = await render('/guests');
 
     const csvInput = root.querySelector('.csv-button input') as HTMLInputElement;
     const FileConstructor = root.ownerDocument.defaultView!.File;
@@ -114,9 +131,8 @@ describe('App', () => {
       { type: 'text/csv' },
     );
     Object.defineProperty(csvInput, 'files', { configurable: true, value: [csvFile] });
-    csvInput.dispatchEvent(new root.ownerDocument.defaultView!.Event('change', { bubbles: true }));
-    await fixture.whenStable();
-    fixture.detectChanges();
+    dispatch(csvInput, 'change');
+    await settle();
 
     expect(root.querySelector('.csv-message')?.textContent).toContain('Imported 1 party');
     expect(root.textContent).toContain('Jamie Lee');
@@ -124,15 +140,10 @@ describe('App', () => {
   });
 
   it('should open a private invitation and update the live RSVP', async () => {
-    const fixture = TestBed.createComponent(App);
-    const router = TestBed.inject(Router);
+    const { root, router, settle, dispatch } = await render('/invite/a7d4e2c9f0614b83');
     const wedding = TestBed.inject(WeddingDataService);
-    fixture.detectChanges();
-    await router.navigateByUrl('/invite/a7d4e2c9f0614b83');
-    fixture.detectChanges();
 
-    const root = fixture.nativeElement as HTMLElement;
-    expect(root.querySelector('[role="dialog"]')).toBeNull();
+    expect(root.querySelector('.sidebar')).toBeNull();
     expect(root.textContent).toContain('Emma & James');
     expect(root.querySelector('.invitation-gallery img')?.getAttribute('alt')).toContain(
       'Sample pre-wedding illustration',
@@ -143,26 +154,23 @@ describe('App', () => {
     expect(root.textContent).toContain('Herb-roasted chicken');
     const attendeeSelect = root.querySelector('#attendees') as HTMLSelectElement;
     attendeeSelect.value = '1';
-    attendeeSelect.dispatchEvent(
-      new root.ownerDocument.defaultView!.Event('change', { bubbles: true }),
-    );
+    dispatch(attendeeSelect, 'change');
     const mealSelect = root.querySelector('#meal') as HTMLSelectElement;
     mealSelect.value = 'Vegan';
-    mealSelect.dispatchEvent(
-      new root.ownerDocument.defaultView!.Event('change', { bubbles: true }),
-    );
-    fixture.detectChanges();
+    dispatch(mealSelect, 'change');
+    await settle();
     (root.querySelector('.invitation-submit') as HTMLButtonElement).click();
-    fixture.detectChanges();
+    await settle();
 
     expect(root.textContent).toContain('Your response has been recorded');
-    await router.navigateByUrl('/');
-    fixture.detectChanges();
-    expect(root.querySelector('.main-nav button:nth-child(4)')).not.toBeNull();
-    expect(root.querySelector('.stat-card:nth-child(2) .stat-value')?.textContent).toContain('9');
     expect(wedding.findGuestByToken('a7d4e2c9f0614b83')?.mealChoice).toBe('Vegan');
-    (root.querySelector('.main-nav button:nth-child(4)') as HTMLButtonElement).click();
-    fixture.detectChanges();
+
+    await router.navigateByUrl('/');
+    await settle();
+    expect(statValue(root, 2)).toBe('9');
+
+    await router.navigateByUrl('/invitations');
+    await settle();
     expect(root.querySelector('.photo-manager-item img')?.getAttribute('src')).toBe(
       '/images/pre-wedding-preview.svg',
     );

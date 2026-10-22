@@ -1,0 +1,194 @@
+<header class="page-heading">
+  <div>
+    <p class="overline">Wedding dashboard</p>
+    <h1>{{ coupleNames }}</h1>
+    <p class="heading-copy">
+      {{ details.date + 'T12:00:00Z' | date: 'd MMMM y' : '+0000' }} · {{ details.venue }},
+      {{ details.city }} · {{ scheduleItems().length }}
+      {{ scheduleItems().length === 1 ? 'event' : 'events' }}
+    </p>
+  </div>
+  <div class="page-actions">
+    <span class="pill pill-gold">{{ countdownLabel() }}</span>
+    <a class="button button-secondary" routerLink="/invitations">Send RSVP reminders</a>
+    <button class="button button-primary" type="button" (click)="isGuestFormOpen.set(true)">
+      + Add guest
+    </button>
+  </div>
+</header>
+
+<section class="stats-grid" aria-label="RSVP summary">
+  <article class="stat-card">
+    <span class="stat-label">Invited</span>
+    <strong class="stat-value">{{ invitedCount() }}</strong>
+    <span class="stat-note"
+      >{{ partyCount() }} {{ partyCount() === 1 ? 'family or group' : 'families or groups' }}</span
+    >
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">Confirmed</span>
+    <strong class="stat-value">{{ confirmedCount() }}</strong>
+    <span class="stat-note">{{ percentOfInvited(confirmedCount()) }}% of invited</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">Awaiting reply</span>
+    <strong class="stat-value">{{ pendingCount() }}</strong>
+    <span class="stat-note"
+      >{{ pendingPartyCount() }} {{ pendingPartyCount() === 1 ? 'party' : 'parties' }} to follow
+      up</span
+    >
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">Declined</span>
+    <strong class="stat-value">{{ declinedCount() }}</strong>
+    <span class="stat-note">{{ percentOfInvited(declinedCount()) }}% of invited</span>
+  </article>
+</section>
+
+<section class="panel rsvp-panel" aria-labelledby="rsvp-progress-title">
+  <div class="panel-heading">
+    <h2 id="rsvp-progress-title">RSVP progress</h2>
+    <span class="panel-meta"
+      >Reply deadline {{ details.rsvpDeadline + 'T12:00:00Z' | date: 'd MMMM y' : '+0000' }}</span
+    >
+  </div>
+  <div
+    class="rsvp-bar"
+    role="img"
+    [attr.aria-label]="
+      confirmedCount() +
+      ' confirmed, ' +
+      pendingCount() +
+      ' awaiting reply, ' +
+      declinedCount() +
+      ' declined'
+    "
+  >
+    <span class="segment-confirmed" [style.width.%]="percentOfInvited(confirmedCount())"></span>
+    <span class="segment-pending" [style.width.%]="percentOfInvited(pendingCount())"></span>
+    <span class="segment-declined" [style.width.%]="percentOfInvited(declinedCount())"></span>
+  </div>
+  <ul class="rsvp-legend" aria-hidden="true">
+    <li><span class="swatch segment-confirmed"></span>Confirmed {{ confirmedCount() }}</li>
+    <li><span class="swatch segment-pending"></span>Awaiting {{ pendingCount() }}</li>
+    <li><span class="swatch segment-declined"></span>Declined {{ declinedCount() }}</li>
+  </ul>
+</section>
+
+<div class="dashboard-grid">
+  <section class="panel" aria-labelledby="schedule-title">
+    <div class="panel-heading">
+      <h2 id="schedule-title">Schedule</h2>
+      <a class="text-link" routerLink="/schedule">Open schedule</a>
+    </div>
+    <ul class="event-list">
+      @for (item of scheduleItems(); track item.id) {
+        <li class="event-row">
+          <time class="date-tile" [attr.datetime]="item.date">
+            <small>{{ item.date + 'T12:00:00Z' | date: 'MMM' : '+0000' }}</small>
+            <strong>{{ item.date + 'T12:00:00Z' | date: 'd' : '+0000' }}</strong>
+          </time>
+          <div class="row-main">
+            <strong>{{ item.title }}</strong>
+            <small
+              >{{ item.date + 'T12:00:00Z' | date: 'EEEE' : '+0000' }} · {{ item.time }} –
+              {{ item.endTime }}</small
+            >
+          </div>
+          <span class="row-aside">{{ item.type }}</span>
+        </li>
+      } @empty {
+        <li class="list-empty">No events yet. Add the first moment from the schedule page.</li>
+      }
+    </ul>
+  </section>
+
+  <section id="budget" class="panel" aria-labelledby="budget-title">
+    <div class="panel-heading">
+      <h2 id="budget-title">Budget</h2>
+      <p class="budget-total">
+        <strong>{{ budgetSpent() | currency: 'USD' : 'symbol' : '1.0-0' }}</strong>
+        of {{ budgetTotal | currency: 'USD' : 'symbol' : '1.0-0' }} spent
+      </p>
+    </div>
+    <ul class="budget-list">
+      @for (category of budgetCategories(); track category.name) {
+        <li>
+          <div class="budget-row">
+            <span>{{ category.name }}</span>
+            <span
+              >{{ category.spent | currency: 'USD' : 'symbol' : '1.0-0' }} /
+              {{ category.planned | currency: 'USD' : 'symbol' : '1.0-0' }}</span
+            >
+          </div>
+          <div
+            class="progress"
+            role="progressbar"
+            [attr.aria-label]="category.name + ' spent'"
+            aria-valuemin="0"
+            [attr.aria-valuemax]="category.planned"
+            [attr.aria-valuenow]="category.spent"
+          >
+            <span [style.width.%]="percent(category.spent, category.planned)"></span>
+          </div>
+        </li>
+      }
+    </ul>
+    <p class="budget-note">
+      Next payment: {{ nextPayment.description }}
+      {{ nextPayment.amount | currency: 'USD' : 'symbol' : '1.0-0' }}, due
+      {{ nextPayment.dueDate + 'T12:00:00Z' | date: 'd MMMM' : '+0000' }}
+    </p>
+  </section>
+
+  <section id="tasks" class="panel" aria-labelledby="tasks-title">
+    <div class="panel-heading">
+      <h2 id="tasks-title">Tasks due soon</h2>
+    </div>
+    <ul class="task-list">
+      @for (task of tasks(); track task.id) {
+        <li class="task-row" [class.done]="task.done">
+          <label>
+            <input type="checkbox" [checked]="task.done" (change)="toggleTask(task.id)" />
+            <span class="row-main">
+              <strong>{{ task.title }}</strong>
+              <small>{{ task.owner }}</small>
+            </span>
+          </label>
+          <time class="task-due" [attr.datetime]="task.dueDate">{{
+            task.dueDate + 'T12:00:00Z' | date: 'MMM d' : '+0000'
+          }}</time>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <section class="panel" aria-labelledby="replies-title">
+    <div class="panel-heading">
+      <h2 id="replies-title">Latest replies</h2>
+      <a class="text-link" routerLink="/guests">All guests</a>
+    </div>
+    <ul class="reply-list">
+      @for (reply of latestReplies(); track reply.guest.id) {
+        <li class="reply-row">
+          <span class="avatar" aria-hidden="true">{{ reply.guest.initials }}</span>
+          <div class="row-main">
+            <strong>{{ reply.guest.name }}</strong>
+            <small>Party of {{ reply.guest.partySize }} · {{ reply.ago }}</small>
+          </div>
+          <span [class]="'rsvp-badge rsvp-' + reply.guest.rsvp.toLowerCase()">{{
+            reply.guest.rsvp
+          }}</span>
+        </li>
+      } @empty {
+        <li class="list-empty">Replies will appear here as guests RSVP.</li>
+      }
+    </ul>
+  </section>
+</div>
+
+<footer class="page-footer">Interactive preview · changes reset when you refresh the page.</footer>
+
+@if (isGuestFormOpen()) {
+  <app-guest-form-dialog (closed)="isGuestFormOpen.set(false)" />
+}

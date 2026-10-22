@@ -1,0 +1,109 @@
+<div class="modal-backdrop" (click)="closed.emit()">
+  <section
+    class="modal-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="schedule-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
+    <span class="eyebrow">ADD A MOMENT TO THE DAY</span>
+    <h2 id="schedule-modal-title">Schedule an event</h2>
+    <form (ngSubmit)="submit()">
+      <label class="form-label" for="event-title">Event name</label>
+      <input
+        id="event-title"
+        class="form-input"
+        type="text"
+        [value]="draft().title"
+        (input)="updateField('title', $event)"
+        required
+      />
+      <div class="form-grid">
+        <div>
+          <label class="form-label" for="event-type">Type</label
+          ><select
+            id="event-type"
+            class="form-input"
+            [value]="draft().type"
+            (change)="updateField('type', $event)"
+          >
+            <option>Ceremony</option>
+            <option>Reception</option>
+            <option>Ritual</option>
+            <option>Travel</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="event-date">Date</label
+          ><input
+            id="event-date"
+            class="form-input"
+            type="date"
+            [value]="draft().date"
+            (input)="updateField('date', $event)"
+            required
+          />
+        </div>
+        <div>
+          <label class="form-label" for="event-start">Start time</label
+          ><input
+            id="event-start"
+            class="form-input"
+            type="time"
+            [value]="draft().time"
+            (input)="updateField('time', $event)"
+            required
+          />
+        </div>
+        <div>
+          <label class="form-label" for="event-end">End time</label
+          ><input
+            id="event-end"
+            class="form-input"
+            type="time"
+            [value]="draft().endTime"
+            (input)="updateField('endTime', $event)"
+            required
+          />
+        </div>
+      </div>
+      <label class="form-label" for="event-location">Location</label>
+      <input
+        id="event-location"
+        class="form-input"
+        type="text"
+        [value]="draft().location"
+        (input)="updateField('location', $event)"
+        required
+      />
+      <label class="form-label" for="event-owner">Responsible person</label>
+      <input
+        id="event-owner"
+        class="form-input"
+        type="text"
+        [value]="draft().responsible"
+        (input)="updateField('responsible', $event)"
+        required
+      />
+      <div class="modal-actions">
+        <button class="button button-secondary" type="button" (click)="closed.emit()">
+          Cancel
+        </button>
+        <button
+          class="button button-primary"
+          type="submit"
+          [disabled]="
+            !draft().title.trim() ||
+            !draft().location.trim() ||
+            !draft().responsible.trim() ||
+            draft().endTime <= draft().time
+          "
+        >
+          Add to timeline
+        </button>
+      </div>
+    </form>
+  </section>
+</div>
