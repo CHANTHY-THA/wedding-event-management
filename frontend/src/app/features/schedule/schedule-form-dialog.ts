@@ -1,18 +1,9 @@
-import { Component, inject, output, signal } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { WeddingDataService } from '../../core/wedding-data.service';
-import { NewScheduleItem } from '../../core/wedding.models';
+import { NewScheduleItem, ScheduleItem } from '../../core/wedding.models';
 
-const EMPTY_SCHEDULE_ITEM: NewScheduleItem = {
-  title: '',
-  type: 'Ceremony',
-  date: '2026-10-24',
-  time: '09:00',
-  endTime: '10:00',
-  location: '',
-  responsible: '',
-};
-
+/** Add a new schedule item, or edit/delete an existing one when `item` is set. */
 @Component({
   selector: 'app-schedule-form-dialog',
   imports: [FormsModule],
@@ -21,9 +12,27 @@ const EMPTY_SCHEDULE_ITEM: NewScheduleItem = {
 export class ScheduleFormDialog {
   private readonly data = inject(WeddingDataService);
 
+  readonly item = input<ScheduleItem | null>(null);
   readonly closed = output<void>();
 
-  protected readonly draft = signal<NewScheduleItem>({ ...EMPTY_SCHEDULE_ITEM });
+  protected readonly isEditing = computed(() => this.item() !== null);
+  protected readonly confirmingDelete = signal(false);
+  protected readonly draft = linkedSignal<NewScheduleItem>(() => {
+    const item = this.item();
+    if (item) {
+      const { id: _id, ...details } = item;
+      return details;
+    }
+    return {
+      title: '',
+      type: 'Ceremony',
+      date: this.data.details.date,
+      time: '09:00',
+      endTime: '10:00',
+      location: '',
+      responsible: '',
+    };
+  });
 
   protected updateField(field: keyof NewScheduleItem, event: Event): void {
     const target = event.target;
@@ -44,7 +53,27 @@ export class ScheduleFormDialog {
     if (draft.endTime <= draft.time) {
       return;
     }
-    this.data.addScheduleItem({ ...draft, title, location, responsible });
+
+    const details = { ...draft, title, location, responsible };
+    const item = this.item();
+    if (item) {
+      this.data.updateScheduleItem({ ...details, id: item.id });
+    } else {
+      this.data.addScheduleItem(details);
+    }
+    this.closed.emit();
+  }
+
+  protected delete(): void {
+    const item = this.item();
+    if (!item) {
+      return;
+    }
+    if (!this.confirmingDelete()) {
+      this.confirmingDelete.set(true);
+      return;
+    }
+    this.data.removeScheduleItem(item.id);
     this.closed.emit();
   }
 }

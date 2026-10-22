@@ -7,8 +7,10 @@
     (click)="$event.stopPropagation()"
   >
     <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
-    <span class="eyebrow">ADD A MOMENT TO THE DAY</span>
-    <h2 id="schedule-modal-title">Schedule an event</h2>
+    <span class="eyebrow">{{
+      isEditing() ? 'Update this moment' : 'Add a moment to the day'
+    }}</span>
+    <h2 id="schedule-modal-title">{{ isEditing() ? 'Edit event' : 'Schedule an event' }}</h2>
     <form (ngSubmit)="submit()">
       <label class="form-label" for="event-title">Event name</label>
       <input
@@ -33,6 +35,9 @@
             <option>Ritual</option>
             <option>Travel</option>
             <option>Other</option>
+            @if (!['Ceremony', 'Reception', 'Ritual', 'Travel', 'Other'].includes(draft().type)) {
+              <option>{{ draft().type }}</option>
+            }
           </select>
         </div>
         <div>
@@ -87,7 +92,15 @@
         (input)="updateField('responsible', $event)"
         required
       />
+      @if (draft().endTime <= draft().time) {
+        <p class="form-error" role="alert">The end time must be after the start time.</p>
+      }
       <div class="modal-actions">
+        @if (isEditing()) {
+          <button class="button button-danger modal-actions-start" type="button" (click)="delete()">
+            {{ confirmingDelete() ? 'Confirm delete' : 'Delete event' }}
+          </button>
+        }
         <button class="button button-secondary" type="button" (click)="closed.emit()">
           Cancel
         </button>
@@ -101,7 +114,7 @@
             draft().endTime <= draft().time
           "
         >
-          Add to timeline
+          {{ isEditing() ? 'Save changes' : 'Add to timeline' }}
         </button>
       </div>
     </form>

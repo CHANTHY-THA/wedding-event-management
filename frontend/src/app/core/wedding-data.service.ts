@@ -150,6 +150,16 @@ export class WeddingDataService {
     ]);
   }
 
+  updateScheduleItem(updated: ScheduleItem): void {
+    this.schedule.update((items) =>
+      items.map((entry) => (entry.id === updated.id ? { ...updated } : entry)),
+    );
+  }
+
+  removeScheduleItem(id: number): void {
+    this.schedule.update((items) => items.filter((entry) => entry.id !== id));
+  }
+
   addPhotos(photos: Omit<WeddingPhoto, 'id'>[]): void {
     this.photos.update((current) => [
       ...current,

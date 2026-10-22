@@ -5,6 +5,8 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build-uat": "node inject-build-info.js --configuration uat && ng build --configuration uat && node package-build.js --configuration uat",
+    "build-production": "node inject-build-info.js --configuration production && ng build --configuration production && node package-build.js --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:wedding-event-management": "node dist/wedding-event-management/server/server.mjs"

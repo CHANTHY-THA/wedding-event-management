@@ -43,6 +43,16 @@
   background: var(--color-surface-muted);
 }
 
+.button-danger {
+  border-color: var(--color-danger);
+  background: var(--color-surface);
+  color: var(--color-danger);
+}
+
+.button-danger:hover:not(:disabled) {
+  background: var(--color-danger-soft);
+}
+
 .pill {
   display: inline-flex;
   min-height: 30px;
@@ -320,6 +330,10 @@
   justify-content: flex-end;
   gap: 8px;
   margin-top: 24px;
+}
+
+.modal-actions-start {
+  margin-right: auto;
 }
 
 .form-label {

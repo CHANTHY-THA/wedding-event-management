@@ -4,7 +4,7 @@
     <h1>Your wedding timeline</h1>
     <p class="heading-copy">Ceremonies, celebrations, and the people making it happen.</p>
   </div>
-  <button class="button button-primary" type="button" (click)="isFormOpen.set(true)">
+  <button class="button button-primary" type="button" (click)="openForm(null)">
     <span>+</span> Add event
   </button>
 </section>
@@ -39,6 +39,14 @@
               <span aria-hidden="true">♙</span> Responsible: {{ item.responsible }}
             </div>
           </div>
+          <button
+            class="button button-secondary event-edit"
+            type="button"
+            [attr.aria-label]="'Edit ' + item.title"
+            (click)="openForm(item)"
+          >
+            Edit
+          </button>
         </article>
       }
     </section>
@@ -53,5 +61,5 @@
 </footer>
 
 @if (isFormOpen()) {
-  <app-schedule-form-dialog (closed)="isFormOpen.set(false)" />
+  <app-schedule-form-dialog [item]="editingItem()" (closed)="isFormOpen.set(false)" />
 }

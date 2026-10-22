@@ -118,6 +118,44 @@ describe('App', () => {
     expect(root.textContent).toContain('Sunday, October 25, 2026');
   });
 
+  it('should edit and then delete a schedule event', async () => {
+    const { root, settle, dispatch } = await render('/schedule');
+    const wedding = TestBed.inject(WeddingDataService);
+
+    (root.querySelector('[aria-label="Edit Lunch reception"]') as HTMLButtonElement).click();
+    await settle();
+    const title = root.querySelector('#event-title') as HTMLInputElement;
+    expect(title.value).toBe('Lunch reception');
+    expect(root.querySelector('#schedule-modal-title')?.textContent).toContain('Edit event');
+
+    title.value = 'Garden lunch';
+    dispatch(title, 'input');
+    const start = root.querySelector('#event-start') as HTMLInputElement;
+    start.value = '13:00';
+    dispatch(start, 'input');
+    await settle();
+    (root.querySelector('.modal-actions .button-primary') as HTMLButtonElement).click();
+    await settle();
+
+    expect(wedding.schedule().find((item) => item.id === 3)).toEqual(
+      expect.objectContaining({ title: 'Garden lunch', time: '13:00', endTime: '14:30' }),
+    );
+    expect(wedding.schedule()).toHaveLength(4);
+
+    (root.querySelector('[aria-label="Edit Garden lunch"]') as HTMLButtonElement).click();
+    await settle();
+    const deleteButton = root.querySelector('.button-danger') as HTMLButtonElement;
+    deleteButton.click();
+    await settle();
+    expect(deleteButton.textContent).toContain('Confirm delete');
+    expect(wedding.schedule()).toHaveLength(4);
+    deleteButton.click();
+    await settle();
+
+    expect(wedding.schedule().map((item) => item.title)).not.toContain('Garden lunch');
+    expect(root.querySelector('#event-title')).toBeNull();
+  });
+
   it('should import guest details from CSV', async () => {
     const { root, settle, dispatch } = await render('/guests');
 

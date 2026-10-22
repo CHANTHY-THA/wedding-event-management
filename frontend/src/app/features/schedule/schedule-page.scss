@@ -152,7 +152,7 @@
   }
 
   .timeline-event {
-    grid-template-columns: 50px 17px minmax(0, 1fr);
+    grid-template-columns: 50px 17px minmax(0, 1fr) auto;
     gap: 8px;
   }
 
@@ -160,4 +160,11 @@
     padding-right: 13px;
     padding-left: 13px;
   }
+}
+
+.event-edit {
+  min-height: 32px;
+  align-self: center;
+  padding: 0 12px;
+  font-size: 13px;
 }
