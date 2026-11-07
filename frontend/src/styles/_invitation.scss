@@ -1,471 +1,1557 @@
-.invitation-page {
-  display: grid;
-  min-height: 100vh;
-  place-items: center;
-  padding: 28px 16px;
-  background:
-    radial-gradient(ellipse at 15% 8%, #f2e5e2 0, transparent 38%),
-    radial-gradient(ellipse at 92% 95%, #eee7df 0, transparent 35%), #faf8f6;
+// Guest invitation card (`/invite/:token`): Khmer wedding style with a photo cover, gold accents and soft
+// watercolour background. Khmer text uses Moul (headings), Moulpali (cover title) and Battambang.
+
+// Scoped to the page element: these styles are global so they stay outside the per-component
+// style budget, and nesting keeps generic names like .countdown from reaching other pages.
+// Artwork for the store templates, drawn as inline SVG so no extra files are needed.
+@function leaf-branch($transform) {
+  @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220'><g transform='#{$transform}'><path fill='none' stroke='%237d9867' stroke-width='2' d='M-10-10C50 30 90 70 140 150'/><g fill='%237d9867'><path transform='translate(18 14) rotate(62)' d='M0 0c8-10 26-12 38-2-10 12-28 12-38 2z'/><path transform='translate(58 44) rotate(70)' d='M0 0c8-10 26-12 38-2-10 12-28 12-38 2z'/><path transform='translate(94 80) rotate(78)' d='M0 0c8-10 26-12 38-2-10 12-28 12-38 2z'/><path transform='translate(122 122) rotate(86)' d='M0 0c8-10 26-12 38-2-10 12-28 12-38 2z'/></g><g fill='%23a7bb8f'><path transform='translate(38 30) rotate(-12)' d='M0 0c8-10 26-12 38-2-10 12-28 12-38 2z'/><path transform='translate(78 62) rotate(-2)' d='M0 0c8-10 26-12 38-2-10 12-28 12-38 2z'/><path transform='translate(108 100) rotate(8)' d='M0 0c8-10 26-12 38-2-10 12-28 12-38 2z'/></g></g></svg>");
 }
 
-.invitation-card {
-  width: min(100%, 720px);
-  padding: 35px clamp(23px, 7vw, 55px) 28px;
-  border: 1px solid #eee6e2;
-  border-radius: 15px;
-  background: #fffdfa;
-  box-shadow: 0 18px 60px #513c3012;
-  text-align: center;
+@function royal-corner($transform) {
+  @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 90'><g fill='none' stroke='%23d9b46a' stroke-linecap='round' transform='#{$transform}'><path stroke-width='2.5' d='M8 78V26Q8 8 26 8h52'/><path stroke-width='1.2' d='M16 66V30q0-14 14-14h36'/><path stroke-width='1.6' d='M24 44c9 0 16-7 16-16M44 24c0 9-7 16-16 16'/><circle cx='28' cy='28' r='3' fill='%23d9b46a'/></g></svg>");
 }
 
-.invitation-brand {
-  display: inline-block;
-  margin-bottom: 22px;
-  color: #4a393d;
-  font-family: Georgia, serif;
-  font-size: 23px;
-  font-weight: 600;
-  text-decoration: none;
-}
+app-guest-invitation-page {
+  & {
+    --gold: #c5a065;
+    --gold-deep: #a9813f;
+    --gold-light: #e9d3a3;
+    --gold-gradient: linear-gradient(135deg, #b8935a, #d9bf86 55%, #b8935a);
+    // Darker gold for text on the white cards; the light middle tone washes out thin Khmer strokes.
+    --gold-text: linear-gradient(180deg, #d9a441, #a8741c);
+    --ink-blue: #6f86b4;
+    --paper: rgb(255 255 255 / 78%);
+    --script: 'Great Vibes', 'Cormorant Garamond', cursive;
+    --display: 'Cormorant Garamond', 'Moul', Georgia, serif;
+    --body: 'Inter', 'Battambang', system-ui, sans-serif;
 
-.invitation-brand span,
-.invitation-card h1 span {
-  color: #b5787f;
-}
+    display: block;
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at 8% 12%, rgb(169 182 204 / 55%), transparent 38%),
+      radial-gradient(ellipse at 92% 30%, rgb(176 189 210 / 50%), transparent 34%),
+      radial-gradient(ellipse at 12% 78%, rgb(186 198 216 / 55%), transparent 40%),
+      radial-gradient(ellipse at 88% 88%, rgb(170 184 206 / 50%), transparent 36%),
+      #eef1f6;
+    color: #3d4656;
+    font-family: var(--body);
+  }
 
-.invitation-flower {
-  display: block;
-  color: #b4787c;
-  font-size: 23px;
-}
+  // Khmer: decorative headings and a softer body face.
+  .lang-km {
+    --display: 'Moul', 'Noto Serif Khmer', serif;
+    --body: 'Battambang', 'Noto Sans Khmer', sans-serif;
+  }
 
-.invitation-kicker {
-  margin: 9px 0 10px;
-  color: #a68e88;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 1.7px;
-}
+  .invite {
+    position: relative;
+    width: min(100% - 32px, 1080px);
+    margin: 0 auto;
+    padding: 16px 0 72px;
+  }
 
-.invitation-card h1 {
-  margin: 0;
-  font-family: Georgia, serif;
-  font-size: 38px;
-  font-weight: 500;
-}
+  // Falling petals
+  .petals {
+    position: fixed;
+    z-index: 3;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
 
-.invitation-card h1 span {
-  font-size: 27px;
-  font-style: italic;
-}
-
-.invitation-intro {
-  max-width: 310px;
-  margin: 11px auto 19px;
-  color: #8f8380;
-  font-family: Georgia, serif;
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.invitation-event {
-  display: grid;
-  gap: 6px;
-  padding: 14px 0;
-  border-top: 1px solid #f1e9e5;
-  border-bottom: 1px solid #f1e9e5;
-  color: #6c595a;
-  font-size: 10px;
-}
-
-.invitation-event strong {
-  font-size: 11px;
-}
-
-.invitation-story,
-.invitation-schedule,
-.invitation-menu {
-  margin: 19px 0;
-  text-align: left;
-}
-
-.invitation-story h2,
-.invitation-schedule h2,
-.invitation-menu h2 {
-  margin: 4px 0 12px;
-  color: #46383b;
-  font-family: Georgia, serif;
-  font-size: 19px;
-  font-weight: 500;
-  text-align: center;
-}
-
-.invitation-section-kicker {
-  margin: 0 0 4px;
-  color: #a68e88;
-  font-size: 7px;
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  text-align: center;
-}
-
-.invitation-gallery {
-  column-count: 3;
-  column-gap: 9px;
-}
-
-.invitation-gallery figure {
-  display: inline-block;
-  width: 100%;
-  margin: 0 0 9px;
-  overflow: hidden;
-  border: 1px solid #eee6e2;
-  border-radius: 8px;
-  background: #f5eeea;
-  vertical-align: top;
-  break-inside: avoid;
-  animation: gallery-photo-enter 450ms ease both;
-}
-
-.invitation-gallery figure:nth-child(2) {
-  animation-delay: 50ms;
-}
-
-.invitation-gallery figure:nth-child(3) {
-  animation-delay: 100ms;
-}
-
-.invitation-gallery figure:nth-child(4) {
-  animation-delay: 150ms;
-}
-
-.invitation-gallery figure:nth-child(5) {
-  animation-delay: 200ms;
-}
-
-.invitation-gallery figure:nth-child(6) {
-  animation-delay: 250ms;
-}
-
-.invitation-gallery img {
-  display: block;
-  width: 100%;
-  height: auto;
-  transition: transform 350ms ease;
-}
-
-@keyframes gallery-photo-enter {
-  from {
+  .petals span {
+    position: absolute;
+    top: -24px;
+    border-radius: 80% 0 80% 0;
+    background: linear-gradient(135deg, #f6c9a8, #eaa982);
     opacity: 0;
-    transform: translateY(9px) scale(0.985);
+    animation: petal-fall linear infinite;
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
+  @keyframes petal-fall {
+    0% {
+      opacity: 0;
+      transform: translate(0, 0) rotate(0deg);
+    }
 
-@media (hover: hover) {
-  .invitation-gallery figure {
-    transition:
-      transform 250ms ease,
-      box-shadow 250ms ease;
-  }
+    10% {
+      opacity: 0.85;
+    }
 
-  .invitation-gallery figure:hover {
-    z-index: 1;
-    transform: translateY(-4px);
-    box-shadow: 0 10px 22px rgb(71 48 48 / 16%);
-  }
+    90% {
+      opacity: 0.7;
+    }
 
-  .invitation-gallery figure:hover img {
-    transform: scale(1.035);
-  }
-}
-
-.invitation-note {
-  margin: 0;
-  padding: 12px;
-  border: 1px dashed #e8dcd5;
-  border-radius: 7px;
-  color: #958987;
-  font-size: 9px;
-  text-align: center;
-}
-
-.invite-day + .invite-day {
-  margin-top: 12px;
-}
-
-.invite-day h3 {
-  margin: 0;
-  padding: 7px 9px;
-  border-radius: 5px;
-  background: #f8f1ed;
-  color: #755d5d;
-  font-family: Georgia, serif;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.invite-timeline-item {
-  display: grid;
-  grid-template-columns: 65px minmax(0, 1fr);
-  gap: 10px;
-  padding: 9px 7px;
-  border-bottom: 1px solid #f1e9e5;
-}
-
-.invite-timeline-item time {
-  display: grid;
-  align-content: start;
-  gap: 3px;
-}
-
-.invite-timeline-item time strong {
-  color: #795b61;
-  font-size: 10px;
-}
-
-.invite-timeline-item time span {
-  color: #a29694;
-  font-size: 8px;
-}
-
-.invite-event-title,
-.invite-event-location {
-  display: block;
-}
-
-.invite-event-title {
-  color: #594a4a;
-  font-size: 9px;
-}
-
-.invite-event-location {
-  margin-top: 3px;
-  color: #958987;
-  font-size: 8px;
-}
-
-.menu-intro,
-.menu-note {
-  color: #958987;
-  font-size: 8px;
-  line-height: 1.6;
-  text-align: center;
-}
-
-.menu-intro {
-  margin: -4px 0 11px;
-}
-
-.invitation-meals {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.invitation-meal {
-  padding: 10px;
-  border: 1px solid #efe7e1;
-  border-radius: 7px;
-  background: #fff;
-}
-
-.meal-flower {
-  color: #b4787c;
-  font-size: 10px;
-}
-
-.invitation-meal h3 {
-  display: inline;
-  margin: 0 0 0 5px;
-  color: #5e4d4f;
-  font-family: Georgia, serif;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.invitation-meal p {
-  margin: 7px 0;
-  color: #928584;
-  font-size: 8px;
-  line-height: 1.5;
-}
-
-.meal-dietary {
-  color: #9f796b;
-  font-size: 7px;
-  font-style: italic;
-}
-
-.menu-note {
-  margin: 9px 0 0;
-}
-
-.invitation-divider {
-  position: relative;
-  height: 24px;
-  margin: 6px 0;
-  color: #b7787e;
-}
-
-.invitation-divider::before {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  left: 0;
-  height: 1px;
-  background: #f0e8e3;
-  content: '';
-}
-
-.invitation-divider span {
-  position: relative;
-  display: inline-block;
-  padding: 0 12px;
-  background: #fffdfa;
-  line-height: 24px;
-}
-
-.invitation-rsvp {
-  text-align: left;
-}
-
-.invitation-greeting {
-  margin: 0 0 5px;
-  color: #928584;
-  font-size: 10px;
-  text-align: center;
-}
-
-.invitation-greeting strong {
-  color: #59484a;
-}
-
-.invitation-rsvp h2,
-.rsvp-success h2 {
-  margin: 0 0 17px;
-  color: #46383b;
-  font-family: Georgia, serif;
-  font-size: 20px;
-  font-weight: 500;
-  text-align: center;
-}
-
-.invitation-label {
-  display: flex;
-  justify-content: space-between;
-  margin: 11px 0 6px;
-  color: #695b5c;
-  font-size: 9px;
-  font-weight: 600;
-}
-
-.invitation-label span {
-  color: #a29694;
-  font-weight: 400;
-}
-
-.invitation-input {
-  width: 100%;
-  height: 38px;
-  padding: 0 10px;
-  border: 1px solid #eae2dd;
-  border-radius: 6px;
-  background: #fff;
-  color: #55484a;
-  font-size: 10px;
-}
-
-.invitation-submit {
-  display: block;
-  width: 100%;
-  min-height: 40px;
-  margin-top: 18px;
-  border: 0;
-  border-radius: 7px;
-  background: #a85d69;
-  color: #fff;
-  cursor: pointer;
-  font-size: 10px;
-  font-weight: 600;
-  text-align: center;
-}
-
-.invitation-submit:hover {
-  background: #914e5a;
-}
-
-.invitation-decline,
-.invitation-edit {
-  display: block;
-  margin: 12px auto 0;
-  padding: 5px;
-  border: 0;
-  background: transparent;
-  color: #8d7f7f;
-  cursor: pointer;
-  font-size: 9px;
-}
-
-.invitation-error {
-  margin: 10px 0 0;
-  color: #a74646;
-  font-size: 9px;
-}
-
-.invitation-footer {
-  margin: 21px 0 0;
-  color: #a59895;
-  font-size: 8px;
-}
-
-.rsvp-success {
-  padding: 12px 0;
-  text-align: center;
-}
-
-.rsvp-success > span {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  margin: 0 auto 10px;
-  border-radius: 50%;
-  background: #eaf3ed;
-  color: #678772;
-}
-
-.rsvp-success h2 {
-  margin-bottom: 7px;
-}
-
-.rsvp-success p {
-  margin: 0;
-  color: #948989;
-  font-size: 10px;
-  line-height: 1.6;
-}
-
-.invitation-return {
-  padding: 13px;
-  text-decoration: none;
-}
-
-@media (max-width: 430px) {
-  .invitation-card {
-    padding-right: 22px;
-    padding-left: 22px;
+    100% {
+      opacity: 0;
+      transform: translate(var(--drift, 0), 105vh) rotate(540deg);
+    }
   }
 
-  .invitation-meals {
-    grid-template-columns: 1fr;
+  @media (prefers-reduced-motion: reduce) {
+    .petals {
+      display: none;
+    }
   }
 
+  .invite-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  // 1. Cover
+  // Split cover sized to fit the screen under the toolbar: the photo on the left, untouched by
+  // text, and a cream paper panel with gold lettering on the right.
+  .invite-hero {
+    --hero-height: clamp(560px, calc(100svh - 90px), 820px);
+    --hero-ink: #4a3d2e;
+
+    display: grid;
+    min-height: var(--hero-height);
+    overflow: hidden;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    border-radius: 34px 34px 0 0;
+    background:
+      radial-gradient(ellipse 70% 40% at 100% 0%, rgb(233 211 163 / 30%), transparent 70%),
+      radial-gradient(ellipse 70% 40% at 0% 100%, rgb(233 211 163 / 25%), transparent 70%),
+      #fbf7ef;
+    box-shadow: 0 30px 70px rgb(40 46 60 / 28%);
+    color: var(--hero-ink);
+    animation: rise-in 900ms var(--ease-out) both;
+  }
+
+  .hero-media {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, #6b5a49, #2f2a26);
+  }
+
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: hero-zoom 18s ease-out both;
+  }
+
+  // A thin gold edge where the photo meets the paper.
+  .hero-media::after {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 4px;
+    background: var(--gold-gradient);
+    content: '';
+  }
+
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.08);
+    }
+  }
+
+  // Gold double-line frame inside the paper panel.
+  .hero-frame {
+    display: flex;
+    margin: 22px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: 32px 24px;
+    border: 1px solid rgb(197 160 101 / 70%);
+    border-radius: 22px;
+    outline: 1px solid rgb(197 160 101 / 35%);
+    outline-offset: -8px;
+    text-align: center;
+  }
+
+  .hero-top,
+  .hero-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-frame .ornament {
+    width: min(220px, 70%);
+    margin: 6px auto 0;
+  }
+
+  // Gradient text is only painted inside the element's box, and Khmer marks above and below
+  // the line (ើ, ្រ, ៍) reach past it. Padding (offset by negative margin) keeps them whole.
+  .hero-title,
+  .section-title,
+  .countdown-badge p {
+    padding: 0.35em 0.2em 0.2em;
+  }
+
+  .hero-title {
+    margin: -0.35em 0 calc(4px - 0.2em);
+    background: var(--gold-text);
+    background-clip: text;
+    color: transparent;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 4.2vw, 52px);
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    animation: rise-in 900ms var(--ease-out) 250ms both;
+  }
+
+  .lang-km .hero-title {
+    font-family: 'Moulpali', 'Moul', serif;
+    font-weight: 400;
+  }
+
+  .hero-script {
+    margin: 0;
+    color: var(--gold-deep);
+    font-family: var(--script);
+    font-size: clamp(28px, 3.4vw, 40px);
+    animation: rise-in 900ms var(--ease-out) 400ms both;
+  }
+
+  // Names stacked with the heart between them.
+  .hero-names {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 22px;
+    color: var(--hero-ink);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(34px, 4.4vw, 56px);
+    font-weight: 600;
+    line-height: 1.25;
+    animation: rise-in 900ms var(--ease-out) 550ms both;
+  }
+
+  .lang-km .hero-names {
+    font-family: 'Battambang', 'Noto Sans Khmer', sans-serif;
+    font-weight: 700;
+  }
+
+  .hero-heart {
+    width: clamp(30px, 3.4vw, 42px);
+    animation: heart-beat 2.4s ease-in-out infinite;
+  }
+
+  @keyframes heart-beat {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+
+    15% {
+      transform: scale(1.12);
+    }
+
+    30% {
+      transform: scale(1);
+    }
+  }
+
+  .hero-save {
+    margin: 0 0 8px;
+    color: var(--gold-deep);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+  }
+
+  .hero-date,
+  .hero-time {
+    margin: 0 0 4px;
+    font-size: clamp(17px, 1.8vw, 21px);
+  }
+
+  // The numeric date between two gold rules, like a printed card.
+  .hero-numeric {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 10px 0 14px;
+    color: var(--gold-deep);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(20px, 2.2vw, 26px);
+    font-weight: 600;
+  }
+
+  .hero-numeric::before,
+  .hero-numeric::after {
+    width: 36px;
+    height: 1px;
+    background: var(--gold);
+    content: '';
+  }
+
+  .hero-place {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: clamp(16px, 1.7vw, 19px);
+  }
+
+  .hero-place svg,
+  .gold-tile svg,
+  .gold-button svg,
+  .outline-button svg {
+    width: 22px;
+    height: 22px;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
+
+  .hero-place svg {
+    color: var(--gold-deep);
+  }
+
+  // Shared section layout
+  // One continuous sheet under the cover, with a soft blue-grey watercolour wash.
+  .invite-paper {
+    overflow: hidden;
+    border-radius: 0 0 34px 34px;
+    background:
+      radial-gradient(ellipse 60% 35% at 0% 8%, rgb(176 189 210 / 45%), transparent 70%),
+      radial-gradient(ellipse 50% 30% at 100% 22%, rgb(190 200 218 / 40%), transparent 70%),
+      radial-gradient(ellipse 55% 30% at 10% 55%, rgb(200 210 226 / 40%), transparent 70%),
+      radial-gradient(ellipse 60% 35% at 95% 78%, rgb(176 189 210 / 40%), transparent 70%),
+      radial-gradient(ellipse 70% 25% at 50% 100%, rgb(186 198 216 / 45%), transparent 70%),
+      #f6f8fb;
+    box-shadow: 0 30px 70px rgb(40 46 60 / 18%);
+  }
+
+  .invite-paper .invite-section {
+    margin-top: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .invite-section {
+    margin-top: 28px;
+    padding: clamp(36px, 6vw, 64px) clamp(18px, 6vw, 72px);
+    border-radius: 34px;
+    background: var(--paper);
+    box-shadow: 0 18px 50px rgb(60 74 100 / 10%);
+    backdrop-filter: blur(6px);
+    text-align: center;
+    animation: rise-in 800ms var(--ease-out) both;
+  }
+
+  .section-title {
+    margin: -0.35em 0 -0.2em;
+    background: var(--gold-text);
+    background-clip: text;
+    color: transparent;
+    font-family: var(--display);
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  // Khmer: elegant Moulpali for section titles and Moul (heavy) only for the main invitation
+  // heading and the countdown badge, as on traditional printed cards.
+  .lang-km .section-title {
+    font-family: 'Moulpali', 'Moul', serif;
+    font-size: clamp(26px, 3.6vw, 38px);
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  .lang-km #welcome-title {
+    font-family: 'Moul', serif;
+    font-size: clamp(20px, 3vw, 32px);
+  }
+
+  .ornament {
+    display: block;
+    width: min(300px, 75%);
+    margin: 8px auto 28px;
+  }
+
+  .invite-message {
+    max-width: 1000px;
+    margin: 0 auto;
+    color: var(--ink-blue);
+    font-size: clamp(18px, 2.2vw, 24px);
+    font-weight: 300;
+    line-height: 1.9;
+  }
+
+  .lang-km .invite-message {
+    color: #7d94bd;
+    font-family: 'Moulpali', 'Battambang', serif;
+    font-size: clamp(18px, 2.1vw, 24px);
+    font-weight: 400;
+    line-height: 1.8;
+  }
+
+  // Countdown: the badge text sits on the cartouche SVG, which stretches to the badge size.
+  .countdown-badge {
+    position: relative;
+    display: grid;
+    width: min(440px, 92%);
+    aspect-ratio: 2 / 1;
+    margin: 36px auto 18px;
+    place-items: center;
+  }
+
+  .cartouche {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 4px 10px rgb(212 154 58 / 30%));
+  }
+
+  .countdown-badge p {
+    position: relative;
+    max-width: 70%;
+    margin: -0.35em 0 -0.2em;
+    background: var(--gold-text);
+    background-clip: text;
+    color: transparent;
+    font-family: var(--display);
+    font-size: clamp(16px, 2.4vw, 24px);
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .lang-km .countdown-badge p {
+    font-family: 'Moul', serif;
+    font-size: clamp(14px, 2.2vw, 22px);
+    font-weight: 400;
+  }
+
+  .countdown {
+    display: grid;
+    max-width: 820px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(8px, 2vw, 20px);
+    margin: 0 auto;
+  }
+
+  // Number tile with its label underneath, as on the reference card.
+  .countdown-item {
+    display: grid;
+    gap: 12px;
+    justify-items: center;
+  }
+
+  .countdown-tile {
+    display: grid;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #c8ad78, #ad9163);
+    box-shadow: 0 10px 22px rgb(150 116 60 / 25%);
+    color: #fff;
+    font-family: 'Inter', 'Roboto', sans-serif;
+    font-size: clamp(24px, 4.6vw, 46px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 15%);
+  }
+
+  .countdown-item span {
+    color: #c08a2a;
+    font-size: clamp(14px, 1.8vw, 18px);
+    font-weight: 600;
+  }
+
+  .lang-km .countdown-item span {
+    font-family: 'Moulpali', 'Battambang', serif;
+    font-weight: 400;
+  }
+
+  // Photo gallery: portrait photos two to a row, landscape photos across the full row.
   .invitation-gallery {
-    column-count: 2;
+    display: grid;
+    grid-auto-flow: dense;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(10px, 2vw, 20px);
+  }
+
+  .invitation-gallery figure {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #e8ecf2;
+    box-shadow: 0 12px 30px rgb(60 74 100 / 14%);
+    animation: pop-in 600ms var(--ease-out) both;
+  }
+
+  .invitation-gallery figure.landscape {
+    grid-column: 1 / -1;
+  }
+
+  .invitation-gallery img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    transition: transform 600ms var(--ease-out);
+  }
+
+  .invitation-gallery figure.landscape img {
+    aspect-ratio: 16 / 9;
+  }
+
+  @media (hover: hover) {
+    .invitation-gallery figure:hover img {
+      transform: scale(1.04);
+    }
+  }
+
+  // Event card on a photo background
+  .event-card,
+  .gift-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 30px;
+    background: linear-gradient(160deg, #8e98a8, #555d6a);
+    box-shadow: 0 20px 50px rgb(40 46 60 / 22%);
+    color: #fff;
+    isolation: isolate;
+    text-align: left;
+  }
+
+  .event-photo {
+    position: absolute;
+    z-index: -2;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .event-card::before,
+  .gift-card::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: linear-gradient(110deg, rgb(70 76 88 / 82%) 0%, rgb(90 96 108 / 60%) 55%, rgb(90 96 108 / 35%) 100%);
+    content: '';
+  }
+
+  .event-details {
+    display: grid;
+    gap: 26px;
+    padding: clamp(24px, 5vw, 56px);
+  }
+
+  .event-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .gold-tile {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    flex: none;
+    place-items: center;
+    border-radius: 16px;
+    background: var(--gold-gradient);
+    box-shadow: 0 10px 22px rgb(0 0 0 / 22%);
+  }
+
+  .gold-tile svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .event-row h3 {
+    margin: 0 0 4px;
+    color: var(--gold-light);
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .lang-km .event-row h3 {
+    font-weight: 400;
+  }
+
+  .event-row p {
+    margin: 0;
+    font-size: clamp(15px, 1.9vw, 19px);
+    line-height: 1.6;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 30%);
+  }
+
+  .event-muted {
+    color: rgb(255 255 255 / 78%);
+  }
+
+  .event-map {
+    display: grid;
+    justify-items: center;
+    gap: 20px;
+    margin-top: 6px;
+  }
+
+  .event-map app-qr-code {
+    padding: 14px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 14px 30px rgb(0 0 0 / 25%);
+  }
+
+  .qr-code img {
+    display: block;
+  }
+
+  .gold-button,
+  .outline-button {
+    display: inline-flex;
+    min-height: 52px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 30px;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: var(--body);
+    font-size: 16px;
+    font-weight: 700;
+    transition:
+      transform var(--duration-fast) var(--ease-out),
+      box-shadow var(--duration-base) ease;
+  }
+
+  .gold-button {
+    background: var(--gold-gradient);
+    box-shadow: 0 12px 26px rgb(169 129 63 / 35%);
+    color: #fff;
+  }
+
+  .gold-button:hover {
+    box-shadow: 0 16px 32px rgb(169 129 63 / 45%);
+    transform: translateY(-2px);
+  }
+
+  .outline-button {
+    border: 1.5px solid var(--gold);
+    background: transparent;
+    color: var(--gold-deep);
+  }
+
+  .outline-button.light {
+    min-height: 44px;
+    border-color: rgb(255 255 255 / 45%);
+    background: rgb(255 255 255 / 10%);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .gold-button:active,
+  .outline-button:active {
+    transform: scale(0.97);
+  }
+
+  // Day timeline under the event card
+  .invite-timeline {
+    display: grid;
+    max-width: 560px;
+    gap: 0;
+    margin: 34px auto 0;
+    text-align: left;
+  }
+
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 64px 18px 1fr;
+    align-items: start;
+    gap: 12px;
+    padding: 10px 0;
+  }
+
+  .timeline-item time {
+    color: var(--gold-deep);
+    font-size: 16px;
+    font-weight: 700;
+    text-align: right;
+  }
+
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    margin-top: 6px;
+    border: 3px solid var(--gold);
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .timeline-item strong {
+    display: block;
+    color: #3d4656;
+    font-size: 16px;
+  }
+
+  .timeline-item span {
+    color: #7a8597;
+    font-size: 14px;
+  }
+
+  // RSVP
+  .rsvp-card {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: clamp(20px, 4vw, 34px);
+    border: 1px solid rgb(197 160 101 / 35%);
+    border-radius: 24px;
+    background: rgb(255 255 255 / 80%);
+    text-align: left;
+  }
+
+  .rsvp-greeting {
+    margin: 0 0 18px;
+    color: #6b7486;
+    text-align: center;
+  }
+
+  .rsvp-greeting strong {
+    color: var(--gold-deep);
+  }
+
+  .rsvp-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .rsvp-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    color: #4b5568;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .rsvp-label span {
+    color: #8a94a6;
+    font-weight: 400;
+  }
+
+  .rsvp-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 12px;
+    border: 1px solid #d8dde6;
+    border-radius: 12px;
+    background: #fff;
+    font-size: 16px;
+  }
+
+  .rsvp-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgb(197 160 101 / 25%);
+    outline: 0;
+  }
+
+  .meal-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    margin: 18px 0 4px;
+  }
+
+  .meal {
+    display: grid;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #f6f2ea;
+  }
+
+  .meal strong {
+    color: var(--gold-deep);
+    font-size: 14px;
+  }
+
+  .meal span {
+    color: #6b7486;
+    font-size: 12.5px;
+    line-height: 1.4;
+  }
+
+  .rsvp-error {
+    margin: 12px 0 0;
+    color: #a2433b;
+    font-size: 14px;
+  }
+
+  .rsvp-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .rsvp-deadline {
+    margin: 14px 0 0;
+    color: #8a94a6;
+    font-size: 13.5px;
+    text-align: center;
+  }
+
+  .rsvp-success {
+    text-align: center;
+  }
+
+  .rsvp-check {
+    display: inline-grid;
+    width: 56px;
+    height: 56px;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--gold-gradient);
+    color: #fff;
+    font-size: 26px;
+    animation: pop-in 500ms var(--ease-out) both;
+  }
+
+  .rsvp-success h3 {
+    margin: 14px 0 6px;
+    color: #3d4656;
+    font-size: 22px;
+  }
+
+  .rsvp-success p {
+    margin: 0 0 12px;
+    color: #6b7486;
+  }
+
+  .link-button {
+    border: 0;
+    background: none;
+    color: var(--gold-deep);
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+
+  // Wedding gift
+  .gift-card {
+    display: grid;
+    grid-template-columns: minmax(180px, 280px) 1fr;
+    align-items: center;
+    gap: 24px;
+    padding: clamp(22px, 5vw, 56px);
+  }
+
+  .gift-tabs {
+    display: grid;
+    align-self: start;
+    gap: 14px;
+  }
+
+  .gift-tabs button {
+    display: flex;
+    min-height: 70px;
+    align-items: center;
+    gap: 14px;
+    padding: 0 18px;
+    border: 1px solid rgb(255 255 255 / 35%);
+    border-radius: 18px;
+    background: rgb(255 255 255 / 12%);
+    backdrop-filter: blur(6px);
+    color: var(--gold-light);
+    cursor: pointer;
+    font-family: var(--body);
+    font-size: 20px;
+    font-weight: 700;
+    transition:
+      background var(--duration-base) ease,
+      transform var(--duration-fast) var(--ease-out);
+  }
+
+  .gift-tabs button.selected {
+    border-color: transparent;
+    background: var(--gold-gradient);
+    box-shadow: 0 14px 28px rgb(0 0 0 / 22%);
+    color: #fff;
+  }
+
+  .gift-tabs button:active {
+    transform: scale(0.98);
+  }
+
+  .tab-symbol {
+    display: grid;
+    width: 32px;
+    height: 42px;
+    place-items: center;
+    border-radius: 10px;
+    background: rgb(255 255 255 / 22%);
+    font-size: 18px;
+  }
+
+  // QR side sits on a frosted glass panel, as on the reference card.
+  .gift-qr {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: clamp(18px, 3vw, 28px);
+    border: 1px solid rgb(255 255 255 / 28%);
+    border-radius: 24px;
+    background: rgb(255 255 255 / 8%);
+    backdrop-filter: blur(4px);
+    text-align: center;
+  }
+
+  .gift-qr-frame {
+    padding: 18px;
+    border-radius: 26px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgb(0 0 0 / 25%);
+    animation: pop-in 500ms var(--ease-out) both;
+  }
+
+  .gift-qr-frame img {
+    display: block;
+    width: min(300px, 60vw);
+    height: auto;
+  }
+
+  .gift-account {
+    margin: 6px 0 0;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .gift-hint {
+    margin: 4px 0 0;
+    color: var(--gold-light);
+    font-size: 18px;
+    text-shadow: 0 1px 6px rgb(0 0 0 / 30%);
+  }
+
+  .lang-km .gift-hint {
+    font-family: 'Moulpali', 'Battambang', serif;
+    font-size: 20px;
+  }
+
+  .gift-khqr {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 6px;
+    color: rgb(255 255 255 / 90%);
+    font-size: 15px;
+  }
+
+  .gift-khqr svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
+
+  // Thank you
+  .invite-thanks .invite-message {
+    margin-top: 18px;
+  }
+
+  .social-links {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .social {
+    display: grid;
+    width: 60px;
+    height: 60px;
+    place-items: center;
+    border-radius: 50%;
+    box-shadow: 0 10px 22px rgb(0 0 0 / 18%);
+    color: #fff;
+    transition: transform var(--duration-base) var(--ease-out);
+  }
+
+  .social:hover {
+    transform: translateY(-3px) scale(1.05);
+  }
+
+  .social svg {
+    width: 26px;
+    height: 26px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .telegram {
+    background: #2f8fd6;
+  }
+
+  .facebook {
+    background: #3b6fe0;
+  }
+
+  .tiktok {
+    background: #111;
+  }
+
+  .invite-signoff {
+    margin: 34px 0 0;
+    color: var(--gold-deep);
+    font-family: var(--script);
+    font-size: 34px;
+  }
+
+  .invite-missing {
+    margin-top: 60px;
+  }
+
+  .invite-missing .gold-button {
+    margin-top: 26px;
+  }
+
+  // Floating music button
+  .music-button {
+    position: fixed;
+    z-index: 4;
+    right: 22px;
+    bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    width: 60px;
+    height: 60px;
+    place-items: center;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 10px 24px rgb(40 46 60 / 22%);
+    color: var(--gold);
+    cursor: pointer;
+  }
+
+  .music-button svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.2;
+  }
+
+  .music-button.playing {
+    animation: music-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes music-pulse {
+    0%,
+    100% {
+      box-shadow:
+        0 10px 24px rgb(40 46 60 / 22%),
+        0 0 0 0 rgb(197 160 101 / 45%);
+    }
+
+    50% {
+      box-shadow:
+        0 10px 24px rgb(40 46 60 / 22%),
+        0 0 0 12px rgb(197 160 101 / 0%);
+    }
+  }
+
+  @media (max-width: 720px) {
+    .invite-hero {
+      border-radius: 24px 24px 0 0;
+    }
+
+    .invite-paper {
+      border-radius: 0 0 24px 24px;
+    }
+
+    .invite-section {
+      border-radius: 24px;
+    }
+
+    // Phones: the photo on top, the paper panel below.
+    .invite-hero {
+      grid-template-columns: 1fr;
+      grid-template-rows: 56svh auto;
+    }
+
+    .hero-media::after {
+      inset: auto 0 0;
+      width: auto;
+      height: 4px;
+    }
+
+    .hero-frame {
+      margin: 12px;
+      padding: 24px 12px 28px;
+      border-radius: 18px;
+      outline-offset: -6px;
+    }
+
+    .rsvp-fields,
+    .rsvp-actions,
+    .gift-card {
+      grid-template-columns: 1fr;
+    }
+
+    .gift-tabs {
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    }
+
+    .gift-tabs button {
+      min-height: 56px;
+      font-size: 16px;
+    }
+
+    .event-row {
+      gap: 14px;
+    }
+
+    .gold-tile {
+      width: 52px;
+      height: 52px;
+    }
+  }
+
+  // Opening screen: the guest's tap opens the card and starts the music.
+  .opening {
+    position: fixed;
+    z-index: 10;
+    inset: 0;
+    display: grid;
+    overflow-y: auto;
+    place-items: center;
+    padding: 16px;
+    background:
+      radial-gradient(ellipse at 8% 12%, rgb(169 182 204 / 55%), transparent 38%),
+      radial-gradient(ellipse at 92% 30%, rgb(176 189 210 / 50%), transparent 34%),
+      radial-gradient(ellipse at 12% 78%, rgb(186 198 216 / 55%), transparent 40%),
+      radial-gradient(ellipse at 88% 88%, rgb(170 184 206 / 50%), transparent 36%),
+      #eef1f6;
+    animation: fade-in 500ms ease both;
+  }
+
+  // Same size as the cover card, but a standalone card, so all four corners are rounded.
+  .opening-cover {
+    --hero-height: clamp(560px, calc(100svh - 32px), 820px);
+
+    width: min(100%, 1080px);
+    border-radius: 34px;
+  }
+
+  @media (max-width: 720px) {
+    // A shorter photo keeps the open button in view; taller content scrolls from the top.
+    .opening {
+      padding: 10px;
+      place-items: start center;
+    }
+
+    .opening-cover {
+      grid-template-rows: 40svh auto;
+      border-radius: 24px;
+    }
+  }
+
+  .opening-to {
+    margin: 8px 0 4px;
+  }
+
+  .opening-guest {
+    margin: 0 0 24px;
+    color: var(--hero-ink);
+    font-size: clamp(22px, 2.6vw, 28px);
+    font-weight: 700;
+  }
+
+  .opening-button {
+    animation: opening-glow 2.2s ease-in-out infinite;
+  }
+
+  @keyframes opening-glow {
+    0%,
+    100% {
+      box-shadow:
+        0 12px 26px rgb(169 129 63 / 35%),
+        0 0 0 0 rgb(233 211 163 / 55%);
+    }
+
+    50% {
+      box-shadow:
+        0 12px 26px rgb(169 129 63 / 35%),
+        0 0 0 14px rgb(233 211 163 / 0%);
+    }
+  }
+
+  .opening-hint {
+    margin: 16px 0 0;
+    color: rgb(74 61 46 / 70%);
+    font-size: 14px;
+  }
+
+  // Gallery photos open the full-screen viewer.
+  .gallery-open {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+  }
+
+  .gallery-open:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: -3px;
+  }
+
+  // Dress code swatches at the bottom of the event card.
+  .dress-code {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding-top: 22px;
+    border-top: 1px solid rgb(255 255 255 / 30%);
+  }
+
+  .dress-code h3 {
+    margin: 0;
+    color: var(--gold-light);
+    font-family: var(--display);
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .lang-km .dress-code h3 {
+    font-family: 'Moulpali', 'Moul', serif;
+    font-weight: 400;
+  }
+
+  .dress-code ul {
+    display: flex;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .dress-code li {
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgb(255 255 255 / 85%);
+    border-radius: 50%;
+    box-shadow: 0 6px 14px rgb(0 0 0 / 25%);
+  }
+
+  // Store templates. The split cover above is the free default; these restyle the same markup
+  // (set by `data-template` on the page), so the opening screen follows the chosen design too.
+
+  // Photo overlay: the photo fills the card and the gold text sits on it.
+  [data-template='overlay'] {
+    .invite-hero {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+      background: #2f2a26;
+      color: #fff;
+    }
+
+    .hero-media,
+    .hero-frame {
+      grid-area: 1 / 1;
+    }
+
+    // Shade the top (title) and bottom (names, date) and leave the middle clear for the couple.
+    .hero-media::after {
+      inset: 0;
+      width: auto;
+      height: auto;
+      background:
+        linear-gradient(
+          180deg,
+          rgb(20 16 12 / 72%) 0%,
+          rgb(20 16 12 / 35%) 24%,
+          rgb(20 16 12 / 0%) 44%,
+          rgb(20 16 12 / 45%) 62%,
+          rgb(20 16 12 / 85%) 100%
+        ),
+        radial-gradient(ellipse at 50% 45%, transparent 55%, rgb(20 16 12 / 35%) 100%);
+    }
+
+    .hero-frame {
+      position: relative;
+      margin: 18px;
+      justify-content: space-between;
+      border-color: rgb(233 211 163 / 70%);
+      outline-color: rgb(233 211 163 / 30%);
+    }
+
+    .hero-title {
+      background: var(--gold-gradient);
+      background-clip: text;
+      font-size: clamp(38px, 7vw, 72px);
+      // Gradient text cannot take a text-shadow, so a drop shadow keeps it readable on light photos.
+      filter: drop-shadow(0 2px 6px rgb(0 0 0 / 45%));
+    }
+
+    .hero-script,
+    .hero-save,
+    .hero-place svg {
+      color: var(--gold-light);
+    }
+
+    .hero-script,
+    .hero-names,
+    .opening-guest {
+      text-shadow: 0 2px 12px rgb(0 0 0 / 40%);
+    }
+
+    .hero-names {
+      flex-flow: row wrap;
+      justify-content: center;
+      gap: 8px 24px;
+      color: #fff;
+      font-size: clamp(36px, 6.4vw, 74px);
+    }
+
+    .hero-heart {
+      width: clamp(38px, 6vw, 64px);
+    }
+
+    .hero-numeric {
+      color: rgb(255 255 255 / 85%);
+    }
+
+    .hero-numeric::before,
+    .hero-numeric::after {
+      background: var(--gold-light);
+    }
+
+    .opening-guest {
+      color: #fff;
+    }
+
+    .opening-hint {
+      color: rgb(255 255 255 / 80%);
+    }
+
+    @media (max-width: 720px) {
+      .hero-frame {
+        margin: 10px;
+      }
+    }
+  }
+
+  // Floral and royal: one centred column, title above a framed photo, names and date below.
+  [data-template='floral'],
+  [data-template='royal'] {
+    .invite-hero {
+      position: relative;
+      grid-template-columns: 1fr;
+      grid-template-rows: none;
+      align-content: center;
+      justify-items: center;
+      gap: 18px;
+      padding: 52px 28px;
+      text-align: center;
+    }
+
+    // The frame is drawn on the card itself, so its contents can sit around the photo.
+    .hero-frame {
+      display: contents;
+    }
+
+    .invite-hero::before {
+      position: absolute;
+      inset: 16px;
+      border: 1px solid rgb(197 160 101 / 70%);
+      border-radius: 22px;
+      outline: 1px solid rgb(197 160 101 / 35%);
+      outline-offset: -8px;
+      content: '';
+      pointer-events: none;
+    }
+
+    .hero-top {
+      order: 1;
+    }
+
+    .hero-media {
+      order: 2;
+    }
+
+    .hero-media::after {
+      display: none;
+    }
+
+    .hero-bottom {
+      order: 3;
+    }
+
+    .hero-names {
+      flex-flow: row wrap;
+      justify-content: center;
+      gap: 6px 18px;
+      font-size: clamp(28px, 3.6vw, 44px);
+    }
+
+    @media (max-width: 720px) {
+      .invite-hero {
+        padding: 40px 18px;
+      }
+
+      .invite-hero::before {
+        inset: 10px;
+        border-radius: 16px;
+      }
+    }
+  }
+
+  // Classic floral cream: watercolour paper, green leaves and an arched photo.
+  [data-template='floral'] {
+    .invite-hero {
+      --hero-ink: #3f5a3a;
+
+      background:
+        leaf-branch('') top left / clamp(110px, 22vw, 240px) no-repeat,
+        leaf-branch('rotate(180 110 110)') bottom right / clamp(110px, 22vw, 240px) no-repeat,
+        radial-gradient(ellipse 60% 45% at 85% 15%, rgb(233 211 163 / 35%), transparent 70%),
+        radial-gradient(ellipse 60% 45% at 15% 85%, rgb(199 214 180 / 35%), transparent 70%),
+        #fbf5e8;
+    }
+
+    .hero-title {
+      background: linear-gradient(180deg, #4f7a45, #2f5530);
+      background-clip: text;
+    }
+
+    .hero-script,
+    .hero-save,
+    .hero-numeric,
+    .hero-place svg {
+      color: #b0823a;
+    }
+
+    .hero-media {
+      width: clamp(150px, 18vw, 210px);
+      aspect-ratio: 3 / 4;
+      border: 3px solid #d9bf86;
+      border-radius: 999px 999px 18px 18px;
+      box-shadow: 0 16px 34px rgb(63 90 58 / 22%);
+    }
+  }
+
+  // Royal night gold: deep navy, an ornate gold border and a round photo.
+  [data-template='royal'] {
+    .invite-hero {
+      --hero-ink: #fbeed0;
+
+      background:
+        royal-corner('') top 20px left 20px / 72px no-repeat,
+        royal-corner('matrix(-1 0 0 1 90 0)') top 20px right 20px / 72px no-repeat,
+        royal-corner('matrix(1 0 0 -1 0 90)') bottom 20px left 20px / 72px no-repeat,
+        royal-corner('matrix(-1 0 0 -1 90 90)') bottom 20px right 20px / 72px no-repeat,
+        radial-gradient(ellipse at 50% 30%, #23335e, #0d1530 72%);
+    }
+
+    .invite-hero::before {
+      inset: 28px;
+      border-color: rgb(217 180 106 / 80%);
+      outline-color: rgb(217 180 106 / 35%);
+    }
+
+    .hero-title {
+      background: linear-gradient(180deg, #f6dc9c, #c9973f);
+      background-clip: text;
+    }
+
+    .hero-script,
+    .hero-save,
+    .hero-numeric,
+    .hero-place svg {
+      color: #e3c27c;
+    }
+
+    .hero-numeric::before,
+    .hero-numeric::after {
+      background: #e3c27c;
+    }
+
+    .hero-media {
+      width: clamp(160px, 19vw, 220px);
+      aspect-ratio: 1;
+      border: 3px solid #d9b46a;
+      border-radius: 50%;
+      box-shadow:
+        0 0 0 8px rgb(217 180 106 / 18%),
+        0 18px 40px rgb(0 0 0 / 45%);
+    }
+
+    .opening-hint {
+      color: rgb(251 238 208 / 75%);
+    }
+
+    @media (max-width: 720px) {
+      .invite-hero {
+        background-size: 48px, 48px, 48px, 48px, auto;
+        background-position:
+          top 12px left 12px,
+          top 12px right 12px,
+          bottom 12px left 12px,
+          bottom 12px right 12px,
+          center;
+      }
+
+      .invite-hero::before {
+        inset: 18px;
+      }
+    }
+  }
+
+  // Marks a store preview of a template the couple has not bought yet.
+  .preview-ribbon {
+    position: fixed;
+    z-index: 12;
+    top: 18px;
+    left: -44px;
+    width: 170px;
+    margin: 0;
+    padding: 6px 0;
+    background: #a2433b;
+    box-shadow: 0 6px 16px rgb(0 0 0 / 25%);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-align: center;
+    text-transform: uppercase;
+    transform: rotate(-45deg);
+    pointer-events: none;
   }
 }

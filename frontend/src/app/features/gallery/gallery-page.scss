@@ -1,0 +1,260 @@
+.gallery-layout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.qr-panel {
+  position: sticky;
+  top: 16px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.qr-panel h2 {
+  margin: 0 0 4px;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.qr-panel app-qr-code {
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  animation: pop-in 500ms var(--ease-out) 200ms both;
+}
+
+:host ::ng-deep .qr-code img,
+:host ::ng-deep .qr-placeholder {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+:host ::ng-deep .qr-placeholder {
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.share-url {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.qr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.qr-actions .button {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.upload-switch {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  text-align: left;
+}
+
+.upload-switch div {
+  display: grid;
+  gap: 2px;
+}
+
+.upload-switch strong {
+  font-size: 13.5px;
+}
+
+.upload-switch small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  flex: none;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-neutral);
+  cursor: pointer;
+  transition: background var(--duration-base) ease;
+}
+
+.switch span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.switch.on {
+  background: var(--color-success);
+}
+
+.switch.on span {
+  transform: translateX(18px);
+}
+
+.qr-tip {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 12.5px;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.photo-tile {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  animation: pop-in 400ms var(--ease-out) both;
+  transition: box-shadow var(--duration-base) ease;
+}
+
+.photo-tile:hover {
+  box-shadow: 0 10px 24px rgb(29 38 35 / 10%);
+}
+
+.photo-tile img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  transition: filter var(--duration-base) ease;
+}
+
+.photo-tile.is-hidden img {
+  filter: grayscale(1) opacity(0.45);
+}
+
+.hidden-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.photo-tile figcaption {
+  display: grid;
+  gap: 1px;
+  padding: 8px 10px 4px;
+}
+
+.photo-tile figcaption strong {
+  overflow: hidden;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photo-tile figcaption small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.photo-actions {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px 10px;
+}
+
+.photo-actions .button {
+  min-height: 30px;
+  flex: 1;
+  padding: 0 8px;
+  font-size: 12.5px;
+}
+
+.photo-empty {
+  grid-column: 1 / -1;
+}
+
+.qr-poster {
+  display: none;
+}
+
+@media (max-width: 1000px) {
+  .gallery-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-panel {
+    position: static;
+  }
+}
+
+// Printing: only the poster, centered on the page.
+@media print {
+  :host > :not(.qr-poster) {
+    display: none !important;
+  }
+
+  .qr-poster {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding-top: 40px;
+    text-align: center;
+  }
+
+  .poster-kicker {
+    margin: 0;
+    font-size: 14px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .qr-poster h2 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 48px;
+  }
+
+  .qr-poster img {
+    width: 320px;
+    height: 320px;
+  }
+
+  .poster-copy {
+    max-width: 340px;
+    margin: 0;
+    font-size: 18px;
+  }
+}

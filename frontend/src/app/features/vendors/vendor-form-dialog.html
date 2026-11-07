@@ -1,0 +1,104 @@
+<div class="modal-backdrop" (click)="closed.emit()">
+  <section
+    class="modal-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="vendor-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
+    <span class="eyebrow">{{ 'The people behind the day' | t }}</span>
+    <h2 id="vendor-modal-title">{{ (isEditing() ? 'Edit vendor' : 'Add a vendor') | t }}</h2>
+    <form (ngSubmit)="submit()">
+      <div class="form-grid">
+        <div>
+          <label class="form-label" for="vendor-name">{{ 'Business name' | t }}</label
+          ><input
+            id="vendor-name"
+            class="form-input"
+            type="text"
+            [value]="draft().name"
+            (input)="updateText('name', $event)"
+            required
+          />
+        </div>
+        <div>
+          <label class="form-label" for="vendor-service">{{ 'Service' | t }}</label
+          ><input
+            id="vendor-service"
+            class="form-input"
+            type="text"
+            placeholder="e.g. Live band"
+            [value]="draft().service"
+            (input)="updateText('service', $event)"
+            required
+          />
+        </div>
+      </div>
+      <label class="form-label" for="vendor-contact">{{ 'Contact person' | t }}</label>
+      <input
+        id="vendor-contact"
+        class="form-input"
+        type="text"
+        [value]="draft().contactPerson"
+        (input)="updateText('contactPerson', $event)"
+      />
+      <div class="form-grid">
+        <div>
+          <label class="form-label" for="vendor-phone">{{ 'Phone' | t }}</label
+          ><input
+            id="vendor-phone"
+            class="form-input"
+            type="tel"
+            [value]="draft().phone"
+            (input)="updateText('phone', $event)"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="vendor-email">{{ 'Email' | t }}</label
+          ><input
+            id="vendor-email"
+            class="form-input"
+            type="email"
+            [value]="draft().email"
+            (input)="updateText('email', $event)"
+          />
+        </div>
+      </div>
+      <span class="form-label">{{ 'Contract' | t }}</span>
+      <div class="filter-tabs contract-tabs" role="group" aria-label="Contract status">
+        @for (status of statuses; track status) {
+          <button
+            type="button"
+            [class.selected]="draft().contractStatus === status"
+            [attr.aria-pressed]="draft().contractStatus === status"
+            (click)="setStatus(status)"
+          >
+            {{ status | t }}
+          </button>
+        }
+      </div>
+      <label class="form-label" for="vendor-notes">{{ 'Notes' | t }}</label>
+      <textarea
+        id="vendor-notes"
+        class="form-input form-textarea"
+        rows="2"
+        [value]="draft().notes"
+        (input)="updateText('notes', $event)"
+      ></textarea>
+      <div class="modal-actions">
+        @if (isEditing()) {
+          <button class="button button-danger modal-actions-start" type="button" (click)="delete()">
+            {{ (confirmingDelete() ? 'Confirm delete' : 'Delete') | t }}
+          </button>
+        }
+        <button class="button button-secondary" type="button" (click)="closed.emit()">
+          {{ 'Cancel' | t }}
+        </button>
+        <button class="button button-primary" type="submit" [disabled]="!isValid()">
+          {{ (isEditing() ? 'Save changes' : 'Add vendor') | t }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

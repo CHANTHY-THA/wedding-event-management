@@ -1,0 +1,145 @@
+<div class="modal-backdrop" (click)="closed.emit()">
+  <section
+    class="modal-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="gift-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
+    <span class="eyebrow">{{ 'With gratitude' | t }}</span>
+    <h2 id="gift-modal-title">{{ (isEditing() ? 'Edit gift' : 'Record a gift') | t }}</h2>
+    <form (ngSubmit)="submit()">
+      <label class="form-label" for="gift-guest">{{ 'From guest' | t }}</label>
+      <select id="gift-guest" class="form-input" (change)="selectGuest($event)">
+        <option value="" [selected]="draft().guestId === null">
+          {{ 'Someone not on the guest list' | t }}
+        </option>
+        @for (guest of guests(); track guest.id) {
+          <option [value]="guest.id" [selected]="draft().guestId === guest.id">
+            {{ guest.name }}
+          </option>
+        }
+      </select>
+      @if (draft().guestId === null) {
+        <label class="form-label" for="gift-giver">{{ 'Giver name' | t }}</label>
+        <input
+          id="gift-giver"
+          class="form-input"
+          type="text"
+          placeholder="e.g. Aunt Sreymom"
+          [value]="draft().giverName"
+          (input)="updateText('giverName', $event)"
+          required
+        />
+      }
+
+      <span class="form-label">{{ 'What did they give?' | t }}</span>
+      <div class="filter-tabs gift-type-tabs" role="group" aria-label="Gift type">
+        <button
+          type="button"
+          [class.selected]="draft().type === 'Cash'"
+          [attr.aria-pressed]="draft().type === 'Cash'"
+          (click)="setType('Cash')"
+        >
+          {{ 'Cash envelope' | t }}
+        </button>
+        <button
+          type="button"
+          [class.selected]="draft().type === 'Gift'"
+          [attr.aria-pressed]="draft().type === 'Gift'"
+          (click)="setType('Gift')"
+        >
+          {{ 'Gift' | t }}
+        </button>
+      </div>
+
+      @if (draft().type === 'Cash') {
+        <div class="form-grid">
+          <div>
+            <label class="form-label" for="gift-amount">{{ 'Amount' | t }}</label
+            ><input
+              id="gift-amount"
+              class="form-input"
+              type="number"
+              min="0"
+              [step]="draft().currency === 'KHR' ? 1000 : 1"
+              [value]="draft().amount || ''"
+              (input)="updateAmount($event)"
+              required
+            />
+          </div>
+          <div>
+            <label class="form-label" for="gift-currency">{{ 'Currency' | t }}</label
+            ><select id="gift-currency" class="form-input" (change)="setCurrency($event)">
+              <option value="USD" [selected]="draft().currency === 'USD'">
+                {{ 'USD ($)' | t }}
+              </option>
+              <option value="KHR" [selected]="draft().currency === 'KHR'">KHR (៛)</option>
+            </select>
+          </div>
+        </div>
+      } @else {
+        <label class="form-label" for="gift-item">{{ 'Gift' | t }}</label>
+        <input
+          id="gift-item"
+          class="form-input"
+          type="text"
+          placeholder="e.g. Silver tea set"
+          [value]="draft().item"
+          (input)="updateText('item', $event)"
+          required
+        />
+      }
+
+      <div class="form-grid">
+        <div>
+          <label class="form-label" for="gift-date">{{ 'Received on' | t }}</label
+          ><input
+            id="gift-date"
+            class="form-input"
+            type="date"
+            [value]="draft().receivedAt"
+            (input)="updateText('receivedAt', $event)"
+            required
+          />
+        </div>
+        <div>
+          <label class="form-label" for="gift-recorded-by">{{ 'Recorded by' | t }}</label
+          ><input
+            id="gift-recorded-by"
+            class="form-input"
+            type="text"
+            [value]="draft().recordedBy"
+            (input)="updateText('recordedBy', $event)"
+          />
+        </div>
+      </div>
+      <label class="form-label" for="gift-notes">{{ 'Notes' | t }}</label>
+      <textarea
+        id="gift-notes"
+        class="form-input form-textarea"
+        rows="2"
+        [value]="draft().notes"
+        (input)="updateText('notes', $event)"
+      ></textarea>
+      <label class="checkbox-row">
+        <input type="checkbox" [checked]="draft().thanked" (change)="toggleThanked()" />
+        {{ 'Thank-you already sent' | t }}
+      </label>
+      <div class="modal-actions">
+        @if (isEditing()) {
+          <button class="button button-danger modal-actions-start" type="button" (click)="delete()">
+            {{ (confirmingDelete() ? 'Confirm delete' : 'Delete') | t }}
+          </button>
+        }
+        <button class="button button-secondary" type="button" (click)="closed.emit()">
+          {{ 'Cancel' | t }}
+        </button>
+        <button class="button button-primary" type="submit" [disabled]="!isValid()">
+          {{ (isEditing() ? 'Save changes' : 'Record gift') | t }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

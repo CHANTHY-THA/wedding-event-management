@@ -1,0 +1,129 @@
+<section class="page-heading">
+  <div>
+    <p class="overline">{{ 'EVERY SMILE, FROM EVERY ANGLE' | t }}</p>
+    <h1>{{ 'Guest photo gallery' | t }}</h1>
+    <p class="heading-copy">
+      {{ 'Guests scan the QR code to add their photos to one shared gallery.' | t }}
+    </p>
+  </div>
+  <a class="button button-secondary" [routerLink]="sharePath" target="_blank" rel="noopener">
+    {{ 'Open guest page' | t }} <span aria-hidden="true">↗</span>
+  </a>
+</section>
+
+<div class="gallery-layout">
+  <section class="panel qr-panel" aria-labelledby="qr-title">
+    <span class="eyebrow">{{ 'SCAN TO SHARE' | t }}</span>
+    <h2 id="qr-title">{{ 'Your gallery QR code' | t }}</h2>
+    <app-qr-code
+      [value]="shareUrl"
+      [size]="220"
+      [alt]="'QR code that opens the guest photo gallery' | t"
+      (rendered)="qrDataUrl.set($event)"
+    />
+    <p class="share-url">{{ shareUrl }}</p>
+    <div class="qr-actions">
+      <button class="button button-secondary" type="button" (click)="copyLink()">
+        {{ 'Copy link' | t }}
+      </button>
+      <button
+        class="button button-secondary"
+        type="button"
+        [disabled]="!qrDataUrl()"
+        (click)="downloadQr()"
+      >
+        {{ 'Download QR' | t }}
+      </button>
+      <button class="button button-primary" type="button" (click)="printPoster()">
+        {{ 'Print poster' | t }}
+      </button>
+    </div>
+    <div class="upload-switch">
+      <div>
+        <strong>{{ (isOpen() ? 'Uploads are open' : 'Uploads are closed') | t }}</strong>
+        <small>{{
+          (isOpen()
+            ? 'Guests can add photos right now.'
+            : 'Guests can view the gallery but not add photos.'
+          ) | t
+        }}</small>
+      </div>
+      <button
+        class="switch"
+        type="button"
+        role="switch"
+        [class.on]="isOpen()"
+        [attr.aria-checked]="isOpen()"
+        [attr.aria-label]="'Allow guest uploads' | t"
+        (click)="toggleOpen()"
+      >
+        <span></span>
+      </button>
+    </div>
+    <p class="qr-tip">
+      {{
+        'Tip: print the poster for each table, or show the code on screen during the reception.' | t
+      }}
+    </p>
+  </section>
+
+  <section class="panel" aria-labelledby="photos-title">
+    <div class="panel-heading">
+      <div>
+        <span class="eyebrow">{{ 'FROM YOUR GUESTS' | t }}</span>
+        <h2 id="photos-title">{{ 'Shared photos' | t }}</h2>
+      </div>
+      <span class="panel-meta"
+        >{{ visibleCount() }} {{ 'visible' | t }} · {{ hiddenCount() }} {{ 'hidden' | t }} ·
+        {{ contributorCount() }}
+        {{ (contributorCount() === 1 ? 'guest sharing' : 'guests sharing') | t }}</span
+      >
+    </div>
+    <div class="photo-grid">
+      @for (photo of photos(); track photo.id) {
+        <figure class="photo-tile" [class.is-hidden]="photo.hidden">
+          <img
+            [src]="photo.url"
+            [alt]="'Photo shared by ' + (photo.uploaderName || 'a guest')"
+            loading="lazy"
+          />
+          @if (photo.hidden) {
+            <span class="hidden-badge">{{ 'Hidden from guests' | t }}</span>
+          }
+          <figcaption>
+            <strong>{{ photo.uploaderName || ('A guest' | t) }}</strong>
+            <small>{{ photo.uploadedAt | date: 'd MMM, HH:mm' }}</small>
+          </figcaption>
+          <div class="photo-actions">
+            <button class="button button-secondary" type="button" (click)="toggleHidden(photo)">
+              {{ (photo.hidden ? 'Show' : 'Hide') | t }}
+            </button>
+            <button class="button button-danger" type="button" (click)="deletePhoto(photo)">
+              {{ (confirmingDeleteId() === photo.id ? 'Confirm delete' : 'Delete') | t }}
+            </button>
+          </div>
+        </figure>
+      } @empty {
+        <p class="empty-state photo-empty">
+          {{ 'No photos yet. Share the QR code and they will appear here.' | t }}
+        </p>
+      }
+    </div>
+  </section>
+</div>
+
+<footer class="page-footer">
+  {{ 'Preview: until the backend is connected, photos stay in this browser only.' | t }}
+</footer>
+
+<!-- Only shown when printing: a poster to place on tables. -->
+<section class="qr-poster" aria-hidden="true">
+  <p class="poster-kicker">{{ 'Share the joy' | t }}</p>
+  <h2>{{ coupleNames }}</h2>
+  @if (qrDataUrl(); as src) {
+    <img [src]="src" alt="" />
+  }
+  <p class="poster-copy">
+    {{ 'Scan with your phone camera to add your photos to our gallery.' | t }}
+  </p>
+</section>

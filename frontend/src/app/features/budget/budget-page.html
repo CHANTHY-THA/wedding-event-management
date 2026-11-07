@@ -1,0 +1,256 @@
+<section class="page-heading">
+  <div>
+    <p class="overline">{{ 'EVERY COST, ACCOUNTED FOR' | t }}</p>
+    <h1>{{ 'Wedding budget' | t }}</h1>
+    <p class="heading-copy">
+      {{ 'Track what each vendor costs, what is paid, and what is still due.' | t }}
+    </p>
+  </div>
+  <button class="button button-primary" type="button" (click)="openForm(null)">
+    <span>+</span> {{ 'Add budget item' | t }}
+  </button>
+</section>
+
+<section class="stats-grid" aria-label="Budget summary">
+  <article class="stat-card budget-total-card">
+    <span class="stat-label">{{ 'Total budget' | t }}</span>
+    @if (isEditingTotal()) {
+      <form class="budget-total-form" (ngSubmit)="saveTotal()">
+        <input
+          class="form-input"
+          type="number"
+          name="budgetTotal"
+          min="0"
+          step="100"
+          aria-label="Total budget in dollars"
+          [ngModel]="totalDraft()"
+          (ngModelChange)="totalDraft.set($event)"
+        />
+        <button class="button button-primary" type="submit">{{ 'Save' | t }}</button>
+      </form>
+    } @else {
+      <strong class="stat-value">{{ budgetTotal() | money }}</strong>
+      <button class="text-link" type="button" (click)="startEditingTotal()">
+        {{ 'Edit budget' | t }}
+      </button>
+    }
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Planned' | t }}</span>
+    <strong class="stat-value">{{ budgetPlanned() | money }}</strong>
+    <span class="stat-note"
+      >{{ percent(budgetPlanned(), budgetTotal()) }}% {{ 'of budget' | t }} ·
+      {{ unallocated() | money }} {{ 'unallocated' | t }}</span
+    >
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Paid' | t }}</span>
+    <strong class="stat-value">{{ budgetSpent() | money }}</strong>
+    <span class="stat-note"
+      >{{ percent(budgetSpent(), budgetPlanned()) }}% {{ 'of planned costs' | t }}</span
+    >
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Still to pay' | t }}</span>
+    <strong class="stat-value">{{ budgetDue() | money }}</strong>
+    <span class="stat-note"
+      >{{ expenseCount() }} {{ (expenseCount() === 1 ? 'item' : 'items') | t }}
+      {{ 'in the budget' | t }}</span
+    >
+  </article>
+</section>
+
+@if (overBudgetBy() > 0) {
+  <p class="budget-warning" role="status">
+    {{ 'Planned costs are over your total budget by' | t }} {{ overBudgetBy() | money }}.
+    {{ 'Raise the budget or trim an item.' | t }}
+  </p>
+}
+
+<div class="budget-layout">
+  <section class="panel" aria-labelledby="expenses-title">
+    <div class="panel-heading">
+      <div>
+        <span class="eyebrow">{{ 'LINE ITEMS' | t }}</span>
+        <h2 id="expenses-title">{{ 'Budget items' | t }}</h2>
+      </div>
+      <div class="filter-tabs" role="group" aria-label="Filter by payment status">
+        @for (option of statusOptions; track option.value) {
+          <button
+            type="button"
+            [class.selected]="statusFilter() === option.value"
+            (click)="statusFilter.set(option.value)"
+          >
+            {{ option.label | t }}
+          </button>
+        }
+      </div>
+    </div>
+    <div class="budget-filters">
+      <label class="search-field">
+        <span aria-hidden="true">⌕</span>
+        <input
+          type="search"
+          aria-label="Search budget items"
+          [placeholder]="'Search item, vendor or notes...' | t"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+      </label>
+      <select
+        class="form-input category-filter"
+        aria-label="Filter by category"
+        [ngModel]="categoryFilter()"
+        (ngModelChange)="categoryFilter.set($event)"
+      >
+        <option value="all">{{ 'All categories' | t }}</option>
+        @for (category of categoryOptions; track category) {
+          <option [value]="category">{{ category }}</option>
+        }
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table class="data-table expense-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'ITEM / VENDOR' | t }}</th>
+            <th scope="col">{{ 'CATEGORY' | t }}</th>
+            <th scope="col" class="amount">{{ 'ESTIMATED' | t }}</th>
+            <th scope="col" class="amount">{{ 'PAID' | t }}</th>
+            <th scope="col">{{ 'NEXT DUE' | t }}</th>
+            <th scope="col">{{ 'STATUS' | t }}</th>
+            <th scope="col">
+              <span class="visually-hidden">{{ 'Actions' | t }}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (expense of filteredExpenses(); track expense.id) {
+            <tr>
+              <td>
+                <strong>{{ expense.name }}</strong
+                ><small>{{ vendorName(expense.vendorId) || 'No vendor yet' }}</small>
+              </td>
+              <td>{{ expense.category }}</td>
+              <td class="amount">{{ expense.estimated | money }}</td>
+              <td class="amount">
+                {{ expense.paid | money }}
+                @if (amountDue(expense) > 0) {
+                  <small>{{ amountDue(expense) | money }} {{ 'to pay' | t }}</small>
+                }
+              </td>
+              <td>
+                @if (expense.dueDate && amountDue(expense) > 0) {
+                  <span class="expense-due" [class.overdue]="isOverdue(expense)">{{
+                    expense.dueDate + 'T12:00:00Z' | date: 'd MMM' : '+0000'
+                  }}</span>
+                  @if (isOverdue(expense)) {
+                    <small class="overdue">{{ 'Overdue' | t }}</small>
+                  }
+                } @else {
+                  <span class="muted-value">—</span>
+                }
+              </td>
+              <td>
+                <span
+                  [class]="
+                    'payment-badge payment-' +
+                    paymentStatus(expense).toLowerCase().replace(' ', '-')
+                  "
+                  >{{ paymentStatus(expense) | t }}</span
+                >
+              </td>
+              <td>
+                <button
+                  class="button button-secondary expense-edit"
+                  type="button"
+                  [attr.aria-label]="'Edit ' + expense.name"
+                  (click)="openForm(expense)"
+                >
+                  {{ 'Edit' | t }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty-state" colspan="7">
+                @if (expenseCount()) {
+                  {{ 'No budget items match your filters.' | t }}
+                  <button class="text-link" type="button" (click)="resetFilters()">
+                    {{ 'Clear filters' | t }}
+                  </button>
+                } @else {
+                  {{ 'No budget items yet. Add the first cost to start tracking.' | t }}
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="budget-side">
+    <section class="panel" aria-labelledby="upcoming-title">
+      <div class="panel-heading">
+        <h2 id="upcoming-title">{{ 'Upcoming payments' | t }}</h2>
+      </div>
+      <ul class="upcoming-list">
+        @for (expense of upcoming(); track expense.id) {
+          <li class="upcoming-row">
+            <div class="row-main">
+              <strong>{{ expense.name }}</strong>
+              <small [class.overdue]="isOverdue(expense)">
+                @if (expense.dueDate) {
+                  {{ (isOverdue(expense) ? 'Overdue since' : 'Due') | t }}
+                  {{ expense.dueDate + 'T12:00:00Z' | date: 'd MMM' : '+0000' }}
+                } @else {
+                  {{ 'No due date' | t }}
+                }
+              </small>
+            </div>
+            <span class="upcoming-amount">{{ amountDue(expense) | money }}</span>
+          </li>
+        } @empty {
+          <li class="list-empty">{{ 'Everything is paid.' | t }}</li>
+        }
+      </ul>
+    </section>
+
+    <section class="panel" aria-labelledby="categories-title">
+      <div class="panel-heading">
+        <h2 id="categories-title">{{ 'By category' | t }}</h2>
+      </div>
+      <ul class="category-list">
+        @for (category of budgetCategories(); track category.name) {
+          <li>
+            <div class="category-row">
+              <span>{{ category.name }}</span>
+              <span>{{ category.spent | money }} / {{ category.planned | money }}</span>
+            </div>
+            <div
+              class="progress"
+              role="progressbar"
+              [attr.aria-label]="category.name + ' paid'"
+              aria-valuemin="0"
+              [attr.aria-valuemax]="category.planned"
+              [attr.aria-valuenow]="category.spent"
+            >
+              <span [style.width.%]="percent(category.spent, category.planned)"></span>
+            </div>
+          </li>
+        } @empty {
+          <li class="list-empty">{{ 'Categories appear once you add budget items.' | t }}</li>
+        }
+      </ul>
+    </section>
+  </aside>
+</div>
+
+<footer class="page-footer">
+  {{ 'Interactive preview · changes reset when you refresh the page.' | t }}
+</footer>
+
+@if (isFormOpen()) {
+  <app-expense-form-dialog [expense]="editingExpense()" (closed)="isFormOpen.set(false)" />
+}

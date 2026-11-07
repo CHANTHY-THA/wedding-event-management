@@ -39,6 +39,14 @@
   vertical-align: middle;
 }
 
+.data-table tbody tr {
+  transition: background var(--duration-fast) ease;
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-surface-muted);
+}
+
 .data-table tbody tr:last-child td {
   border-bottom: 0;
 }

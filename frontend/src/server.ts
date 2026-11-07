@@ -5,6 +5,8 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
+import { request as httpRequest } from 'node:http';
+import { request as httpsRequest } from 'node:https';
 import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
@@ -13,16 +15,34 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * Pass `/api` requests through to the backend (`backend/`), so the browser talks to one site and
+ * the session cookie stays first-party. `API_URL` is the backend's address, e.g.
+ * http://localhost:3000. (During `ng serve`, proxy.conf.json does the same.)
  */
+const apiUrl = process.env['API_URL'];
+if (apiUrl) {
+  app.use('/api', (req, res) => {
+    const target = new URL(req.originalUrl, apiUrl);
+    const send = target.protocol === 'https:' ? httpsRequest : httpRequest;
+    const upstream = send(
+      target,
+      {
+        method: req.method,
+        headers: { ...req.headers, host: target.host, 'x-forwarded-for': req.ip },
+      },
+      (response) => {
+        res.writeHead(response.statusCode ?? 502, response.headers);
+        response.pipe(res);
+      },
+    );
+    upstream.on('error', () => {
+      if (!res.headersSent) {
+        res.status(502).json({ error: 'The server is not reachable right now.' });
+      }
+    });
+    req.pipe(upstream);
+  });
+}
 
 /**
  * Serve static files from /browser

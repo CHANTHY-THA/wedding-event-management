@@ -1,0 +1,98 @@
+<main class="share-page">
+  <header class="share-header">
+    <span class="share-brand">
+      <svg viewBox="0 0 26 18" aria-hidden="true">
+        <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <circle cx="17" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.6" />
+      </svg>
+      Vows
+    </span>
+    <app-language-toggle />
+  </header>
+
+  @if (isValidLink) {
+    <section class="share-hero">
+      <p class="share-kicker">{{ 'Share the joy' | t }}</p>
+      <h1>{{ coupleNames }}</h1>
+      <p class="share-date">
+        {{ details.date + 'T12:00:00Z' | date: 'd MMMM y' : '+0000' }} · {{ details.venue }}
+      </p>
+    </section>
+
+    <section class="share-card" aria-labelledby="share-upload-title">
+      @if (isOpen()) {
+        <h2 id="share-upload-title">{{ 'Add your photos' | t }}</h2>
+        <p class="share-copy">
+          {{
+            'Help the couple see the day through your eyes. Photos appear in the gallery below.' | t
+          }}
+        </p>
+        <label class="share-label" for="share-name">{{ 'Your name (optional)' | t }}</label>
+        <input
+          id="share-name"
+          class="share-input"
+          type="text"
+          name="guestName"
+          autocomplete="name"
+          maxlength="60"
+          [placeholder]="'e.g. Cousin Vanna' | t"
+          [ngModel]="guestName()"
+          (ngModelChange)="guestName.set($event)"
+        />
+        <label class="share-upload-button">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
+          </svg>
+          {{ 'Choose or take photos' | t }}
+          <input
+            class="visually-hidden"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            (change)="upload($event)"
+          />
+        </label>
+        <p class="share-hint">{{ 'JPG, PNG or WebP · up to 8 MB each · 10 at a time' | t }}</p>
+        @if (message()) {
+          <p class="share-success" role="status">{{ message() | t }}</p>
+        }
+        @for (error of errors(); track error) {
+          <p class="share-error" role="alert">{{ error }}</p>
+        }
+      } @else {
+        <h2 id="share-upload-title">{{ 'Uploads are closed' | t }}</h2>
+        <p class="share-copy">
+          {{ 'The couple has closed photo sharing, but you can still enjoy the gallery.' | t }}
+        </p>
+      }
+    </section>
+
+    <section class="share-gallery" aria-labelledby="share-gallery-title">
+      <div class="share-gallery-heading">
+        <h2 id="share-gallery-title">{{ 'Shared gallery' | t }}</h2>
+        <span>{{ photoCount() }} {{ (photoCount() === 1 ? 'photo' : 'photos') | t }}</span>
+      </div>
+      <div class="share-grid">
+        @for (photo of photos(); track photo.id) {
+          <figure>
+            <img
+              [src]="photo.url"
+              [alt]="'Photo shared by ' + (photo.uploaderName || 'a guest')"
+              loading="lazy"
+            />
+            <figcaption>{{ photo.uploaderName || ('A guest' | t) }}</figcaption>
+          </figure>
+        } @empty {
+          <p class="share-empty">{{ 'Be the first to share a photo!' | t }}</p>
+        }
+      </div>
+    </section>
+  } @else {
+    <section class="share-card share-invalid">
+      <h1>{{ 'This link is not valid' | t }}</h1>
+      <p class="share-copy">
+        {{ 'Scan the QR code at the venue again, or ask the couple for the gallery link.' | t }}
+      </p>
+    </section>
+  }
+</main>

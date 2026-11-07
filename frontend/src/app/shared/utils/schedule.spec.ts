@@ -10,6 +10,7 @@ const item = (id: number, date: string, time: string): ScheduleItem => ({
   endTime: '23:59',
   location: '',
   responsible: '',
+  vendorIds: [],
 });
 
 describe('groupScheduleByDay', () => {

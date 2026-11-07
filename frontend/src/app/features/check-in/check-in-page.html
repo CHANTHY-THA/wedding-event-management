@@ -1,35 +1,37 @@
 <header class="page-heading">
   <div>
-    <p class="overline">On the day</p>
-    <h1>Guest check-in</h1>
-    <p class="heading-copy">Mark parties as they arrive. Only confirmed guests are listed.</p>
+    <p class="overline">{{ 'On the day' | t }}</p>
+    <h1>{{ 'Guest check-in' | t }}</h1>
+    <p class="heading-copy">
+      {{ 'Mark parties as they arrive. Only confirmed guests are listed.' | t }}
+    </p>
   </div>
 </header>
 
 <section class="stats-grid check-in-stats" aria-label="Check-in summary">
   <article class="stat-card">
-    <span class="stat-label">Guests checked in</span>
+    <span class="stat-label">{{ 'Guests checked in' | t }}</span>
     <strong class="stat-value"
       >{{ checkedInCount() }}<small> / {{ confirmedCount() }}</small></strong
     >
-    <span class="stat-note">Confirmed guests who have arrived</span>
+    <span class="stat-note">{{ 'Confirmed guests who have arrived' | t }}</span>
   </article>
   <article class="stat-card">
-    <span class="stat-label">Parties arrived</span>
+    <span class="stat-label">{{ 'Parties arrived' | t }}</span>
     <strong class="stat-value">{{ arrivedParties() }}</strong>
-    <span class="stat-note">Families or groups</span>
+    <span class="stat-note">{{ 'Families or groups' | t }}</span>
   </article>
 </section>
 
 <section class="panel" aria-labelledby="check-in-title">
   <div class="panel-heading">
-    <h2 id="check-in-title">Confirmed parties</h2>
+    <h2 id="check-in-title">{{ 'Confirmed parties' | t }}</h2>
     <label class="search-field">
       <span aria-hidden="true">⌕</span>
       <input
         type="search"
         aria-label="Search confirmed guests"
-        placeholder="Search name, family or tag…"
+        [placeholder]="'Search name, family or tag…' | t"
         [ngModel]="searchTerm()"
         (ngModelChange)="searchTerm.set($event)"
       />
@@ -39,10 +41,10 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th scope="col">Guest / party</th>
-          <th scope="col">Attending</th>
-          <th scope="col">Meal</th>
-          <th scope="col">Check-in</th>
+          <th scope="col">{{ 'Guest / party' | t }}</th>
+          <th scope="col">{{ 'Attending' | t }}</th>
+          <th scope="col">{{ 'Meal' | t }}</th>
+          <th scope="col">{{ 'Check-in' | t }}</th>
         </tr>
       </thead>
       <tbody>
@@ -57,7 +59,7 @@
                 >
               </div>
             </td>
-            <td>{{ guest.attendingCount }} of {{ guest.partySize }}</td>
+            <td>{{ guest.attendingCount }} / {{ guest.partySize }}</td>
             <td>{{ guest.mealChoice || '—' }}</td>
             <td>
               <button
@@ -72,13 +74,15 @@
                 "
                 (click)="toggleCheckIn(guest.id)"
               >
-                {{ guest.checkedIn ? '✓ Arrived' : 'Check in' }}
+                {{ (guest.checkedIn ? '✓ Arrived' : 'Check in') | t }}
               </button>
             </td>
           </tr>
         } @empty {
           <tr>
-            <td class="empty-state" colspan="4">No confirmed guests match your search.</td>
+            <td class="empty-state" colspan="4">
+              {{ 'No confirmed guests match your search.' | t }}
+            </td>
           </tr>
         }
       </tbody>

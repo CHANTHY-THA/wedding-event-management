@@ -1,0 +1,113 @@
+<section class="page-heading">
+  <div>
+    <p class="overline">{{ 'INVITATION DESIGNS' | t }}</p>
+    <h1>{{ 'Invitation templates' | t }}</h1>
+    <p class="heading-copy">
+      {{
+        'Choose the design your guests see. Buy a template once and use it for your whole guest list.'
+          | t
+      }}
+    </p>
+  </div>
+  @if (previewToken()) {
+    <a
+      class="button button-secondary"
+      [routerLink]="['/invite', previewToken()]"
+      target="_blank"
+      rel="noopener"
+    >
+      {{ 'Open my invitation' | t }} <span aria-hidden="true">↗</span>
+    </a>
+  }
+</section>
+
+@if (loadError()) {
+  <p class="form-error" role="alert">
+    {{ loadError() | t }}
+    <button class="text-link" type="button" (click)="reload()">{{ 'Try again' | t }}</button>
+  </p>
+} @else if (activeName()) {
+  <p class="template-current">
+    {{ 'Guests now see' | t }}: <strong>{{ activeName() | t }}</strong>
+  </p>
+}
+
+<div class="template-grid">
+  @for (template of templates(); track template.id) {
+    <article class="template-card" [class.is-active]="template.id === active()">
+      <div class="template-preview">
+        @if (previewToken()) {
+          <!-- A live, non-interactive copy of the guest page at phone size. -->
+          <iframe
+            [src]="previewFrames().get(template.id)"
+            [title]="('Preview of' | t) + ' ' + (template.name | t)"
+            loading="lazy"
+            tabindex="-1"
+            inert
+          ></iframe>
+        } @else {
+          <p class="template-empty">{{ 'Add a guest to see a preview.' | t }}</p>
+        }
+        @if (template.id === active()) {
+          <span class="template-badge">✓ {{ 'In use' | t }}</span>
+        }
+      </div>
+
+      <div class="template-body">
+        <h2>{{ template.name | t }}</h2>
+        <p class="template-copy">{{ template.description | t }}</p>
+        <p class="template-price">
+          @if (template.priceCents) {
+            <strong>{{ template.priceCents / 100 | currency: 'USD' }}</strong>
+            @if (template.listPriceCents > template.priceCents) {
+              <s>{{ template.listPriceCents / 100 | currency: 'USD' }}</s>
+              <span class="template-promo">{{ 'Promotion' | t }}</span>
+            }
+          } @else {
+            <strong>{{ 'Free' | t }}</strong>
+          }
+        </p>
+
+        <div class="template-actions">
+          @if (previewToken()) {
+            <a
+              class="button button-secondary"
+              [routerLink]="['/invite', previewToken()]"
+              [queryParams]="{ template: template.id }"
+              target="_blank"
+              rel="noopener"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {{ 'Preview' | t }}
+            </a>
+          }
+          @if (!template.owned) {
+            <button
+              class="button button-buy"
+              type="button"
+              (click)="checkoutTemplate.set(template)"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2" />
+              </svg>
+              {{ 'Buy now' | t }}
+            </button>
+          } @else if (template.id !== active()) {
+            <button class="button button-primary" type="button" (click)="useTemplate(template)">
+              {{ 'Use template' | t }}
+            </button>
+          } @else {
+            <span class="pill pill-gold">{{ 'In use' | t }}</span>
+          }
+        </div>
+      </div>
+    </article>
+  }
+</div>
+
+@if (checkoutTemplate(); as template) {
+  <app-template-checkout-dialog [template]="template" (closed)="checkoutTemplate.set(null)" />
+}

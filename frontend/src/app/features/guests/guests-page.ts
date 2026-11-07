@@ -5,12 +5,13 @@ import { GuestFormDialog } from '../../shared/guest-form-dialog/guest-form-dialo
 import { RsvpFilterTabs } from '../../shared/rsvp-filter-tabs/rsvp-filter-tabs';
 import { parseGuestCsv } from '../../shared/utils/guest-csv';
 import { filterGuests, RsvpFilter } from '../../shared/utils/guests';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 const MAX_CSV_BYTES = 2_000_000;
 
 @Component({
   selector: 'app-guests-page',
-  imports: [FormsModule, GuestFormDialog, RsvpFilterTabs],
+  imports: [TranslatePipe, FormsModule, GuestFormDialog, RsvpFilterTabs],
   templateUrl: './guests-page.html',
   styleUrl: './guests-page.scss',
 })

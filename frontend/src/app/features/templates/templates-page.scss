@@ -1,0 +1,158 @@
+.template-current {
+  margin: -8px 0 20px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.template-current strong {
+  color: var(--color-ink);
+}
+
+// Cards keep a fixed width so the phone-sized previews scale by a fixed amount.
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 260px);
+  justify-content: center;
+  gap: 24px;
+}
+
+.template-card {
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow var(--duration-base) ease,
+    transform var(--duration-base) var(--ease-out);
+}
+
+.template-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+
+.template-card.is-active {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 2px var(--color-gold);
+}
+
+// The guest page is drawn at a 390 × 760 phone size, then scaled down to the card width.
+.template-preview {
+  position: relative;
+  height: 506px;
+  overflow: hidden;
+  background: var(--color-surface-muted);
+}
+
+.template-preview iframe {
+  width: 390px;
+  height: 760px;
+  border: 0;
+  pointer-events: none;
+  transform: scale(0.6667);
+  transform-origin: 0 0;
+}
+
+.template-empty {
+  display: grid;
+  height: 100%;
+  margin: 0;
+  place-items: center;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.template-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--color-gold);
+  box-shadow: 0 6px 14px rgb(0 0 0 / 20%);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.template-body {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: 8px;
+  padding: 18px;
+}
+
+.template-body h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.template-copy {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13.5px;
+}
+
+.template-price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.template-price strong {
+  color: var(--color-danger);
+  font-size: 24px;
+}
+
+.template-price s {
+  color: var(--color-muted);
+  font-size: 15px;
+}
+
+.template-promo {
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.template-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.template-actions .button {
+  flex: 1;
+}
+
+.template-actions svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.button-buy {
+  background: var(--color-danger);
+  color: #fff;
+}
+
+.button-buy:hover:not(:disabled) {
+  box-shadow: 0 6px 16px rgb(162 67 59 / 28%);
+}

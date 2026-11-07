@@ -1,0 +1,264 @@
+.stat-card .progress {
+  margin-top: 10px;
+}
+
+.stat-alert {
+  border-color: var(--color-danger-soft);
+  background: linear-gradient(var(--color-danger-soft), var(--color-surface) 70%);
+}
+
+.stat-alert .stat-value {
+  color: var(--color-danger);
+}
+
+.tasks-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+  gap: 16px;
+}
+
+.task-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 4px 0 8px;
+}
+
+.task-filters .search-field {
+  width: min(100%, 320px);
+}
+
+.owner-filter {
+  width: auto;
+  height: 38px;
+}
+
+.task-phase {
+  margin-top: 18px;
+}
+
+.task-phase-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.task-phase-heading h3 {
+  margin: 0;
+  color: var(--color-brand-ink);
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.task-phase-heading span {
+  color: var(--color-muted);
+  font-size: 12.5px;
+}
+
+.checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklist-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 -10px;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  animation: fade-in var(--duration-base) ease both;
+  transition: background var(--duration-fast) ease;
+}
+
+.checklist-row + .checklist-row {
+  border-top: 1px solid var(--color-border);
+}
+
+.checklist-row:hover {
+  background: var(--color-surface-muted);
+}
+
+.checklist-check {
+  display: grid;
+  cursor: pointer;
+}
+
+.checklist-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.checklist-check input:checked {
+  animation: check-pop 260ms var(--ease-out);
+}
+
+@keyframes check-pop {
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+.checklist-main {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.checklist-main strong {
+  color: var(--color-ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: color var(--duration-base) ease;
+}
+
+.checklist-main small {
+  color: var(--color-muted);
+  font-size: 12.5px;
+}
+
+.checklist-row.done .checklist-main strong {
+  color: var(--color-muted);
+  text-decoration: line-through;
+}
+
+.owner-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--color-brand-soft);
+  color: var(--color-brand-ink);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.checklist-due {
+  display: grid;
+  min-width: 112px;
+  gap: 2px;
+  color: var(--color-ink-soft);
+  font-size: 13px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.checklist-due small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.checklist-row.overdue .checklist-due small {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.checklist-row.done .checklist-due small {
+  color: var(--color-success-ink);
+}
+
+.task-edit {
+  min-height: 32px;
+  padding: 0 12px;
+  opacity: 0.75;
+}
+
+.checklist-row:hover .task-edit,
+.task-edit:focus-visible {
+  opacity: 1;
+}
+
+.workload-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workload-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background var(--duration-fast) ease,
+    border-color var(--duration-fast) ease;
+}
+
+.workload-row:hover {
+  background: var(--color-surface-muted);
+}
+
+.workload-row.selected {
+  border-color: var(--color-brand);
+  background: var(--color-brand-soft);
+}
+
+.workload-main {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 2px;
+}
+
+.workload-main strong {
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.workload-main small {
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.workload-progress {
+  width: 52px;
+  flex: none;
+}
+
+.workload-hint {
+  margin: 12px 0 0;
+  color: var(--color-muted);
+  font-size: 12.5px;
+}
+
+@media (max-width: 1100px) {
+  .tasks-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .checklist-row {
+    flex-wrap: wrap;
+  }
+
+  .checklist-main {
+    flex-basis: calc(100% - 40px);
+  }
+
+  .owner-chip {
+    margin-left: 30px;
+  }
+
+  .checklist-due {
+    min-width: 0;
+    margin-left: auto;
+  }
+}

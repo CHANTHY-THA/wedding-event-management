@@ -1,0 +1,175 @@
+<section class="page-heading">
+  <div>
+    <p class="overline">{{ 'THE TEAM BEHIND THE DAY' | t }}</p>
+    <h1>{{ 'Vendors' | t }}</h1>
+    <p class="heading-copy">
+      {{ 'Contacts, contracts and payments for everyone you have booked.' | t }}
+    </p>
+  </div>
+  <button class="button button-primary" type="button" (click)="openForm(null)">
+    <span>+</span> {{ 'Add vendor' | t }}
+  </button>
+</section>
+
+<section class="stats-grid" aria-label="Vendor summary">
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Vendors' | t }}</span>
+    <strong class="stat-value">{{ vendorCount() }}</strong>
+    <span class="stat-note">{{ 'Booked for the wedding' | t }}</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Contracts signed' | t }}</span>
+    <strong class="stat-value"
+      >{{ signedCount() }} <small>/ {{ vendorCount() }}</small></strong
+    >
+    <span class="stat-note">{{ vendorCount() - signedCount() }} {{ 'still to sign' | t }}</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Booked value' | t }}</span>
+    <strong class="stat-value">{{ committed() | money }}</strong>
+    <span class="stat-note">{{ 'From linked budget items' | t }}</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Still to pay' | t }}</span>
+    <strong class="stat-value">{{ due() | money }}</strong>
+    <span class="stat-note">{{ 'Across all vendors' | t }}</span>
+  </article>
+</section>
+
+<section class="vendor-toolbar">
+  <label class="search-field">
+    <span aria-hidden="true">⌕</span>
+    <input
+      type="search"
+      [attr.aria-label]="'Search vendors' | t"
+      [placeholder]="'Search name, service or contact...' | t"
+      [ngModel]="searchTerm()"
+      (ngModelChange)="searchTerm.set($event)"
+    />
+  </label>
+  <div class="filter-tabs" role="group" aria-label="Filter by contract status">
+    @for (option of filterOptions; track option.value) {
+      <button
+        type="button"
+        [class.selected]="filter() === option.value"
+        (click)="filter.set(option.value)"
+      >
+        {{ option.label | t }}
+      </button>
+    }
+  </div>
+</section>
+
+<section class="vendor-grid" aria-label="Vendor directory">
+  @for (summary of visibleSummaries(); track summary.vendor.id) {
+    <article class="panel vendor-card">
+      <header class="vendor-card-heading">
+        <span class="avatar vendor-avatar" aria-hidden="true">{{
+          summary.vendor.name.charAt(0)
+        }}</span>
+        <div class="vendor-title">
+          <h2>{{ summary.vendor.name }}</h2>
+          <span>{{ summary.vendor.service }}</span>
+        </div>
+        <span [class]="'contract-badge contract-' + statusClass(summary.vendor.contractStatus)">{{
+          summary.vendor.contractStatus | t
+        }}</span>
+      </header>
+
+      <dl class="vendor-contact">
+        <div>
+          <dt>{{ 'Contact' | t }}</dt>
+          <dd>{{ summary.vendor.contactPerson || '—' }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'Phone' | t }}</dt>
+          <dd>
+            @if (summary.vendor.phone) {
+              <a class="text-link" [href]="'tel:' + summary.vendor.phone">{{
+                summary.vendor.phone
+              }}</a>
+            } @else {
+              —
+            }
+          </dd>
+        </div>
+        <div>
+          <dt>{{ 'Email' | t }}</dt>
+          <dd>
+            @if (summary.vendor.email) {
+              <a class="text-link" [href]="'mailto:' + summary.vendor.email">{{
+                summary.vendor.email
+              }}</a>
+            } @else {
+              —
+            }
+          </dd>
+        </div>
+      </dl>
+
+      <div class="vendor-payments">
+        @if (summary.paymentStatus) {
+          <div class="vendor-payment-row">
+            <span
+              >{{ 'Paid' | t }} {{ summary.paid | money }} / {{ summary.estimated | money }}</span
+            >
+            <span [class]="'payment-pill payment-' + statusClass(summary.paymentStatus)">{{
+              summary.paymentStatus | t
+            }}</span>
+          </div>
+          <div
+            class="progress"
+            role="progressbar"
+            [attr.aria-label]="summary.vendor.name + ' paid'"
+            aria-valuemin="0"
+            [attr.aria-valuemax]="summary.estimated"
+            [attr.aria-valuenow]="summary.paid"
+          >
+            <span [style.width.%]="percent(summary.paid, summary.estimated)"></span>
+          </div>
+        } @else {
+          <p class="vendor-muted">{{ 'No budget items linked yet.' | t }}</p>
+        }
+      </div>
+
+      <div class="vendor-events">
+        <span class="eyebrow">{{ 'On the timeline' | t }}</span>
+        @for (event of summary.events; track event.id) {
+          <span class="event-chip">{{ event.time }} · {{ event.title }}</span>
+        } @empty {
+          <span class="vendor-muted">{{ 'Not linked to any schedule event.' | t }}</span>
+        }
+      </div>
+
+      @if (summary.vendor.notes) {
+        <p class="vendor-notes">{{ summary.vendor.notes }}</p>
+      }
+
+      <button
+        class="button button-secondary vendor-edit"
+        type="button"
+        [attr.aria-label]="'Edit ' + summary.vendor.name"
+        (click)="openForm(summary.vendor)"
+      >
+        {{ 'Edit' | t }}
+      </button>
+    </article>
+  } @empty {
+    <p class="panel empty-state vendor-empty">
+      {{
+        (vendorCount()
+          ? 'No vendors match your filters.'
+          : 'No vendors yet. Add the first one you book.'
+        ) | t
+      }}
+    </p>
+  }
+</section>
+
+<footer class="page-footer">
+  {{ 'Interactive preview · changes reset when you refresh the page.' | t }}
+</footer>
+
+@if (isFormOpen()) {
+  <app-vendor-form-dialog [vendor]="editingVendor()" (closed)="isFormOpen.set(false)" />
+}

@@ -1,16 +1,21 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { WeddingDataService } from '../../core/wedding-data.service';
 import { GuestFormDialog } from '../../shared/guest-form-dialog/guest-form-dialog';
+import { amountDue } from '../../shared/utils/budget';
 import { daysUntil, timeAgo } from '../../shared/utils/dates';
 import { groupScheduleByDay } from '../../shared/utils/schedule';
 
 const MAX_LATEST_REPLIES = 5;
+const MAX_DUE_SOON_TASKS = 6;
+const DUE_SOON_DAYS = 7;
+import { MoneyPipe } from '../../shared/pipes/money.pipe';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-overview-page',
-  imports: [CurrencyPipe, DatePipe, RouterLink, GuestFormDialog],
+  imports: [TranslatePipe, DatePipe, MoneyPipe, RouterLink, GuestFormDialog],
   templateUrl: './overview-page.html',
   styleUrl: './overview-page.scss',
 })
@@ -31,6 +36,11 @@ export class OverviewPage {
     () => this.data.guests().filter((guest) => guest.rsvp === 'Pending').length,
   );
 
+  protected readonly greeting = (() => {
+    const hour = this.now.getHours();
+    return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  })();
+
   protected readonly countdownLabel = computed(() => {
     const days = daysUntil(this.details.date, this.now);
     if (days > 1) {
@@ -47,9 +57,23 @@ export class OverviewPage {
   protected readonly budgetSpent = this.data.budgetSpent;
   protected readonly budgetCategories = this.data.budgetCategories;
   protected readonly nextPayment = this.data.nextPayment;
+  protected readonly amountDue = amountDue;
 
+  /** Tasks ticked on this visit stay listed (crossed out) instead of vanishing mid-click. */
+  private readonly toggledTaskIds = signal<ReadonlySet<number>>(new Set());
+  /** Open tasks due within a week (including overdue ones), plus done ones due in that window. */
   protected readonly tasks = computed(() =>
-    [...this.data.tasks()].sort((left, right) => left.dueDate.localeCompare(right.dueDate)),
+    this.data
+      .tasks()
+      .filter((task) => {
+        const days = daysUntil(task.dueDate, this.now);
+        if (this.toggledTaskIds().has(task.id)) {
+          return true;
+        }
+        return task.done ? days >= 0 && days <= DUE_SOON_DAYS : days <= DUE_SOON_DAYS;
+      })
+      .sort((left, right) => left.dueDate.localeCompare(right.dueDate))
+      .slice(0, MAX_DUE_SOON_TASKS),
   );
 
   protected readonly latestReplies = computed(() =>
@@ -69,6 +93,7 @@ export class OverviewPage {
   }
 
   protected toggleTask(id: number): void {
+    this.toggledTaskIds.update((ids) => new Set(ids).add(id));
     this.data.toggleTask(id);
   }
 }

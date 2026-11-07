@@ -1,0 +1,227 @@
+<section class="page-heading">
+  <div>
+    <p class="overline">{{ 'EVERYONE HAS A PLACE' | t }}</p>
+    <h1>{{ 'Seating chart' | t }}</h1>
+    <p class="heading-copy">
+      {{ 'Drag each family or group to a table, or use its menu to move it.' | t }}
+    </p>
+  </div>
+  <div class="page-actions">
+    <button class="button button-secondary" type="button" (click)="printCards()">
+      {{ 'Print table cards' | t }}
+    </button>
+    <button class="button button-primary" type="button" (click)="openForm(null)">
+      <span>+</span> {{ 'Add table' | t }}
+    </button>
+  </div>
+</section>
+
+<section class="stats-grid" aria-label="Seating summary">
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Guests seated' | t }}</span>
+    <strong class="stat-value"
+      >{{ seatedGuests() }} <small>/ {{ expectedGuests() }}</small></strong
+    >
+    <span class="stat-note">{{ 'Confirmed guests plus pending invitations' | t }}</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Tables' | t }}</span>
+    <strong class="stat-value">{{ tables().length }}</strong>
+    <span class="stat-note">{{ totalSeats() }} {{ 'seats in total' | t }}</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Still to seat' | t }}</span>
+    <strong class="stat-value">{{ unseated().length }}</strong>
+    <span class="stat-note">{{ 'Families or groups' | t }}</span>
+  </article>
+  <article class="stat-card" [class.stat-alert]="warnings().length > 0">
+    <span class="stat-label">{{ 'Warnings' | t }}</span>
+    <strong class="stat-value">{{ warnings().length }}</strong>
+    <span class="stat-note">{{
+      (warnings().length ? 'See the list below' : 'Every table fits') | t
+    }}</span>
+  </article>
+</section>
+
+@if (warnings().length) {
+  <ul class="seating-warnings" role="status">
+    @for (warning of warnings(); track warning.message) {
+      <li>{{ warning.message }}</li>
+    }
+  </ul>
+}
+
+<ng-template #partyChip let-guest let-tableId="tableId">
+  <span class="party-name">
+    <strong>{{ guest.name }}</strong>
+    <small
+      >{{ seatsFor(guest) }} {{ (seatsFor(guest) === 1 ? 'seat' : 'seats') | t }}
+      @if (guest.rsvp === 'Pending') {
+        · {{ 'awaiting RSVP' | t }}
+      }
+    </small>
+  </span>
+  <select
+    class="party-move"
+    [attr.aria-label]="'Move ' + guest.name + ' to a table'"
+    (change)="moveFromSelect(guest, $event)"
+    (mousedown)="$event.stopPropagation()"
+    (touchstart)="$event.stopPropagation()"
+  >
+    <option value="" [selected]="tableId === null">{{ 'Not seated' | t }}</option>
+    @for (table of tables(); track table.id) {
+      <option [value]="table.id" [selected]="tableId === table.id">{{ table.name }}</option>
+    }
+  </select>
+</ng-template>
+
+<div class="seating-layout" cdkDropListGroup>
+  <aside class="seating-side">
+    <section class="panel" aria-labelledby="unseated-title">
+      <div class="panel-heading">
+        <h2 id="unseated-title">{{ 'Not seated yet' | t }}</h2>
+        <span class="panel-meta">{{ unseated().length }}</span>
+      </div>
+      <div
+        class="party-list unseated-list"
+        cdkDropList
+        [cdkDropListData]="null"
+        (cdkDropListDropped)="drop($event)"
+      >
+        @for (guest of unseated(); track guest.id) {
+          <div
+            class="party-chip"
+            [class.pending]="guest.rsvp === 'Pending'"
+            cdkDrag
+            [cdkDragData]="guest"
+          >
+            <ng-container
+              *ngTemplateOutlet="partyChip; context: { $implicit: guest, tableId: null }"
+            />
+          </div>
+        } @empty {
+          <p class="drop-hint">{{ 'Everyone has a seat. Lovely!' | t }}</p>
+        }
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="lookup-title">
+      <div class="panel-heading">
+        <h2 id="lookup-title">{{ 'Which table am I?' | t }}</h2>
+      </div>
+      <label class="search-field">
+        <span aria-hidden="true">⌕</span>
+        <input
+          type="search"
+          [attr.aria-label]="'Look up a guest' | t"
+          [placeholder]="'Type a guest or family name...' | t"
+          [ngModel]="lookupTerm()"
+          (ngModelChange)="lookupTerm.set($event)"
+        />
+      </label>
+      <ul class="lookup-results" aria-live="polite">
+        @for (result of lookupResults(); track result.guest.id) {
+          <li>
+            <span>{{ result.guest.name }}</span>
+            <strong [class.lookup-missing]="!result.table">{{
+              result.table?.name ?? ('Not seated yet' | t)
+            }}</strong>
+          </li>
+        } @empty {
+          @if (lookupTerm().trim().length >= 2) {
+            <li class="lookup-empty">{{ 'No guest by that name.' | t }}</li>
+          }
+        }
+      </ul>
+    </section>
+  </aside>
+
+  <section class="table-grid" aria-label="Tables">
+    @for (load of loads(); track load.table.id) {
+      <article
+        class="panel table-card"
+        [class.over]="load.used > load.table.capacity"
+        [class.has-warning]="warningTableIds().has(load.table.id)"
+      >
+        <header class="table-card-heading">
+          <div class="table-badge" aria-hidden="true">{{ load.table.name.charAt(0) }}</div>
+          <div class="table-title">
+            <h2>{{ load.table.name }}</h2>
+            <span
+              >{{ load.used }} / {{ load.table.capacity }} {{ 'seats' | t }}
+              @if (load.used < load.table.capacity) {
+                · {{ load.table.capacity - load.used }} {{ 'free' | t }}
+              }
+            </span>
+          </div>
+          <button
+            class="button button-secondary table-edit"
+            type="button"
+            [attr.aria-label]="'Edit ' + load.table.name"
+            (click)="openForm(load.table)"
+          >
+            {{ 'Edit' | t }}
+          </button>
+        </header>
+        <div
+          class="progress table-meter"
+          role="progressbar"
+          [attr.aria-label]="load.table.name + ' seats used'"
+          aria-valuemin="0"
+          [attr.aria-valuemax]="load.table.capacity"
+          [attr.aria-valuenow]="load.used"
+        >
+          <span [style.width.%]="percent(load.used, load.table.capacity)"></span>
+        </div>
+        <div
+          class="party-list table-drop"
+          cdkDropList
+          [cdkDropListData]="load.table.id"
+          (cdkDropListDropped)="drop($event)"
+        >
+          @for (guest of load.parties; track guest.id) {
+            <div
+              class="party-chip"
+              [class.pending]="guest.rsvp === 'Pending'"
+              cdkDrag
+              [cdkDragData]="guest"
+            >
+              <ng-container
+                *ngTemplateOutlet="partyChip; context: { $implicit: guest, tableId: load.table.id }"
+              />
+            </div>
+          } @empty {
+            <p class="drop-hint">{{ 'Drop a family or group here' | t }}</p>
+          }
+        </div>
+      </article>
+    } @empty {
+      <p class="panel empty-state">
+        {{ 'No tables yet. Add your first table to start seating.' | t }}
+      </p>
+    }
+  </section>
+</div>
+
+<footer class="page-footer">
+  {{ 'Interactive preview · changes reset when you refresh the page.' | t }}
+</footer>
+
+<!-- Only shown when printing: one folded card per table. -->
+<section class="print-cards" aria-hidden="true">
+  @for (load of loads(); track load.table.id) {
+    <article class="print-card">
+      <p class="print-couple">{{ coupleNames }}</p>
+      <h2>{{ load.table.name }}</h2>
+      <ul>
+        @for (guest of load.parties; track guest.id) {
+          <li>{{ guest.name }}</li>
+        }
+      </ul>
+    </article>
+  }
+</section>
+
+@if (isFormOpen()) {
+  <app-table-form-dialog [table]="editingTable()" (closed)="isFormOpen.set(false)" />
+}

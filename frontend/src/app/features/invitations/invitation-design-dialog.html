@@ -1,0 +1,314 @@
+<ng-template #imagePicker let-field let-label="label" let-url="url">
+  <div class="design-upload">
+    <div class="design-thumb" [class.empty]="!url">
+      @if (url) {
+        <img [src]="url" alt="" />
+      }
+    </div>
+    <div class="design-upload-actions">
+      <strong>{{ label | t }}</strong>
+      <div>
+        <label class="button button-secondary">
+          {{ (url ? 'Replace' : 'Upload') | t }}
+          <input
+            class="visually-hidden"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            [attr.aria-label]="label"
+            (change)="chooseImage(field, $event)"
+          />
+        </label>
+        @if (url) {
+          <button class="button button-secondary" type="button" (click)="clear(field)">
+            {{ 'Remove' | t }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<div class="modal-backdrop" (click)="closed.emit()">
+  <section
+    class="modal-panel design-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="design-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
+    <span class="eyebrow">{{ 'MAKE IT PERSONAL' | t }}</span>
+    <h2 id="design-modal-title">{{ 'Invitation design' | t }}</h2>
+    <form (ngSubmit)="save()">
+      <h3 class="design-heading">{{ 'Cover' | t }}</h3>
+      <div class="form-grid">
+        <div>
+          <label class="form-label" for="design-name-one">{{ 'First name on the card' | t }}</label
+          ><input
+            id="design-name-one"
+            class="form-input"
+            type="text"
+            [value]="draft().nameOne"
+            (input)="updateText('nameOne', $event)"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="design-name-two">{{ 'Second name on the card' | t }}</label
+          ><input
+            id="design-name-two"
+            class="form-input"
+            type="text"
+            [value]="draft().nameTwo"
+            (input)="updateText('nameTwo', $event)"
+          />
+        </div>
+      </div>
+      <p class="form-hint design-note">
+        {{ 'These names are shown when guests read the card in Khmer.' | t }}
+      </p>
+      <ng-container
+        *ngTemplateOutlet="
+          imagePicker;
+          context: { $implicit: 'coverPhotoUrl', label: 'Cover photo', url: draft().coverPhotoUrl }
+        "
+      />
+      <label class="form-label" for="design-cover">{{ 'Cover photo file path' | t }}</label>
+      <input
+        id="design-cover"
+        class="form-input"
+        type="text"
+        placeholder="/images/cover.jpg"
+        [value]="draft().coverPhotoUrl.startsWith('blob:') ? '' : draft().coverPhotoUrl"
+        (input)="updateText('coverPhotoUrl', $event)"
+      />
+      <p class="form-hint design-note">
+        {{
+          'Tip: save the cover in the public/images folder so it is still there after a reload.' | t
+        }}
+      </p>
+
+      <h3 class="design-heading">{{ 'Date and place' | t }}</h3>
+      <div class="form-grid">
+        <div>
+          <label class="form-label" for="design-time">{{ 'Ceremony time' | t }}</label
+          ><input
+            id="design-time"
+            class="form-input"
+            type="time"
+            [value]="draft().ceremonyTime"
+            (input)="updateText('ceremonyTime', $event)"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="design-map">{{ 'Map link' | t }}</label
+          ><input
+            id="design-map"
+            class="form-input"
+            type="url"
+            placeholder="https://maps.google.com/..."
+            [value]="draft().mapUrl"
+            (input)="updateText('mapUrl', $event)"
+          />
+        </div>
+      </div>
+      <label class="form-label" for="design-lunar">{{ 'Lunar date (optional)' | t }}</label>
+      <input
+        id="design-lunar"
+        class="form-input"
+        type="text"
+        placeholder="ថ្ងៃសៅរ៍ ១២កើត ខែបុស្ស ឆ្នាំមមែ នព្វស័ក ពុទ្ធសករាជ ២៥៧១"
+        [value]="draft().lunarDate"
+        (input)="updateText('lunarDate', $event)"
+      />
+      <label class="form-label" for="design-address">{{ 'Venue address' | t }}</label>
+      <input
+        id="design-address"
+        class="form-input"
+        type="text"
+        [value]="draft().venueAddress"
+        (input)="updateText('venueAddress', $event)"
+      />
+
+      <h3 class="design-heading">{{ 'Wording' | t }}</h3>
+      <label class="form-label" for="design-message">{{ 'Invitation message' | t }}</label>
+      <textarea
+        id="design-message"
+        class="form-input form-textarea"
+        rows="4"
+        [value]="draft().invitationMessage"
+        (input)="updateText('invitationMessage', $event)"
+      ></textarea>
+      <label class="form-label" for="design-thanks">{{ 'Thank-you message' | t }}</label>
+      <textarea
+        id="design-thanks"
+        class="form-input form-textarea"
+        rows="3"
+        [value]="draft().thankYouMessage"
+        (input)="updateText('thankYouMessage', $event)"
+      ></textarea>
+
+      <h3 class="design-heading">{{ 'Wedding gift' | t }}</h3>
+      <p class="form-hint design-note">
+        {{
+          'Upload the KHQR images from your banking app. Leave both empty to hide this section.' | t
+        }}
+      </p>
+      <ng-container
+        *ngTemplateOutlet="
+          imagePicker;
+          context: { $implicit: 'giftQrKhr', label: 'Riel QR code', url: draft().giftQrKhr }
+        "
+      />
+      <ng-container
+        *ngTemplateOutlet="
+          imagePicker;
+          context: { $implicit: 'giftQrUsd', label: 'Dollar QR code', url: draft().giftQrUsd }
+        "
+      />
+      <div class="form-grid">
+        <div>
+          <label class="form-label" for="design-qr-khr">{{ 'Riel QR file path' | t }}</label
+          ><input
+            id="design-qr-khr"
+            class="form-input"
+            type="text"
+            placeholder="/gifts/khqr-riel.png"
+            [value]="draft().giftQrKhr.startsWith('blob:') ? '' : draft().giftQrKhr"
+            (input)="updateText('giftQrKhr', $event)"
+          />
+        </div>
+        <div>
+          <label class="form-label" for="design-qr-usd">{{ 'Dollar QR file path' | t }}</label
+          ><input
+            id="design-qr-usd"
+            class="form-input"
+            type="text"
+            placeholder="/gifts/khqr-dollar.png"
+            [value]="draft().giftQrUsd.startsWith('blob:') ? '' : draft().giftQrUsd"
+            (input)="updateText('giftQrUsd', $event)"
+          />
+        </div>
+      </div>
+      <p class="form-hint design-note">
+        {{
+          'Tip: save the QR images in the public/gifts folder so they are still there after a reload.'
+            | t
+        }}
+      </p>
+      <label class="form-label" for="design-account">{{ 'Account name' | t }}</label>
+      <input
+        id="design-account"
+        class="form-input"
+        type="text"
+        [value]="draft().giftAccountName"
+        (input)="updateText('giftAccountName', $event)"
+      />
+
+      <h3 class="design-heading">{{ 'Music and links' | t }}</h3>
+      <div class="design-upload">
+        <div class="design-thumb music" [class.empty]="!draft().musicUrl" aria-hidden="true">♪</div>
+        <div class="design-upload-actions">
+          <strong>{{ 'Background music' | t }}</strong>
+          <div>
+            <label class="button button-secondary">
+              {{ (draft().musicUrl ? 'Replace' : 'Upload') | t }}
+              <input
+                class="visually-hidden"
+                type="file"
+                accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg,audio/wav"
+                aria-label="Background music"
+                (change)="chooseMusic($event)"
+              />
+            </label>
+            @if (draft().musicUrl) {
+              <button class="button button-secondary" type="button" (click)="clear('musicUrl')">
+                {{ 'Remove' | t }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+      <label class="form-label" for="design-music">{{ 'Music file path or link' | t }}</label>
+      <input
+        id="design-music"
+        class="form-input"
+        type="text"
+        placeholder="/music/wedding-song.mp3"
+        [value]="draft().musicUrl.startsWith('blob:') ? '' : draft().musicUrl"
+        (input)="updateText('musicUrl', $event)"
+      />
+      <p class="form-hint design-note">
+        {{
+          'Tip: put the song in the public/music folder and enter its path, so it is still there after a reload. Uploaded files only last until the page is refreshed.'
+            | t
+        }}
+      </p>
+      @if (uploadError()) {
+        <p class="form-error" role="alert">{{ uploadError() }}</p>
+      }
+      <span class="form-label">{{ 'Dress code colours' | t }}</span>
+      <div class="design-colors">
+        @for (color of draft().dressCodeColors; track $index) {
+          <div class="design-color">
+            <input
+              type="color"
+              [value]="color"
+              [attr.aria-label]="'Dress code colour ' + ($index + 1)"
+              (input)="setColor($index, $event)"
+            />
+            <button
+              type="button"
+              [attr.aria-label]="'Remove colour ' + ($index + 1)"
+              (click)="removeColor($index)"
+            >
+              ×
+            </button>
+          </div>
+        }
+        @if (draft().dressCodeColors.length < maxColors) {
+          <button
+            class="button button-secondary design-add-color"
+            type="button"
+            (click)="addColor()"
+          >
+            + {{ 'Add colour' | t }}
+          </button>
+        }
+      </div>
+      <label class="form-label" for="design-telegram">Telegram</label>
+      <input
+        id="design-telegram"
+        class="form-input"
+        type="url"
+        placeholder="https://t.me/..."
+        [value]="draft().telegramUrl"
+        (input)="updateText('telegramUrl', $event)"
+      />
+      <label class="form-label" for="design-facebook">Facebook</label>
+      <input
+        id="design-facebook"
+        class="form-input"
+        type="url"
+        placeholder="https://facebook.com/..."
+        [value]="draft().facebookUrl"
+        (input)="updateText('facebookUrl', $event)"
+      />
+      <label class="form-label" for="design-tiktok">TikTok</label>
+      <input
+        id="design-tiktok"
+        class="form-input"
+        type="url"
+        placeholder="https://tiktok.com/@..."
+        [value]="draft().tiktokUrl"
+        (input)="updateText('tiktokUrl', $event)"
+      />
+
+      <div class="modal-actions">
+        <button class="button button-secondary" type="button" (click)="closed.emit()">
+          {{ 'Cancel' | t }}
+        </button>
+        <button class="button button-primary" type="submit">{{ 'Save changes' | t }}</button>
+      </div>
+    </form>
+  </section>
+</div>

@@ -1,0 +1,124 @@
+.design-panel {
+  width: min(100%, 620px);
+}
+
+.design-heading {
+  margin: 24px 0 2px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-brand-ink);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.design-note {
+  color: var(--color-muted);
+}
+
+.design-upload {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.design-thumb {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  flex: none;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  color: var(--color-gold-ink);
+  font-size: 28px;
+}
+
+.design-thumb.empty {
+  border-style: dashed;
+  color: var(--color-muted);
+}
+
+.design-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.design-upload-actions {
+  display: grid;
+  gap: 6px;
+}
+
+.design-upload-actions strong {
+  font-size: 13.5px;
+}
+
+.design-upload-actions div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.design-upload-actions .button {
+  min-height: 32px;
+  padding: 0 12px;
+  cursor: pointer;
+  font-size: 12.5px;
+}
+
+.design-colors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.design-color {
+  position: relative;
+}
+
+.design-color input {
+  width: 42px;
+  height: 42px;
+  padding: 2px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.design-color input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.design-color input::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.design-color button {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.design-add-color {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 12.5px;
+}

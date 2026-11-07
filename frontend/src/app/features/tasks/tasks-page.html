@@ -1,0 +1,194 @@
+<section class="page-heading">
+  <div>
+    <p class="overline">{{ 'ONE STEP AT A TIME' | t }}</p>
+    <h1>{{ 'Planning checklist' | t }}</h1>
+    <p class="heading-copy">
+      {{ 'Every to-do from the first booking to the last thank-you note.' | t }}
+    </p>
+  </div>
+  <button class="button button-primary" type="button" (click)="openForm(null)">
+    <span>+</span> {{ 'Add task' | t }}
+  </button>
+</section>
+
+<section class="stats-grid" aria-label="Checklist summary">
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Progress' | t }}</span>
+    <strong class="stat-value">{{ progress() }}%</strong>
+    <div
+      class="progress"
+      role="progressbar"
+      aria-label="Checklist progress"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      [attr.aria-valuenow]="progress()"
+    >
+      <span [style.width.%]="progress()"></span>
+    </div>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Completed' | t }}</span>
+    <strong class="stat-value"
+      >{{ doneCount() }} <small>/ {{ totalCount() }}</small></strong
+    >
+    <span class="stat-note">{{ totalCount() - doneCount() }} {{ 'still to do' | t }}</span>
+  </article>
+  <article class="stat-card">
+    <span class="stat-label">{{ 'Due this week' | t }}</span>
+    <strong class="stat-value">{{ dueSoonCount() }}</strong>
+    <span class="stat-note">{{ 'Open tasks due in the next 7 days' | t }}</span>
+  </article>
+  <article class="stat-card" [class.stat-alert]="overdueCount() > 0">
+    <span class="stat-label">{{ 'Overdue' | t }}</span>
+    <strong class="stat-value">{{ overdueCount() }}</strong>
+    <span class="stat-note">{{
+      (overdueCount() ? 'Past their deadline' : 'Nothing is late. Well done!') | t
+    }}</span>
+  </article>
+</section>
+
+<div class="tasks-layout">
+  <section class="panel" aria-labelledby="checklist-title">
+    <div class="panel-heading">
+      <div>
+        <span class="eyebrow">{{ 'BY PLANNING PHASE' | t }}</span>
+        <h2 id="checklist-title">{{ 'Checklist' | t }}</h2>
+      </div>
+      <div class="filter-tabs" role="group" aria-label="Filter by task status">
+        @for (option of statusOptions; track option.value) {
+          <button
+            type="button"
+            [class.selected]="statusFilter() === option.value"
+            (click)="statusFilter.set(option.value)"
+          >
+            {{ option.label | t }}
+          </button>
+        }
+      </div>
+    </div>
+    <div class="task-filters">
+      <label class="search-field">
+        <span aria-hidden="true">⌕</span>
+        <input
+          type="search"
+          aria-label="Search tasks"
+          [placeholder]="'Search tasks, people or notes...' | t"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+      </label>
+      <select
+        class="form-input owner-filter"
+        aria-label="Filter by person"
+        [ngModel]="ownerFilter()"
+        (ngModelChange)="ownerFilter.set($event)"
+      >
+        <option value="all">{{ 'Everyone' | t }}</option>
+        @for (owner of owners(); track owner) {
+          <option [value]="owner">{{ owner }}</option>
+        }
+      </select>
+    </div>
+
+    @for (phase of phases(); track phase.label) {
+      <section class="task-phase" [attr.aria-label]="phase.label">
+        <header class="task-phase-heading">
+          <h3>{{ phase.label | t }}</h3>
+          <span>{{ phaseDone(phase.tasks) }} / {{ phase.tasks.length }} {{ 'done' | t }}</span>
+        </header>
+        <ul class="checklist">
+          @for (task of phase.tasks; track task.id) {
+            <li class="checklist-row" [class.done]="task.done" [class.overdue]="isOverdue(task)">
+              <label class="checklist-check">
+                <input
+                  type="checkbox"
+                  [checked]="task.done"
+                  [attr.aria-label]="
+                    'Mark ' + task.title + (task.done ? ' as not done' : ' as done')
+                  "
+                  (change)="toggleTask(task)"
+                />
+              </label>
+              <div class="checklist-main">
+                <strong>{{ task.title }}</strong>
+                @if (task.notes) {
+                  <small>{{ task.notes }}</small>
+                }
+              </div>
+              <span class="owner-chip">{{ task.owner }}</span>
+              <div class="checklist-due">
+                <time [attr.datetime]="task.dueDate">{{
+                  task.dueDate + 'T12:00:00Z' | date: 'd MMM y' : '+0000'
+                }}</time>
+                <small>{{ dueLabel(task) }}</small>
+              </div>
+              <button
+                class="button button-secondary task-edit"
+                type="button"
+                [attr.aria-label]="'Edit ' + task.title"
+                (click)="openForm(task)"
+              >
+                {{ 'Edit' | t }}
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    } @empty {
+      <p class="empty-state">
+        @if (totalCount()) {
+          {{ 'No tasks match your filters.' | t }}
+          <button class="text-link" type="button" (click)="resetFilters()">
+            {{ 'Clear filters' | t }}
+          </button>
+        } @else {
+          {{ 'No tasks yet. Add the first to-do to start your checklist.' | t }}
+        }
+      </p>
+    }
+  </section>
+
+  <aside class="panel" aria-labelledby="people-title">
+    <div class="panel-heading">
+      <h2 id="people-title">{{ "Who's doing what" | t }}</h2>
+    </div>
+    <ul class="workload-list">
+      @for (person of workload(); track person.owner) {
+        <li>
+          <button
+            type="button"
+            class="workload-row"
+            [class.selected]="ownerFilter() === person.owner"
+            [attr.aria-pressed]="ownerFilter() === person.owner"
+            (click)="showOwner(person.owner)"
+          >
+            <span class="avatar" aria-hidden="true">{{ person.owner.charAt(0) }}</span>
+            <span class="workload-main">
+              <strong>{{ person.owner }}</strong>
+              <small
+                >{{ person.open }} {{ 'open' | t }} · {{ person.total - person.open }}
+                {{ 'done' | t }}</small
+              >
+            </span>
+            <span class="progress workload-progress" aria-hidden="true">
+              <span [style.width.%]="((person.total - person.open) / person.total) * 100"></span>
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+    <p class="workload-hint">{{ 'Select a person to see only their tasks.' | t }}</p>
+  </aside>
+</div>
+
+<footer class="page-footer">
+  {{ 'Interactive preview · changes reset when you refresh the page.' | t }}
+</footer>
+
+@if (isFormOpen()) {
+  <app-task-form-dialog
+    [task]="editingTask()"
+    [owners]="owners()"
+    (closed)="isFormOpen.set(false)"
+  />
+}

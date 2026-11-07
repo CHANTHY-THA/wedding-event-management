@@ -8,11 +8,11 @@
   >
     <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
     <span class="eyebrow">{{
-      isEditing() ? 'Update this moment' : 'Add a moment to the day'
+      (isEditing() ? 'Update this moment' : 'Add a moment to the day') | t
     }}</span>
-    <h2 id="schedule-modal-title">{{ isEditing() ? 'Edit event' : 'Schedule an event' }}</h2>
+    <h2 id="schedule-modal-title">{{ (isEditing() ? 'Edit event' : 'Schedule an event') | t }}</h2>
     <form (ngSubmit)="submit()">
-      <label class="form-label" for="event-title">Event name</label>
+      <label class="form-label" for="event-title">{{ 'Event name' | t }}</label>
       <input
         id="event-title"
         class="form-input"
@@ -23,7 +23,7 @@
       />
       <div class="form-grid">
         <div>
-          <label class="form-label" for="event-type">Type</label
+          <label class="form-label" for="event-type">{{ 'Type' | t }}</label
           ><select
             id="event-type"
             class="form-input"
@@ -41,7 +41,7 @@
           </select>
         </div>
         <div>
-          <label class="form-label" for="event-date">Date</label
+          <label class="form-label" for="event-date">{{ 'Date' | t }}</label
           ><input
             id="event-date"
             class="form-input"
@@ -52,7 +52,7 @@
           />
         </div>
         <div>
-          <label class="form-label" for="event-start">Start time</label
+          <label class="form-label" for="event-start">{{ 'Start time' | t }}</label
           ><input
             id="event-start"
             class="form-input"
@@ -63,7 +63,7 @@
           />
         </div>
         <div>
-          <label class="form-label" for="event-end">End time</label
+          <label class="form-label" for="event-end">{{ 'End time' | t }}</label
           ><input
             id="event-end"
             class="form-input"
@@ -74,7 +74,7 @@
           />
         </div>
       </div>
-      <label class="form-label" for="event-location">Location</label>
+      <label class="form-label" for="event-location">{{ 'Location' | t }}</label>
       <input
         id="event-location"
         class="form-input"
@@ -83,7 +83,7 @@
         (input)="updateField('location', $event)"
         required
       />
-      <label class="form-label" for="event-owner">Responsible person</label>
+      <label class="form-label" for="event-owner">{{ 'Responsible person' | t }}</label>
       <input
         id="event-owner"
         class="form-input"
@@ -92,17 +92,35 @@
         (input)="updateField('responsible', $event)"
         required
       />
+      @if (vendors().length) {
+        <span class="form-label">{{ 'Vendors working at this event' | t }}</span>
+        <div class="preset-chips" role="group" aria-label="Vendors working at this event">
+          @for (vendor of vendors(); track vendor.id) {
+            <button
+              type="button"
+              class="preset-chip"
+              [class.selected]="draft().vendorIds.includes(vendor.id)"
+              [attr.aria-pressed]="draft().vendorIds.includes(vendor.id)"
+              (click)="toggleVendor(vendor.id)"
+            >
+              {{ vendor.name }}
+            </button>
+          }
+        </div>
+      }
       @if (draft().endTime <= draft().time) {
-        <p class="form-error" role="alert">The end time must be after the start time.</p>
+        <p class="form-error" role="alert">
+          {{ 'The end time must be after the start time.' | t }}
+        </p>
       }
       <div class="modal-actions">
         @if (isEditing()) {
           <button class="button button-danger modal-actions-start" type="button" (click)="delete()">
-            {{ confirmingDelete() ? 'Confirm delete' : 'Delete event' }}
+            {{ (confirmingDelete() ? 'Confirm delete' : 'Delete event') | t }}
           </button>
         }
         <button class="button button-secondary" type="button" (click)="closed.emit()">
-          Cancel
+          {{ 'Cancel' | t }}
         </button>
         <button
           class="button button-primary"
@@ -114,7 +132,7 @@
             draft().endTime <= draft().time
           "
         >
-          {{ isEditing() ? 'Save changes' : 'Add to timeline' }}
+          {{ (isEditing() ? 'Save changes' : 'Add to timeline') | t }}
         </button>
       </div>
     </form>

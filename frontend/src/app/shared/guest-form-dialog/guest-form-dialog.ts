@@ -1,8 +1,10 @@
 import { Component, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../core/toast.service';
 import { WeddingDataService } from '../../core/wedding-data.service';
 import { NewGuest } from '../../core/wedding.models';
 import { isValidParty } from '../utils/guests';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 const EMPTY_GUEST: NewGuest = {
   name: '',
@@ -21,11 +23,12 @@ const NUMERIC_FIELDS: ReadonlySet<keyof NewGuest> = new Set(['partySize', 'plusO
 
 @Component({
   selector: 'app-guest-form-dialog',
-  imports: [FormsModule],
+  imports: [TranslatePipe, FormsModule],
   templateUrl: './guest-form-dialog.html',
 })
 export class GuestFormDialog {
   private readonly data = inject(WeddingDataService);
+  private readonly toast = inject(ToastService);
 
   readonly closed = output<void>();
   readonly added = output<void>();
@@ -66,6 +69,7 @@ export class GuestFormDialog {
       email: draft.email.trim(),
       phone: draft.phone.trim(),
     });
+    this.toast.show(`${name} added to the guest list`);
     this.added.emit();
     this.closed.emit();
   }

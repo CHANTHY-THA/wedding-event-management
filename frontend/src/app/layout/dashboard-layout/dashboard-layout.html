@@ -9,31 +9,72 @@
     </a>
 
     <nav class="main-nav" aria-label="Main navigation">
-      @for (item of navItems; track item.label) {
-        @if (item.fragment) {
-          <a class="nav-link" [routerLink]="item.path" [fragment]="item.fragment">
-            {{ item.label }}
-          </a>
-        } @else {
-          <a
-            class="nav-link"
-            [routerLink]="item.path"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: item.path === '/' }"
-            ariaCurrentWhenActive="page"
-          >
-            {{ item.label }}
-            @if (item.count) {
-              <span class="nav-count">{{ item.count() }}</span>
-            }
-          </a>
-        }
+      @for (item of visibleNavItems(); track item.page) {
+        <a
+          class="nav-link"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+          ariaCurrentWhenActive="page"
+        >
+          <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="item.icon" />
+          </svg>
+          {{ item.label | t }}
+          @if (item.count) {
+            <span class="nav-count">{{ item.count() }}</span>
+          }
+        </a>
       }
     </nav>
 
     <div class="sidebar-footer">
-      <strong>Planner access</strong>
-      <small>{{ coupleNames }} · Couple account</small>
+      <div class="sidebar-settings">
+        <div class="segmented" role="group" [attr.aria-label]="'Language' | t">
+          <button
+            type="button"
+            [class.selected]="language() === 'en'"
+            [attr.aria-pressed]="language() === 'en'"
+            (click)="language.set('en')"
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            lang="km"
+            [class.selected]="language() === 'km'"
+            [attr.aria-pressed]="language() === 'km'"
+            (click)="language.set('km')"
+          >
+            ខ្មែរ
+          </button>
+        </div>
+        <div class="segmented" role="group" [attr.aria-label]="'Currency' | t">
+          <button
+            type="button"
+            [class.selected]="currency() === 'USD'"
+            [attr.aria-pressed]="currency() === 'USD'"
+            title="US dollar"
+            (click)="currency.set('USD')"
+          >
+            $
+          </button>
+          <button
+            type="button"
+            [class.selected]="currency() === 'KHR'"
+            [attr.aria-pressed]="currency() === 'KHR'"
+            title="Cambodian riel"
+            (click)="currency.set('KHR')"
+          >
+            ៛
+          </button>
+        </div>
+      </div>
+      <div class="sidebar-account">
+        <strong>{{ session()?.name ?? 'Planner access' }}</strong>
+        <small>{{ roleLabel() | t }} · {{ session()?.email ?? coupleNames }}</small>
+      </div>
+      <button class="sidebar-signout" type="button" (click)="logout()">{{ 'Sign out' | t }}</button>
     </div>
   </aside>
 

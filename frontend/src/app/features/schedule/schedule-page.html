@@ -1,25 +1,30 @@
 <section class="page-heading">
   <div>
-    <p class="overline">EVERY MOMENT, THOUGHTFULLY PLANNED</p>
-    <h1>Your wedding timeline</h1>
-    <p class="heading-copy">Ceremonies, celebrations, and the people making it happen.</p>
+    <p class="overline">{{ 'EVERY MOMENT, THOUGHTFULLY PLANNED' | t }}</p>
+    <h1>{{ 'Your wedding timeline' | t }}</h1>
+    <p class="heading-copy">
+      {{ 'Ceremonies, celebrations, and the people making it happen.' | t }}
+    </p>
   </div>
   <button class="button button-primary" type="button" (click)="openForm(null)">
-    <span>+</span> Add event
+    <span>+</span> {{ 'Add event' | t }}
   </button>
 </section>
 <section class="schedule-toolbar">
-  <div><span class="eyebrow">RUN OF SHOW</span><strong>Wedding-day timeline</strong></div>
+  <div>
+    <span class="eyebrow">{{ 'RUN OF SHOW' | t }}</span
+    ><strong>{{ 'Wedding-day timeline' | t }}</strong>
+  </div>
   <span class="schedule-event-count"
-    >{{ eventCount() }} moments across {{ scheduleDays().length }}
-    {{ scheduleDays().length === 1 ? 'day' : 'days' }}</span
+    >{{ eventCount() }} {{ 'moments across' | t }} {{ scheduleDays().length }}
+    {{ (scheduleDays().length === 1 ? 'day' : 'days') | t }}</span
   >
 </section>
 <section class="schedule-panel panel" aria-label="Wedding day schedule">
   @for (day of scheduleDays(); track day.date; let dayIndex = $index) {
     <section class="timeline-day" [attr.aria-label]="'Day ' + (dayIndex + 1) + ' schedule'">
       <header class="timeline-day-heading">
-        <span class="eyebrow">DAY {{ dayIndex + 1 }}</span>
+        <span class="eyebrow">{{ 'DAY' | t }} {{ dayIndex + 1 }}</span>
         <time [attr.datetime]="day.date">{{
           day.date + 'T12:00:00Z' | date: 'EEEE, MMMM d, y' : '+0000'
         }}</time>
@@ -36,8 +41,15 @@
             <h2>{{ item.title }}</h2>
             <div class="event-meta"><span aria-hidden="true">⌖</span> {{ item.location }}</div>
             <div class="event-meta">
-              <span aria-hidden="true">♙</span> Responsible: {{ item.responsible }}
+              <span aria-hidden="true">♙</span> {{ 'Responsible' | t }}: {{ item.responsible }}
             </div>
+            @if (vendorNames(item).length) {
+              <div class="event-vendors">
+                @for (name of vendorNames(item); track name) {
+                  <span class="event-vendor-chip">{{ name }}</span>
+                }
+              </div>
+            }
           </div>
           <button
             class="button button-secondary event-edit"
@@ -45,19 +57,19 @@
             [attr.aria-label]="'Edit ' + item.title"
             (click)="openForm(item)"
           >
-            Edit
+            {{ 'Edit' | t }}
           </button>
         </article>
       }
     </section>
   } @empty {
     <p class="empty-state schedule-empty">
-      No events yet. Add a ceremony or timeline item to get started.
+      {{ 'No events yet. Add a ceremony or timeline item to get started.' | t }}
     </p>
   }
 </section>
 <footer class="page-footer">
-  Run of show · Confirm event times and responsibilities with your venue.
+  {{ 'Run of show · Confirm event times and responsibilities with your venue.' | t }}
 </footer>
 
 @if (isFormOpen()) {

@@ -4,10 +4,11 @@ import { WeddingDataService } from '../../core/wedding-data.service';
 import { ScheduleItem } from '../../core/wedding.models';
 import { groupScheduleByDay } from '../../shared/utils/schedule';
 import { ScheduleFormDialog } from './schedule-form-dialog';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-schedule-page',
-  imports: [DatePipe, ScheduleFormDialog],
+  imports: [TranslatePipe, DatePipe, ScheduleFormDialog],
   templateUrl: './schedule-page.html',
   styleUrl: './schedule-page.scss',
 })
@@ -19,6 +20,12 @@ export class SchedulePage {
   protected readonly editingItem = signal<ScheduleItem | null>(null);
   protected readonly eventCount = computed(() => this.data.schedule().length);
   protected readonly scheduleDays = computed(() => groupScheduleByDay(this.data.schedule()));
+
+  protected vendorNames(item: ScheduleItem): string[] {
+    return item.vendorIds
+      .map((id) => this.data.findVendor(id)?.name)
+      .filter((name): name is string => !!name);
+  }
 
   protected openForm(item: ScheduleItem | null): void {
     this.editingItem.set(item);

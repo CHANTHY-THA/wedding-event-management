@@ -1,0 +1,50 @@
+<div class="modal-backdrop" (click)="closed.emit()">
+  <section
+    class="modal-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="table-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
+    <span class="eyebrow">{{ 'Seating chart' | t }}</span>
+    <h2 id="table-modal-title">{{ (isEditing() ? 'Edit table' : 'Add a table') | t }}</h2>
+    <form (ngSubmit)="submit()">
+      <label class="form-label" for="table-name">{{ 'Table name' | t }}</label>
+      <input
+        id="table-name"
+        class="form-input"
+        type="text"
+        name="name"
+        [ngModel]="name()"
+        (ngModelChange)="name.set($event)"
+        required
+      />
+      <label class="form-label" for="table-capacity">{{ 'Seats' | t }}</label>
+      <input
+        id="table-capacity"
+        class="form-input"
+        type="number"
+        name="capacity"
+        min="1"
+        [max]="maxCapacity"
+        [ngModel]="capacity()"
+        (ngModelChange)="capacity.set(+$event)"
+        required
+      />
+      <div class="modal-actions">
+        @if (isEditing()) {
+          <button class="button button-danger modal-actions-start" type="button" (click)="delete()">
+            {{ (confirmingDelete() ? 'Confirm delete' : 'Delete') | t }}
+          </button>
+        }
+        <button class="button button-secondary" type="button" (click)="closed.emit()">
+          {{ 'Cancel' | t }}
+        </button>
+        <button class="button button-primary" type="submit" [disabled]="!isValid()">
+          {{ (isEditing() ? 'Save changes' : 'Add table') | t }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

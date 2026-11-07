@@ -1,0 +1,79 @@
+.private-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: -8px 0 16px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--color-gold-soft);
+  color: var(--color-gold-ink);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.private-icon {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.stat-alert {
+  border-color: var(--color-gold-soft);
+  background: linear-gradient(var(--color-gold-soft), var(--color-surface) 70%);
+}
+
+.gift-search {
+  width: min(100%, 360px);
+  margin: 4px 0 12px;
+}
+
+.gift-amount,
+.gift-item {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.gift-amount {
+  white-space: nowrap;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.thanks-toggle {
+  min-width: 84px;
+  padding: 4px 12px;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition:
+    background var(--duration-base) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-base) ease;
+}
+
+.thanks-toggle:hover {
+  border-color: var(--color-brand);
+  color: var(--color-ink);
+}
+
+.thanks-toggle.sent {
+  border-style: solid;
+  border-color: transparent;
+  background: var(--color-success-soft);
+  color: var(--color-success-ink);
+}
+
+.gift-edit {
+  min-height: 32px;
+  padding: 0 12px;
+}

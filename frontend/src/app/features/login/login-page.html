@@ -1,0 +1,95 @@
+<main class="login-shell">
+  <section class="login-welcome" aria-hidden="true">
+    <div class="login-brand">
+      <svg class="brand-mark" viewBox="0 0 26 18">
+        <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <circle cx="17" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.6" />
+      </svg>
+      Vows
+    </div>
+    <div class="login-welcome-copy">
+      <p class="login-welcome-eyebrow">{{ 'The wedding of' | t }}</p>
+      <p class="login-couple">{{ coupleNames }}</p>
+      <p class="login-date">
+        {{ details.date + 'T12:00:00Z' | date: 'd MMMM y' : '+0000' }} · {{ details.venue }}
+      </p>
+    </div>
+    <svg class="login-rings" viewBox="0 0 260 180">
+      <circle cx="95" cy="90" r="70" />
+      <circle cx="165" cy="90" r="70" />
+    </svg>
+  </section>
+
+  <section class="login-panel" aria-labelledby="login-title">
+    <app-language-toggle class="login-lang" />
+    <div class="login-card">
+      <span class="eyebrow">{{ 'Planner access' | t }}</span>
+      <h1 id="login-title">{{ 'Welcome back' | t }}</h1>
+      <p class="login-copy">
+        {{ 'Sign in to manage guests, the schedule, budget and check-in.' | t }}
+      </p>
+
+      <form (ngSubmit)="submit()" novalidate>
+        <label class="form-label" for="login-email">{{ 'Email' | t }}</label>
+        <input
+          id="login-email"
+          class="form-input"
+          type="email"
+          name="email"
+          autocomplete="username"
+          placeholder="you@example.com"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          required
+        />
+        <label class="form-label" for="login-password">{{ 'Password' | t }}</label>
+        <div class="password-field">
+          <input
+            id="login-password"
+            class="form-input"
+            [type]="showPassword() ? 'text' : 'password'"
+            name="password"
+            autocomplete="current-password"
+            [ngModel]="password()"
+            (ngModelChange)="password.set($event)"
+            required
+          />
+          <button
+            class="password-toggle"
+            type="button"
+            [attr.aria-pressed]="showPassword()"
+            (click)="showPassword.set(!showPassword())"
+          >
+            {{ (showPassword() ? 'Hide' : 'Show') | t }}
+          </button>
+        </div>
+        @if (errorMessage()) {
+          <p class="form-error" role="alert">{{ errorMessage() | t }}</p>
+        }
+        <button class="button button-primary login-submit" type="submit" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="spinner" aria-hidden="true"></span> {{ 'Signing in…' | t }}
+          } @else {
+            {{ 'Sign in' | t }}
+          }
+        </button>
+      </form>
+
+      <section class="demo-accounts" aria-labelledby="demo-title">
+        <h2 id="demo-title">{{ 'Try a demo account' | t }}</h2>
+        <div class="demo-grid">
+          @for (account of demoAccounts; track account.email) {
+            <button
+              type="button"
+              class="demo-account"
+              (click)="useDemoAccount(account.email, account.password)"
+            >
+              <strong>{{ account.roleLabel | t }}</strong>
+              <small>{{ account.email }}</small>
+            </button>
+          }
+        </div>
+      </section>
+    </div>
+  </section>
+</main>

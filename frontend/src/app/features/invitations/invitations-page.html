@@ -1,40 +1,113 @@
 <section class="page-heading">
   <div>
-    <p class="overline">A PERSONAL INVITATION FOR EVERY PARTY</p>
-    <h1>Invitations &amp; RSVP</h1>
-    <p class="heading-copy">Share private links and keep every reply in one live dashboard.</p>
+    <p class="overline">{{ 'A PERSONAL INVITATION FOR EVERY PARTY' | t }}</p>
+    <h1>{{ 'Invitations & RSVP' | t }}</h1>
+    <p class="heading-copy">
+      {{ 'Share private links and keep every reply in one live dashboard.' | t }}
+    </p>
   </div>
 </section>
 <section class="stats-grid" aria-label="RSVP summary">
   <article class="stat-card">
-    <span class="stat-label">Invited</span>
+    <span class="stat-label">{{ 'Invited' | t }}</span>
     <strong class="stat-value">{{ invitedCount() }}</strong>
-    <span class="stat-note">People on the guest list</span>
+    <span class="stat-note">{{ 'People on the guest list' | t }}</span>
   </article>
   <article class="stat-card">
-    <span class="stat-label">Accepted</span>
+    <span class="stat-label">{{ 'Accepted' | t }}</span>
     <strong class="stat-value">{{ confirmedCount() }}</strong>
-    <span class="stat-note">Guests attending</span>
+    <span class="stat-note">{{ 'Guests attending' | t }}</span>
   </article>
   <article class="stat-card">
-    <span class="stat-label">Awaiting reply</span>
+    <span class="stat-label">{{ 'Awaiting reply' | t }}</span>
     <strong class="stat-value">{{ pendingCount() }}</strong>
-    <span class="stat-note">Guests still to hear from</span>
+    <span class="stat-note">{{ 'Guests still to hear from' | t }}</span>
   </article>
   <article class="stat-card">
-    <span class="stat-label">Replied</span>
+    <span class="stat-label">{{ 'Replied' | t }}</span>
     <strong class="stat-value">{{ invitedCount() - pendingCount() }}</strong>
-    <span class="stat-note">Confirmed or declined</span>
+    <span class="stat-note">{{ 'Confirmed or declined' | t }}</span>
   </article>
 </section>
+<section class="panel design-summary" aria-labelledby="design-title">
+  <div class="design-summary-cover" aria-hidden="true">
+    @if (coverPreview(); as cover) {
+      <img [src]="cover" alt="" />
+    }
+    <span>{{ invitation().nameOne }} ♥ {{ invitation().nameTwo }}</span>
+  </div>
+  <div class="design-summary-body">
+    <span class="eyebrow">{{ 'THE CARD YOUR GUESTS OPEN' | t }}</span>
+    <h2 id="design-title">{{ 'Invitation design' | t }}</h2>
+    <ul class="design-checklist">
+      <li
+        [class.done]="!!invitation().coverPhotoUrl && !coverMissing()"
+        [class.warning]="coverMissing()"
+      >
+        {{ 'Cover photo' | t }}
+      </li>
+      <li [class.done]="!!invitation().mapUrl">{{ 'Map link' | t }}</li>
+      <li [class.done]="giftQrStatus() === 'ok'" [class.warning]="giftQrStatus() === 'missing'">
+        {{ 'Gift QR codes' | t }}
+      </li>
+      <li [class.done]="musicStatus() === 'ok'" [class.warning]="musicStatus() === 'missing'">
+        {{ 'Background music' | t }}
+      </li>
+    </ul>
+    @if (coverMissing()) {
+      <p class="music-warning" role="status">
+        {{ 'Cover photo not found:' | t }} <code>{{ invitation().coverPhotoUrl }}</code
+        >.
+        {{
+          'Save your cover photo into the frontend/public/images folder with that name. Until then guests see the first pre-wedding photo.'
+            | t
+        }}
+      </p>
+    }
+    @if (missingGiftQrs().length) {
+      <p class="music-warning" role="status">
+        {{ 'Gift QR image not found:' | t }}
+        @for (url of missingGiftQrs(); track url) {
+          <code>{{ url }}</code
+          >{{ $last ? '.' : ', ' }}
+        }
+        {{
+          'Save your KHQR images into the frontend/public/gifts folder with those names, or choose other files in the design dialog.'
+            | t
+        }}
+      </p>
+    }
+    @if (musicStatus() === 'missing') {
+      <p class="music-warning" role="status">
+        {{ 'Music file not found:' | t }} <code>{{ invitation().musicUrl }}</code
+        >.
+        {{
+          'Copy your song into the frontend/public/music folder with that name, or choose another file in the design dialog.'
+            | t
+        }}
+      </p>
+    }
+    <div class="design-summary-actions">
+      <button class="button button-primary" type="button" (click)="isDesignOpen.set(true)">
+        {{ 'Edit invitation design' | t }}
+      </button>
+      @if (previewPath(); as path) {
+        <a class="button button-secondary" [routerLink]="path" target="_blank" rel="noopener">
+          {{ 'Preview invitation' | t }} <span aria-hidden="true">↗</span>
+        </a>
+      }
+    </div>
+  </div>
+</section>
+
 <section class="panel photo-manager">
   <div class="panel-heading">
     <div>
-      <span class="eyebrow">MAKE IT PERSONAL</span>
-      <h2>Pre-wedding photos</h2>
+      <span class="eyebrow">{{ 'MAKE IT PERSONAL' | t }}</span>
+      <h2>{{ 'Pre-wedding photos' | t }}</h2>
     </div>
     <label class="button button-secondary photo-upload-button">
-      Add photos
+      {{ 'Add photos' | t }}
       <input
         class="visually-hidden"
         type="file"
@@ -46,12 +119,17 @@
     </label>
   </div>
   <p class="invitation-help">
-    Upload up to {{ remainingPhotoSlots() }} JPG, PNG, or WebP photos (8 MB max each). These are
-    shown in the invitation preview.
+    {{ 'Photos you can still add' | t }}: {{ remainingPhotoSlots() }} (JPG, PNG, WebP · 8 MB).
+    {{ 'They are shown in the invitation preview.' | t }}
   </p>
   <p class="photo-preview-note">
-    The preview illustration shows the gallery frame size. Remove it when you upload your own
-    pre-wedding photos.
+    {{
+      'To keep photos after a reload, save up to 6 files as photo-1.jpg … photo-6.jpg in the frontend/public/images/gallery folder.'
+        | t
+    }}
+    @if (missingPhotoCount()) {
+      {{ missingPhotoCount() }} {{ 'of these files are not there yet and are skipped.' | t }}
+    }
   </p>
   @if (photoMessage()) {
     <p class="status-message" role="status">{{ photoMessage() }}</p>
@@ -68,7 +146,7 @@
               [attr.aria-label]="'Remove ' + photo.name"
               (click)="removePhoto(photo.id)"
             >
-              Remove
+              {{ 'Remove' | t }}
             </button>
           </figcaption>
         </figure>
@@ -76,21 +154,23 @@
     </div>
   } @else {
     <p class="photo-empty-state">
-      Your invitation will show its photo gallery here after you add photos.
+      {{ 'Your invitation will show its photo gallery here after you add photos.' | t }}
     </p>
   }
 </section>
 <section class="panel invitation-management-panel">
   <div class="panel-heading">
     <div>
-      <span class="eyebrow">INDIVIDUAL INVITATION LINKS</span>
-      <h2>Share &amp; follow up</h2>
+      <span class="eyebrow">{{ 'INDIVIDUAL INVITATION LINKS' | t }}</span>
+      <h2>{{ 'Share & follow up' | t }}</h2>
     </div>
-    <span class="live-rsvp-label"><span></span> RSVP updates live</span>
+    <span class="live-rsvp-label"><span></span> {{ 'RSVP updates live' | t }}</span>
   </div>
   <p class="invitation-help">
-    Each link opens a private invitation and RSVP form. Reminder buttons open your email, SMS,
-    WhatsApp, or Telegram app so you can review and send the message.
+    {{
+      'Each link opens a private invitation and RSVP form. Reminder buttons open your email, SMS, WhatsApp, or Telegram app so you can review and send the message.'
+        | t
+    }}
   </p>
   @if (copyMessage()) {
     <p class="status-message" role="status">{{ copyMessage() }}</p>
@@ -99,10 +179,10 @@
     <table class="data-table invitations-table">
       <thead>
         <tr>
-          <th scope="col">GUEST / PARTY</th>
-          <th scope="col">INVITATION LINK</th>
-          <th scope="col">RSVP</th>
-          <th scope="col">REMIND VIA</th>
+          <th scope="col">{{ 'GUEST / PARTY' | t }}</th>
+          <th scope="col">{{ 'INVITATION LINK' | t }}</th>
+          <th scope="col">{{ 'RSVP' | t }}</th>
+          <th scope="col">{{ 'REMIND VIA' | t }}</th>
         </tr>
       </thead>
       <tbody>
@@ -115,18 +195,20 @@
             <td>
               <div class="link-actions">
                 <a class="open-invite-link" [routerLink]="invitePath(guest.invitationToken)"
-                  >Open invite <span aria-hidden="true">↗</span></a
+                  >{{ 'Open invite' | t }} <span aria-hidden="true">↗</span></a
                 ><button
                   class="copy-link-button"
                   type="button"
                   (click)="copyInvite(guest.invitationToken)"
                 >
-                  Copy link
+                  {{ 'Copy link' | t }}
                 </button>
               </div>
             </td>
             <td>
-              <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{ guest.rsvp }}</span>
+              <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{
+                guest.rsvp | t
+              }}</span>
             </td>
             <td>
               <div class="reminder-actions">
@@ -134,7 +216,7 @@
                   [href]="reminderHref(guest, 'email')"
                   [attr.aria-label]="'Prepare email reminder for ' + guest.name"
                   title="Email"
-                  >Email</a
+                  >{{ 'Email' | t }}</a
                 >
                 <a
                   [href]="reminderHref(guest, 'sms')"
@@ -162,3 +244,7 @@
     </table>
   </div>
 </section>
+
+@if (isDesignOpen()) {
+  <app-invitation-design-dialog (closed)="isDesignOpen.set(false)" />
+}

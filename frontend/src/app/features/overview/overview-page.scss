@@ -10,8 +10,13 @@
   background: var(--color-neutral-soft);
 }
 
+.rsvp-bar {
+  transform-origin: left center;
+  animation: grow-x 900ms var(--ease-out) 300ms both;
+}
+
 .rsvp-bar > span {
-  transition: width 300ms ease;
+  transition: width var(--duration-slow) var(--ease-out);
 }
 
 .segment-confirmed {
@@ -120,7 +125,7 @@
 }
 
 .budget-total {
-  margin: 0;
+  margin: 0 0 14px;
   color: var(--color-muted);
   font-size: 13px;
 }
@@ -171,9 +176,23 @@
   accent-color: var(--color-brand);
 }
 
+.task-row strong {
+  transition: color var(--duration-base) ease;
+}
+
 .task-row.done strong {
   color: var(--color-muted);
   text-decoration: line-through;
+}
+
+.task-row input:checked {
+  animation: check-pop 260ms var(--ease-out);
+}
+
+@keyframes check-pop {
+  50% {
+    transform: scale(1.25);
+  }
 }
 
 .task-due {

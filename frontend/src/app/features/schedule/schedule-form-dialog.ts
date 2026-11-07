@@ -1,20 +1,24 @@
 import { Component, computed, inject, input, linkedSignal, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../../core/toast.service';
 import { WeddingDataService } from '../../core/wedding-data.service';
 import { NewScheduleItem, ScheduleItem } from '../../core/wedding.models';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 /** Add a new schedule item, or edit/delete an existing one when `item` is set. */
 @Component({
   selector: 'app-schedule-form-dialog',
-  imports: [FormsModule],
+  imports: [TranslatePipe, FormsModule],
   templateUrl: './schedule-form-dialog.html',
 })
 export class ScheduleFormDialog {
   private readonly data = inject(WeddingDataService);
+  private readonly toast = inject(ToastService);
 
   readonly item = input<ScheduleItem | null>(null);
   readonly closed = output<void>();
 
+  protected readonly vendors = this.data.vendors;
   protected readonly isEditing = computed(() => this.item() !== null);
   protected readonly confirmingDelete = signal(false);
   protected readonly draft = linkedSignal<NewScheduleItem>(() => {
@@ -31,6 +35,7 @@ export class ScheduleFormDialog {
       endTime: '10:00',
       location: '',
       responsible: '',
+      vendorIds: [],
     };
   });
 
@@ -40,6 +45,15 @@ export class ScheduleFormDialog {
       return;
     }
     this.draft.update((draft) => ({ ...draft, [field]: target.value }));
+  }
+
+  protected toggleVendor(vendorId: number): void {
+    this.draft.update((draft) => ({
+      ...draft,
+      vendorIds: draft.vendorIds.includes(vendorId)
+        ? draft.vendorIds.filter((id) => id !== vendorId)
+        : [...draft.vendorIds, vendorId],
+    }));
   }
 
   protected submit(): void {
@@ -58,8 +72,10 @@ export class ScheduleFormDialog {
     const item = this.item();
     if (item) {
       this.data.updateScheduleItem({ ...details, id: item.id });
+      this.toast.show(`${title} updated`);
     } else {
       this.data.addScheduleItem(details);
+      this.toast.show(`${title} added to the timeline`);
     }
     this.closed.emit();
   }
@@ -74,6 +90,7 @@ export class ScheduleFormDialog {
       return;
     }
     this.data.removeScheduleItem(item.id);
+    this.toast.show(`${item.title} removed from the timeline`, 'info');
     this.closed.emit();
   }
 }

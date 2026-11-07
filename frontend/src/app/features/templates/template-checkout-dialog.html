@@ -1,0 +1,127 @@
+<div class="modal-backdrop" (click)="closed.emit()">
+  <section
+    class="modal-panel checkout-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="checkout-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
+    <span class="eyebrow">{{ 'Checkout' | t }}</span>
+    <h2 id="checkout-title">{{ template().name | t }}</h2>
+
+    @if (order(); as order) {
+      @switch (order.status) {
+        @case ('pending') {
+          <p class="modal-copy">
+            {{ 'Scan with any KHQR banking app to pay for this template.' | t }}
+          </p>
+          @if (order.testMode) {
+            <p class="checkout-test" role="note">
+              {{ 'Test mode: this QR cannot be paid with a bank app. No real money moves.' | t }}
+            </p>
+          }
+          <div class="checkout-qr">
+            <app-qr-code
+              [value]="order.qrString ?? ''"
+              [size]="220"
+              [alt]="'KHQR code to pay for the template' | t"
+            />
+          </div>
+          <dl class="checkout-summary">
+            <div>
+              <dt>{{ 'Amount' | t }}</dt>
+              <dd>
+                <strong>{{ order.amountCents / 100 | currency: order.currency }}</strong>
+                @if (template().listPriceCents > order.amountCents) {
+                  <s>{{ template().listPriceCents / 100 | currency: order.currency }}</s>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>{{ 'Order' | t }}</dt>
+              <dd>
+                <code>{{ order.reference }}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>{{ 'QR expires in' | t }}</dt>
+              <dd>{{ timeLeft() }}</dd>
+            </div>
+          </dl>
+          <p class="checkout-status" role="status">
+            <span class="checkout-spinner" aria-hidden="true"></span>
+            {{ 'Waiting for payment. This updates by itself once your bank confirms.' | t }}
+          </p>
+        }
+        @case ('expired') {
+          <p class="modal-copy" role="status">
+            {{ 'This QR code has expired before a payment arrived.' | t }}
+          </p>
+        }
+        @case ('review') {
+          <p class="modal-copy" role="status">
+            {{
+              'We received a payment that does not match this order. We will check it and contact you.'
+                | t
+            }}
+            {{ 'Your order' | t }}: <code>{{ order.reference }}</code>
+          </p>
+        }
+        @case ('failed') {
+          <p class="modal-copy" role="status">{{ 'The payment was not completed.' | t }}</p>
+        }
+      }
+    } @else if (!error()) {
+      <p class="modal-copy checkout-status" role="status">
+        <span class="checkout-spinner" aria-hidden="true"></span>
+        {{ 'Preparing your payment…' | t }}
+      </p>
+    }
+
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() | t }}</p>
+    }
+
+    <div class="modal-actions">
+      <button class="button button-secondary" type="button" (click)="closed.emit()">
+        {{ 'Close' | t }}
+      </button>
+      @switch (order()?.status) {
+        @case ('pending') {
+          @if (order()?.testMode) {
+            <button
+              class="button button-secondary"
+              type="button"
+              [disabled]="isBusy()"
+              (click)="simulatePayment()"
+            >
+              {{ 'Simulate payment' | t }}
+            </button>
+          }
+          <button
+            class="button button-primary"
+            type="button"
+            [disabled]="isBusy()"
+            (click)="checkPayment()"
+          >
+            {{ 'Check payment now' | t }}
+          </button>
+        }
+        @case ('review') {}
+        @default {
+          @if (order() || error()) {
+            <button
+              class="button button-primary"
+              type="button"
+              [disabled]="isBusy()"
+              (click)="startOrder()"
+            >
+              {{ 'Get a new QR' | t }}
+            </button>
+          }
+        }
+      }
+    </div>
+  </section>
+</div>

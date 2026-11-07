@@ -1,0 +1,87 @@
+<div class="modal-backdrop" (click)="closed.emit()">
+  <section
+    class="modal-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="task-modal-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
+    <span class="eyebrow">{{
+      (isEditing() ? 'Update this to-do' : 'Something to get done') | t
+    }}</span>
+    <h2 id="task-modal-title">{{ (isEditing() ? 'Edit task' : 'Add a task') | t }}</h2>
+    <form (ngSubmit)="submit()">
+      <label class="form-label" for="task-title">{{ 'Task' | t }}</label>
+      <input
+        id="task-title"
+        class="form-input"
+        type="text"
+        placeholder="e.g. Book the wedding car"
+        [value]="draft().title"
+        (input)="updateField('title', $event)"
+        required
+      />
+      <label class="form-label" for="task-owner">{{ 'Assigned to' | t }}</label>
+      <input
+        id="task-owner"
+        class="form-input"
+        type="text"
+        list="task-owner-options"
+        placeholder="Family member, helper or planner"
+        [value]="draft().owner"
+        (input)="updateField('owner', $event)"
+      />
+      <datalist id="task-owner-options">
+        @for (owner of owners(); track owner) {
+          <option [value]="owner"></option>
+        }
+      </datalist>
+      <label class="form-label" for="task-due">{{ 'Deadline' | t }}</label>
+      <input
+        id="task-due"
+        class="form-input"
+        type="date"
+        [value]="draft().dueDate"
+        (input)="updateField('dueDate', $event)"
+        required
+      />
+      <div class="preset-chips" role="group" aria-label="Deadline shortcuts">
+        @for (preset of presets; track preset.label) {
+          <button
+            type="button"
+            class="preset-chip"
+            [class.selected]="draft().dueDate === preset.date"
+            (click)="setDueDate(preset.date)"
+          >
+            {{ preset.label | t }}
+          </button>
+        }
+      </div>
+      @if (phase()) {
+        <p class="form-hint task-phase-hint">{{ 'Planning phase' | t }}: {{ phase() | t }}</p>
+      }
+      <label class="form-label" for="task-notes">{{ 'Notes' | t }}</label>
+      <textarea
+        id="task-notes"
+        class="form-input form-textarea"
+        rows="2"
+        [value]="draft().notes"
+        (input)="updateField('notes', $event)"
+      ></textarea>
+      <div class="modal-actions">
+        @if (isEditing()) {
+          <button class="button button-danger modal-actions-start" type="button" (click)="delete()">
+            {{ (confirmingDelete() ? 'Confirm delete' : 'Delete task') | t }}
+          </button>
+        }
+        <button class="button button-secondary" type="button" (click)="closed.emit()">
+          {{ 'Cancel' | t }}
+        </button>
+        <button class="button button-primary" type="submit" [disabled]="!isValid()">
+          {{ (isEditing() ? 'Save changes' : 'Add task') | t }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

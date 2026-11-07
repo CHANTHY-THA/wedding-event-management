@@ -1,17 +1,19 @@
 <section class="page-heading">
   <div>
-    <p class="overline">EVERYONE WHO MAKES YOUR DAY SPECIAL</p>
-    <h1>Guest management</h1>
-    <p class="heading-copy">Organize families, contact details, plus-ones, and guest needs.</p>
+    <p class="overline">{{ 'EVERYONE WHO MAKES YOUR DAY SPECIAL' | t }}</p>
+    <h1>{{ 'Guest management' | t }}</h1>
+    <p class="heading-copy">
+      {{ 'Organize families, contact details, plus-ones, and guest needs.' | t }}
+    </p>
   </div>
   <button class="button button-primary" type="button" (click)="isGuestFormOpen.set(true)">
-    <span>+</span> Add a guest
+    <span>+</span> {{ 'Add a guest' | t }}
   </button>
 </section>
 <section class="import-panel panel">
   <div>
-    <span class="eyebrow">START FROM A SPREADSHEET</span>
-    <h2>Import guests from CSV</h2>
+    <span class="eyebrow">{{ 'START FROM A SPREADSHEET' | t }}</span>
+    <h2>{{ 'Import guests from CSV' | t }}</h2>
     <p>
       Headers:
       <code>name, group, side, relationship, email, phone, partySize, plusOnes, children, tags</code
@@ -22,7 +24,7 @@
     }
   </div>
   <label class="button button-secondary csv-button">
-    Import CSV
+    {{ 'Import CSV' | t }}
     <input
       class="visually-hidden"
       type="file"
@@ -35,8 +37,8 @@
 <section class="panel guest-management-panel">
   <div class="panel-heading">
     <div>
-      <span class="eyebrow">YOUR PEOPLE</span>
-      <h2>{{ invitedCount() }} invited guests</h2>
+      <span class="eyebrow">{{ 'YOUR PEOPLE' | t }}</span>
+      <h2>{{ invitedCount() }} {{ 'invited guests' | t }}</h2>
     </div>
     <app-rsvp-filter-tabs [(value)]="statusFilter" />
   </div>
@@ -45,7 +47,7 @@
     <input
       type="search"
       aria-label="Search all guest details"
-      placeholder="Search name, family, relationship, or tag..."
+      [placeholder]="'Search name, family, relationship, or tag...' | t"
       [ngModel]="searchTerm()"
       (ngModelChange)="searchTerm.set($event)"
     />
@@ -54,12 +56,12 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th scope="col">GUEST / FAMILY</th>
-          <th scope="col">SIDE &amp; RELATIONSHIP</th>
-          <th scope="col">CONTACT</th>
-          <th scope="col">PARTY</th>
-          <th scope="col">NEEDS &amp; TAGS</th>
-          <th scope="col">RSVP</th>
+          <th scope="col">{{ 'GUEST / FAMILY' | t }}</th>
+          <th scope="col">{{ 'SIDE & RELATIONSHIP' | t }}</th>
+          <th scope="col">{{ 'CONTACT' | t }}</th>
+          <th scope="col">{{ 'PARTY' | t }}</th>
+          <th scope="col">{{ 'NEEDS & TAGS' | t }}</th>
+          <th scope="col">{{ 'RSVP' | t }}</th>
         </tr>
       </thead>
       <tbody>
@@ -70,14 +72,16 @@
               ><small>{{ guest.group }}</small>
             </td>
             <td>
-              {{ guest.side }} side<small>{{ guest.relationship || '—' }}</small>
+              {{ guest.side + ' side' | t }}<small>{{ guest.relationship || '—' }}</small>
             </td>
             <td>
               {{ guest.email || '—' }}<small>{{ guest.phone || 'No phone added' }}</small>
             </td>
             <td>
-              {{ guest.partySize }} invited<small
-                >{{ guest.plusOnes }} plus-ones · {{ guest.children }} children</small
+              {{ guest.partySize }} {{ 'invited' | t
+              }}<small
+                >{{ guest.plusOnes }} {{ 'plus-ones' | t }} · {{ guest.children }}
+                {{ 'children' | t }}</small
               >
             </td>
             <td>
@@ -85,17 +89,19 @@
                 @for (tag of guest.tags; track tag) {
                   <span class="guest-tag">{{ tag }}</span>
                 } @empty {
-                  <span class="muted-value">No tags</span>
+                  <span class="muted-value">{{ 'No tags' | t }}</span>
                 }
               </div>
             </td>
             <td>
-              <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{ guest.rsvp }}</span>
+              <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{
+                guest.rsvp | t
+              }}</span>
             </td>
           </tr>
         } @empty {
           <tr>
-            <td class="empty-state" colspan="6">No guests match your filters.</td>
+            <td class="empty-state" colspan="6">{{ 'No guests match your filters.' | t }}</td>
           </tr>
         }
       </tbody>

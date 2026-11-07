@@ -1,143 +1,591 @@
-<main class="invitation-page">
-  <article class="invitation-card">
-    <a class="invitation-brand" routerLink="/" aria-label="Return to Wedding Event"
-      >wedding event<span>.</span></a
-    >
-    @if (guest(); as invitedGuest) {
-      <span class="invitation-flower" aria-hidden="true">✳</span>
-      <p class="invitation-kicker">WITH JOY IN OUR HEARTS</p>
-      <h1>{{ details.partnerOne }} <span>&amp;</span> {{ details.partnerTwo }}</h1>
-      <p class="invitation-intro">
-        would love for you to join them as they celebrate their wedding
-      </p>
-      <div class="invitation-event">
-        <strong>{{ details.date + 'T12:00:00Z' | date: 'EEEE, MMMM d, y' : '+0000' }}</strong>
-        <span>{{ details.venue }} · {{ details.city }}</span>
-      </div>
-      <div class="invitation-divider"><span>♡</span></div>
+<!-- Gold flourish under section headings: a lotus bud between two leafy scrolls. -->
+<ng-template #ornament let-position="position">
+  <svg [class]="'ornament ' + (position ?? '')" viewBox="0 0 300 52" aria-hidden="true">
+    <defs>
+      <linearGradient id="ornament-gold" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#f3c66b" />
+        <stop offset="0.55" stop-color="#d9962f" />
+        <stop offset="1" stop-color="#a8681a" />
+      </linearGradient>
+    </defs>
+    <g id="ornament-half" fill="url(#ornament-gold)" stroke="url(#ornament-gold)">
+      <path
+        fill="none"
+        stroke-linecap="round"
+        stroke-width="2.6"
+        d="M136 37C113 46 93 45 78 35 66 27 52 27 44 35c-6 6-2 14 5 12 6-2 5-9 0-9"
+      />
+      <path fill="none" stroke-linecap="round" stroke-width="2" d="M78 35C60 45 34 46 10 38" />
+      <path
+        stroke="none"
+        d="M102 41c-5-8-13-10-20-8 5 6 12 9 20 8zM60 33c1-8-3-14-9-16 0 7 3 12 9 16zM30 41c-6-5-13-5-18-2 5 4 12 5 18 2zM118 44c-2-6-7-9-13-9 3 5 8 8 13 9z"
+      />
+      <circle stroke="none" cx="9" cy="38" r="3" />
+      <path stroke="none" d="M138 31c-8-3-15 1-17 8 7 1 13-2 17-8z" />
+    </g>
+    <use href="#ornament-half" transform="matrix(-1 0 0 1 300 0)" />
+    <path
+      fill="url(#ornament-gold)"
+      d="M150 4c7 9 11 15 11 22 0 8-5 13-11 15-6-2-11-7-11-15 0-7 4-13 11-22z"
+    />
+    <path fill="#fbe3a8" d="M150 13c3 5 5 9 5 13s-2 7-5 8c-3-1-5-4-5-8s2-8 5-13z" />
+    <circle cx="150" cy="46" r="3.2" fill="url(#ornament-gold)" />
+  </svg>
+</ng-template>
 
-      <section class="invitation-story" aria-labelledby="story-title">
-        <p class="invitation-section-kicker">A LITTLE SNEAK PEEK</p>
-        <h2 id="story-title">Our story in photos</h2>
-        @if (photos().length) {
+<!-- Countdown frame: a gold cartouche with pointed ends and scrollwork above and below. -->
+<ng-template #cartouche>
+  <svg class="cartouche" viewBox="0 0 440 220" aria-hidden="true" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="cartouche-gold" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#f6d58a" />
+        <stop offset="0.5" stop-color="#d49a3a" />
+        <stop offset="1" stop-color="#f1c873" />
+      </linearGradient>
+      <g id="cartouche-crest">
+        <path d="M220 72c-9-1-13-9-9-16 3-6 12-7 15-1 3 5-2 10-6 8" />
+        <path d="M220 72c9-1 13-9 9-16-3-6-12-7-15-1-3 5 2 10 6 8" />
+        <path d="M207 66c-12-12-30-11-38 0-6 9 3 18 10 13 6-4 3-11-2-10" />
+        <path d="M233 66c12-12 30-11 38 0 6 9-3 18-10 13-6-4-3-11 2-10" />
+        <path d="M169 70c-14 6-26 7-40 4M271 70c14 6 26 7 40 4" />
+        <path
+          fill="url(#cartouche-gold)"
+          stroke="none"
+          d="M220 30c6 8 9 14 9 19 0 6-4 10-9 12-5-2-9-6-9-12 0-5 3-11 9-19z"
+        />
+      </g>
+    </defs>
+    <g fill="none" stroke="url(#cartouche-gold)" stroke-linecap="round" stroke-linejoin="round">
+      <path
+        stroke-width="4"
+        d="M80 64h280c26 0 40 26 60 46-20 20-34 46-60 46H80c-26 0-40-26-60-46 20-20 34-46 60-46z"
+      />
+      <path
+        stroke-width="2.5"
+        d="M88 76h264c18 0 30 18 46 34-16 16-28 34-46 34H88c-18 0-30-18-46-34 16-16 28-34 46-34z"
+      />
+      <g stroke-width="3" transform="translate(0 -8)"><use href="#cartouche-crest" /></g>
+      <g stroke-width="3" transform="matrix(1 0 0 -1 0 228)"><use href="#cartouche-crest" /></g>
+    </g>
+  </svg>
+</ng-template>
+
+<main class="invite" [class.lang-km]="isKhmer()" [attr.data-template]="template()">
+  @if (isPreview()) {
+    <p class="preview-ribbon">{{ 'Preview' | t }}</p>
+  }
+  @if (settings().coverPhotoUrl; as coverUrl) {
+    <img
+      class="visually-hidden"
+      [src]="coverUrl"
+      alt=""
+      aria-hidden="true"
+      (error)="onCoverError(coverUrl)"
+    />
+  }
+  @if (guest(); as openingGuest) {
+    @if (!isOpened()) {
+      <section class="opening" aria-labelledby="opening-title">
+        <!-- Same card, photo and frame as the cover below, with the guest's name and the open button. -->
+        <div class="invite-hero opening-cover">
+          <div class="hero-media">
+            @if (coverPhoto()) {
+              <img class="hero-photo" [src]="coverPhoto()" alt="" />
+            }
+          </div>
+          <div class="hero-frame">
+            <div class="hero-top">
+              <p class="hero-title">{{ 'Wedding Celebration' | t }}</p>
+              <p class="hero-script">The Wedding Day</p>
+              <ng-container [ngTemplateOutlet]="ornament" />
+            </div>
+            <div class="hero-bottom">
+              <h2 id="opening-title" class="hero-names">
+                <span>{{ isKhmer() ? settings().nameOne : details.partnerOne }}</span>
+                <svg class="hero-heart" viewBox="0 0 24 22" aria-label="and">
+                  <path
+                    d="M12 21 2.8 11.6A5.6 5.6 0 0 1 12 4.1a5.6 5.6 0 0 1 9.2 7.5z"
+                    fill="url(#opening-heart-gold)"
+                  />
+                  <defs>
+                    <linearGradient id="opening-heart-gold" x1="0" x2="1" y1="0" y2="1">
+                      <stop offset="0" stop-color="#f1d58e" />
+                      <stop offset="1" stop-color="#b8862f" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <span>{{ isKhmer() ? settings().nameTwo : details.partnerTwo }}</span>
+              </h2>
+              <p class="hero-save opening-to">{{ 'Dear' | t }}</p>
+              <p class="opening-guest">{{ openingGuest.name }}</p>
+              <button class="gold-button opening-button" type="button" (click)="openInvitation()">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 7h18v12H3zM3 8l9 6 9-6" />
+                </svg>
+                {{ 'Open invitation' | t }}
+              </button>
+              @if (hasMusic()) {
+                <p class="opening-hint">
+                  ♪ {{ 'Music will play when you open the invitation' | t }}
+                </p>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+  }
+
+  <div class="petals" aria-hidden="true">
+    @for (petal of petals; track $index) {
+      <span
+        [style.left.%]="petal.left"
+        [style.width.px]="petal.size"
+        [style.height.px]="petal.size"
+        [style.animation-delay.s]="petal.delay"
+        [style.animation-duration.s]="petal.duration"
+        [style.--drift]="petal.drift + 'px'"
+      ></span>
+    }
+  </div>
+
+  <div class="invite-toolbar">
+    <app-language-toggle />
+  </div>
+
+  @if (guest(); as invitedGuest) {
+    <!-- 1. Cover -->
+    <!-- Split cover: the photo on one side, a paper panel with the names and date on the other. -->
+    <section class="invite-hero" aria-labelledby="invite-names">
+      <div class="hero-media">
+        @if (coverPhoto()) {
+          <img class="hero-photo" [src]="coverPhoto()" alt="" />
+        }
+      </div>
+      <div class="hero-frame">
+        <div class="hero-top">
+          <p class="hero-title">{{ 'Wedding Celebration' | t }}</p>
+          <p class="hero-script">The Wedding Day</p>
+          <ng-container [ngTemplateOutlet]="ornament" />
+        </div>
+        <div class="hero-bottom">
+          <h1 id="invite-names" class="hero-names">
+            <span>{{ isKhmer() ? settings().nameOne : details.partnerOne }}</span>
+            <svg class="hero-heart" viewBox="0 0 24 22" aria-label="and">
+              <path
+                d="M12 21 2.8 11.6A5.6 5.6 0 0 1 12 4.1a5.6 5.6 0 0 1 9.2 7.5z"
+                fill="url(#heart-gold)"
+              />
+              <defs>
+                <linearGradient id="heart-gold" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0" stop-color="#f1d58e" />
+                  <stop offset="1" stop-color="#b8862f" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <span>{{ isKhmer() ? settings().nameTwo : details.partnerTwo }}</span>
+          </h1>
+          <p class="hero-save">SAVE THE DATE</p>
+          <p class="hero-date">
+            @if (isKhmer()) {
+              {{ dateText() }}
+            } @else {
+              {{ details.date + 'T12:00:00Z' | date: 'EEEE, d MMMM y' : '+0000' }}
+            }
+          </p>
+          <p class="hero-time">{{ timeText() }}</p>
+          <p class="hero-numeric">{{ numericDate() }}</p>
+          <p class="hero-place">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+              <circle cx="12" cy="9.5" r="2.5" />
+            </svg>
+            {{ details.venue | t }}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Everything below the cover sits on one continuous watercolour "paper". -->
+    <div class="invite-paper">
+      <!-- 2. Invitation wording and countdown -->
+      <section class="invite-section invite-welcome" aria-labelledby="welcome-title">
+        <h2 id="welcome-title" class="section-title">
+          {{ 'We are honoured to invite you' | t }}
+        </h2>
+        <ng-container [ngTemplateOutlet]="ornament" />
+        <p class="invite-message">
+          {{
+            isKhmer()
+              ? settings().invitationMessage
+              : ('would love for you to join them as they celebrate their wedding' | t)
+          }}
+        </p>
+
+        <div class="countdown-badge">
+          <ng-container [ngTemplateOutlet]="cartouche" />
+          <p>{{ 'Counting down to our special day' | t }}</p>
+        </div>
+        <div class="countdown" role="timer" aria-live="off">
+          @for (part of countdown(); track part.label) {
+            <div class="countdown-item">
+              <strong class="countdown-tile">{{ part.text }}</strong>
+              <span>{{ part.label | t }}</span>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- 3. Photos -->
+      @if (photos().length) {
+        <section class="invite-section" aria-labelledby="story-title">
+          <h2 id="story-title" class="section-title">{{ 'Our wedding album' | t }}</h2>
+          <ng-container [ngTemplateOutlet]="ornament" />
           <div class="invitation-gallery">
-            @for (photo of photos(); track photo.id) {
-              <figure>
-                <img [src]="photo.url" [alt]="'Pre-wedding photo: ' + photo.name" />
+            @for (photo of photos(); track photo.id; let photoIndex = $index) {
+              <figure [class.landscape]="landscapeIds().has(photo.id)">
+                <button
+                  type="button"
+                  class="gallery-open"
+                  [attr.aria-label]="'Open photo ' + (photoIndex + 1) + ' of ' + photos().length"
+                  (click)="lightboxIndex.set(photoIndex)"
+                >
+                  <img
+                    [src]="photo.url"
+                    [alt]="'Pre-wedding photo: ' + photo.name"
+                    loading="lazy"
+                    (load)="detectOrientation(photo.id, $event)"
+                  />
+                </button>
               </figure>
             }
           </div>
-        } @else {
-          <p class="invitation-note">A few favorite moments will be shared here soon.</p>
-        }
-      </section>
-
-      <section class="invitation-schedule" aria-labelledby="timeline-title">
-        <p class="invitation-section-kicker">CELEBRATE WITH US</p>
-        <h2 id="timeline-title">The day, at a glance</h2>
-        @for (day of scheduleDays(); track day.date) {
-          <div class="invite-day">
-            <h3>{{ day.date + 'T12:00:00Z' | date: 'EEEE, MMMM d, y' : '+0000' }}</h3>
-            @for (item of day.items; track item.id) {
-              <article class="invite-timeline-item">
-                <time [attr.datetime]="day.date + 'T' + item.time">
-                  <strong>{{ item.time }}</strong>
-                  <span>{{ item.endTime }}</span>
-                </time>
-                <div>
-                  <strong class="invite-event-title">{{ item.title }}</strong>
-                  <span class="invite-event-location">{{ item.location }}</span>
-                </div>
-              </article>
-            }
-          </div>
-        } @empty {
-          <p class="invitation-note">The day's schedule will be shared soon.</p>
-        }
-      </section>
-
-      <section class="invitation-menu" aria-labelledby="menu-title">
-        <p class="invitation-section-kicker">SOMETHING DELICIOUS AWAITS</p>
-        <h2 id="menu-title">A taste of the celebration</h2>
-        <p class="menu-intro">
-          Choose a meal when you RSVP. Please share any additional dietary needs with the couple.
-        </p>
-        <div class="invitation-meals">
-          @for (meal of meals; track meal.name) {
-            <article class="invitation-meal">
-              <span class="meal-flower" aria-hidden="true">✳</span>
-              <h3>{{ meal.name }}</h3>
-              <p>{{ meal.description }}</p>
-              <span class="meal-dietary">{{ meal.dietary }}</span>
-            </article>
-          }
-        </div>
-        <p class="menu-note">Menu preview — final selections subject to venue confirmation.</p>
-      </section>
-      <div class="invitation-divider"><span>♡</span></div>
-
-      @if (submitted()) {
-        <div class="rsvp-success" role="status">
-          <span aria-hidden="true">✓</span>
-          <h2>Thank you, {{ invitedGuest.name }}!</h2>
-          <p>Your response has been recorded. We can't wait to celebrate with you.</p>
-          <button class="invitation-edit" type="button" (click)="submitted.set(false)">
-            Update your response
-          </button>
-        </div>
-      } @else {
-        <section class="invitation-rsvp" aria-labelledby="rsvp-title">
-          <p class="invitation-greeting">
-            A seat is saved for <strong>{{ invitedGuest.name }}</strong>
-          </p>
-          <h2 id="rsvp-title">Will you join us?</h2>
-          <label class="invitation-label" for="attendees"
-            >Number attending <span>Up to {{ invitedGuest.partySize }}</span></label
-          >
-          <select
-            id="attendees"
-            class="invitation-input"
-            [ngModel]="attendees()"
-            (ngModelChange)="attendees.set(+$event)"
-            name="attendees"
-          >
-            @for (count of attendeeOptions(); track count) {
-              <option [value]="count">{{ count }} {{ count === 1 ? 'guest' : 'guests' }}</option>
-            }
-          </select>
-          <label class="invitation-label" for="meal">Meal preference</label>
-          <select
-            id="meal"
-            class="invitation-input"
-            [ngModel]="mealChoice()"
-            (ngModelChange)="mealChoice.set($event)"
-            name="meal"
-          >
-            @for (meal of meals; track meal.name) {
-              <option>{{ meal.name }}</option>
-            }
-          </select>
-          @if (error()) {
-            <p class="invitation-error" role="alert">{{ error() }}</p>
-          }
-          <button class="invitation-submit" type="button" (click)="respond('Confirmed')">
-            Joyfully accepts
-          </button>
-          <button class="invitation-decline" type="button" (click)="respond('Declined')">
-            Regretfully declines
-          </button>
+          <app-photo-lightbox [photos]="lightboxPhotos()" [(index)]="lightboxIndex" />
         </section>
       }
-      <p class="invitation-footer">
-        Kindly reply by {{ details.rsvpDeadline + 'T12:00:00Z' | date: 'MMMM d, y' : '+0000' }}
-      </p>
-    } @else {
-      <span class="invitation-flower" aria-hidden="true">✳</span>
-      <h1>Invitation not found</h1>
-      <p class="invitation-intro">
-        This invitation link may be invalid. Please contact the couple for a new link.
-      </p>
-      <a class="invitation-submit invitation-return" routerLink="/">Return to the planner</a>
+
+      <!-- 4. When and where -->
+      <section class="invite-section" aria-labelledby="program-title">
+        <h2 id="program-title" class="section-title">{{ 'Wedding programme' | t }}</h2>
+        <ng-container [ngTemplateOutlet]="ornament" />
+        <div class="event-card">
+          @if (eventPhoto()) {
+            <img class="event-photo" [src]="eventPhoto()" alt="" />
+          }
+          <div class="event-details">
+            <div class="event-row">
+              <span class="gold-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16v14H4zM4 10h16M8 3v4M16 3v4" /></svg>
+              </span>
+              <div>
+                <h3>{{ 'Date' | t }}</h3>
+                @if (settings().lunarDate && isKhmer()) {
+                  <p>{{ settings().lunarDate }}</p>
+                  <p>{{ 'Which falls on' | t }} {{ dateText() }}</p>
+                } @else {
+                  <p>
+                    @if (isKhmer()) {
+                      {{ dateText() }}
+                    } @else {
+                      {{ details.date + 'T12:00:00Z' | date: 'EEEE, d MMMM y' : '+0000' }}
+                    }
+                  </p>
+                }
+                <p>{{ timeText() }}</p>
+              </div>
+            </div>
+            <div class="event-row">
+              <span class="gold-tile" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+                  <circle cx="12" cy="9.5" r="2.5" />
+                </svg>
+              </span>
+              <div>
+                <h3>{{ 'Venue' | t }}</h3>
+                <p>{{ details.venue | t }}</p>
+                @if (settings().venueAddress) {
+                  <p class="event-muted">{{ settings().venueAddress | t }}</p>
+                }
+              </div>
+            </div>
+            @if (settings().mapUrl) {
+              <div class="event-map">
+                <app-qr-code
+                  [value]="settings().mapUrl"
+                  [size]="150"
+                  [alt]="'QR code for the venue location' | t"
+                />
+                <a class="gold-button" [href]="settings().mapUrl" target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+                    <circle cx="12" cy="9.5" r="2.5" />
+                  </svg>
+                  {{ 'Open the venue location' | t }}
+                </a>
+              </div>
+            }
+            @if (settings().dressCodeColors.length) {
+              <div class="dress-code">
+                <h3>{{ 'Dress code colours' | t }}</h3>
+                <ul [attr.aria-label]="'Dress code colours' | t">
+                  @for (color of settings().dressCodeColors; track $index) {
+                    <li [style.background]="color" [attr.title]="color"></li>
+                  }
+                </ul>
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (scheduleDays().length) {
+          <div class="invite-timeline">
+            @for (day of scheduleDays(); track day.date) {
+              @for (item of day.items; track item.id) {
+                <article class="timeline-item">
+                  <time [attr.datetime]="day.date + 'T' + item.time">{{ item.time }}</time>
+                  <span class="timeline-dot" aria-hidden="true"></span>
+                  <div>
+                    <strong>{{ item.title }}</strong>
+                    <span>{{ item.location }}</span>
+                  </div>
+                </article>
+              }
+            }
+          </div>
+        }
+      </section>
+
+      <!-- 5. RSVP and menu -->
+      <section class="invite-section" aria-labelledby="rsvp-title">
+        <h2 id="rsvp-title" class="section-title">{{ 'Will you join us?' | t }}</h2>
+        <ng-container [ngTemplateOutlet]="ornament" />
+        @if (submitted()) {
+          <div class="rsvp-card rsvp-success" role="status">
+            <span class="rsvp-check" aria-hidden="true">✓</span>
+            <h3>{{ 'Thank you' | t }}, {{ invitedGuest.name }}!</h3>
+            <p>{{ "Your response has been recorded. We can't wait to celebrate with you." | t }}</p>
+            <button class="link-button" type="button" (click)="submitted.set(false)">
+              {{ 'Update your response' | t }}
+            </button>
+          </div>
+        } @else {
+          <div class="rsvp-card">
+            <p class="rsvp-greeting">
+              {{ 'A seat is saved for' | t }} <strong>{{ invitedGuest.name }}</strong>
+            </p>
+            <div class="rsvp-fields">
+              <div>
+                <label class="rsvp-label" for="attendees"
+                  >{{ 'Number attending' | t }}
+                  <span>{{ 'Up to' | t }} {{ invitedGuest.partySize }}</span></label
+                >
+                <select
+                  id="attendees"
+                  class="rsvp-input"
+                  [ngModel]="attendees()"
+                  (ngModelChange)="attendees.set(+$event)"
+                  name="attendees"
+                >
+                  @for (count of attendeeOptions(); track count) {
+                    <option [value]="count">
+                      {{ count }} {{ (count === 1 ? 'guest' : 'guests') | t }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label class="rsvp-label" for="meal">{{ 'Meal preference' | t }}</label>
+                <select
+                  id="meal"
+                  class="rsvp-input"
+                  [ngModel]="mealChoice()"
+                  (ngModelChange)="mealChoice.set($event)"
+                  name="meal"
+                >
+                  @for (meal of meals; track meal.name) {
+                    <option>{{ meal.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="meal-list" aria-label="Menu">
+              @for (meal of meals; track meal.name) {
+                <article class="meal">
+                  <strong>{{ meal.name }}</strong>
+                  <span>{{ meal.description }}</span>
+                </article>
+              }
+            </div>
+            @if (error()) {
+              <p class="rsvp-error" role="alert">{{ error() }}</p>
+            }
+            <div class="rsvp-actions">
+              <button
+                class="gold-button invitation-submit"
+                type="button"
+                (click)="respond('Confirmed')"
+              >
+                {{ 'Joyfully accepts' | t }}
+              </button>
+              <button class="outline-button" type="button" (click)="respond('Declined')">
+                {{ 'Regretfully declines' | t }}
+              </button>
+            </div>
+            <p class="rsvp-deadline">
+              {{ 'Kindly reply by' | t }}
+              {{ details.rsvpDeadline + 'T12:00:00Z' | date: 'd MMMM y' : '+0000' }}
+            </p>
+          </div>
+        }
+      </section>
+
+      <!-- 6. Wedding gift -->
+      @for (url of giftQrUrls(); track url) {
+        <img
+          class="visually-hidden"
+          [src]="url"
+          alt=""
+          aria-hidden="true"
+          (error)="onGiftQrError(url)"
+        />
+      }
+      @if (activeGift(); as gift) {
+        <section class="invite-section" aria-labelledby="gift-title">
+          <h2 id="gift-title" class="section-title">{{ 'Wedding gift' | t }}</h2>
+          <ng-container [ngTemplateOutlet]="ornament" />
+          <div class="gift-card">
+            @if (coverPhoto()) {
+              <img class="event-photo" [src]="coverPhoto()" alt="" />
+            }
+            <div class="gift-tabs" role="tablist" aria-label="Gift currency">
+              @for (option of giftOptions(); track option.currency) {
+                <button
+                  type="button"
+                  role="tab"
+                  [class.selected]="option.currency === gift.currency"
+                  [attr.aria-selected]="option.currency === gift.currency"
+                  (click)="giftCurrency.set(option.currency)"
+                >
+                  <span class="tab-symbol">{{ option.symbol }}</span> {{ option.label | t }}
+                </button>
+              }
+            </div>
+            <div class="gift-qr" role="tabpanel">
+              <div class="gift-qr-frame">
+                @for (shown of [gift]; track shown.url) {
+                  <img [src]="shown.url" [alt]="'Bank QR code for a wedding gift' | t" />
+                }
+              </div>
+              @if (settings().giftAccountName) {
+                <p class="gift-account">{{ settings().giftAccountName }}</p>
+              }
+              <p class="gift-hint">{{ 'Scan to send your wedding gift' | t }}</p>
+              <p class="gift-khqr">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M8 3h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM11 18h2"
+                  />
+                </svg>
+                {{ 'Pay with any KHQR banking app' | t }}
+              </p>
+              <button class="outline-button light" type="button" (click)="downloadGiftQr()">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+                </svg>
+                {{ 'Download QR' | t }}
+              </button>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- 7. Thank you -->
+      <section class="invite-section invite-thanks" aria-labelledby="thanks-title">
+        <h2 id="thanks-title" class="section-title">{{ 'With heartfelt thanks' | t }}</h2>
+        <p class="invite-message">
+          {{
+            isKhmer()
+              ? settings().thankYouMessage
+              : ('Your presence is the greatest honour for our families.' | t)
+          }}
+        </p>
+        @if (hasSocialLinks()) {
+          <div class="social-links">
+            @if (settings().telegramUrl) {
+              <a
+                class="social telegram"
+                [href]="settings().telegramUrl"
+                target="_blank"
+                rel="noopener"
+                aria-label="Telegram"
+              >
+                <svg viewBox="0 0 24 24"><path d="M21 4 3 11l6 2 2 6 3-4 5 4z M9 13l9-7" /></svg>
+              </a>
+            }
+            @if (settings().facebookUrl) {
+              <a
+                class="social facebook"
+                [href]="settings().facebookUrl"
+                target="_blank"
+                rel="noopener"
+                aria-label="Facebook"
+              >
+                <svg viewBox="0 0 24 24">
+                  <path d="M14 8h3V4h-3a4 4 0 0 0-4 4v3H7v4h3v6h4v-6h3l1-4h-4V8z" />
+                </svg>
+              </a>
+            }
+            @if (settings().tiktokUrl) {
+              <a
+                class="social tiktok"
+                [href]="settings().tiktokUrl"
+                target="_blank"
+                rel="noopener"
+                aria-label="TikTok"
+              >
+                <svg viewBox="0 0 24 24"><path d="M14 3v11a4 4 0 1 1-4-4M14 3c0 3 2 5 5 5" /></svg>
+              </a>
+            }
+          </div>
+        }
+        <p class="invite-signoff">{{ details.partnerOne }} &amp; {{ details.partnerTwo }}</p>
+      </section>
+    </div>
+
+    @if (settings().musicUrl) {
+      <audio
+        #music
+        [src]="settings().musicUrl"
+        loop
+        preload="auto"
+        (error)="onMusicError()"
+      ></audio>
     }
-  </article>
+    @if (hasMusic() && isOpened()) {
+      <button
+        class="music-button"
+        type="button"
+        [class.playing]="isPlaying()"
+        [attr.aria-label]="(isPlaying() ? 'Pause music' : 'Play music') | t"
+        [attr.aria-pressed]="isPlaying()"
+        (click)="toggleMusic()"
+      >
+        @if (isPlaying()) {
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>
+        } @else {
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z" /></svg>
+        }
+      </button>
+    }
+  } @else {
+    <section class="invite-section invite-missing">
+      <h1 class="section-title">{{ 'Invitation not found' | t }}</h1>
+      <ng-container [ngTemplateOutlet]="ornament" />
+      <p class="invite-message">
+        {{ 'This invitation link may be invalid. Please contact the couple for a new link.' | t }}
+      </p>
+      <a class="gold-button" routerLink="/">{{ 'Return to the planner' | t }}</a>
+    </section>
+  }
 </main>

@@ -1,17 +1,17 @@
 import { isPlatformBrowser } from '@angular/common';
-import { Component, computed, inject, PLATFORM_ID, signal } from '@angular/core';
+import { Component, computed, effect, inject, PLATFORM_ID, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MAX_GALLERY_PHOTOS, WeddingDataService } from '../../core/wedding-data.service';
 import { Guest } from '../../core/wedding.models';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { checkPhotoFiles } from '../../shared/utils/photos';
+import { InvitationDesignDialog } from './invitation-design-dialog';
 
 type ReminderChannel = 'email' | 'sms' | 'whatsapp' | 'telegram';
 
-const ACCEPTED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_PHOTO_BYTES = 8_000_000;
-
 @Component({
   selector: 'app-invitations-page',
-  imports: [RouterLink],
+  imports: [TranslatePipe, RouterLink, InvitationDesignDialog],
   templateUrl: './invitations-page.html',
   styleUrl: './invitations-page.scss',
 })
@@ -20,12 +20,100 @@ export class InvitationsPage {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   protected readonly guests = this.data.guests;
-  protected readonly photos = this.data.photos;
+  protected readonly photos = this.data.availablePhotos;
+  /** Album files not added to public/images/gallery yet. */
+  protected readonly missingPhotoCount = computed(
+    () => this.data.photos().length - this.data.availablePhotos().length,
+  );
   protected readonly invitedCount = this.data.invitedCount;
   protected readonly confirmedCount = this.data.confirmedCount;
   protected readonly pendingCount = this.data.pendingCount;
 
+  protected readonly invitation = this.data.invitation;
+  protected readonly isDesignOpen = signal(false);
+  /** Any guest's link works as a preview of the shared card design. */
+  protected readonly previewPath = computed(() => {
+    const guest = this.guests()[0];
+    return guest ? this.invitePath(guest.invitationToken) : null;
+  });
+
+  /** Whether the invitation music file actually loads, so a missing file is obvious here. */
+  protected readonly musicStatus = signal<'none' | 'checking' | 'ok' | 'missing'>('none');
+  /** The cover file could not be loaded, so guests see the first pre-wedding photo instead. */
+  protected readonly coverMissing = signal(false);
+  protected readonly coverPreview = computed(() => {
+    const cover = this.invitation().coverPhotoUrl;
+    return (cover && !this.coverMissing() ? cover : '') || this.photos()[0]?.url || '';
+  });
+  /** Gift QR image paths that could not be loaded (the file has not been added yet). */
+  protected readonly missingGiftQrs = signal<string[]>([]);
+  protected readonly giftQrStatus = computed<'none' | 'ok' | 'missing'>(() => {
+    const { giftQrKhr, giftQrUsd } = this.invitation();
+    if (!giftQrKhr && !giftQrUsd) {
+      return 'none';
+    }
+    return this.missingGiftQrs().length ? 'missing' : 'ok';
+  });
+
   protected readonly copyMessage = signal('');
+
+  constructor() {
+    effect((onCleanup) => {
+      const url = this.invitation().musicUrl;
+      if (!url) {
+        this.musicStatus.set('none');
+        return;
+      }
+      if (!this.isBrowser) {
+        return;
+      }
+      this.musicStatus.set('checking');
+      const probe = new Audio();
+      const ok = () => this.musicStatus.set('ok');
+      const missing = () => this.musicStatus.set('missing');
+      probe.addEventListener('loadedmetadata', ok);
+      probe.addEventListener('error', missing);
+      probe.preload = 'metadata';
+      probe.src = url;
+      onCleanup(() => {
+        probe.removeEventListener('loadedmetadata', ok);
+        probe.removeEventListener('error', missing);
+        probe.removeAttribute('src');
+      });
+    });
+
+    effect((onCleanup) => {
+      const url = this.invitation().coverPhotoUrl;
+      this.coverMissing.set(false);
+      if (!url || !this.isBrowser) {
+        return;
+      }
+      let active = true;
+      const image = new Image();
+      image.onerror = () => active && this.coverMissing.set(true);
+      image.src = url;
+      onCleanup(() => (active = false));
+    });
+
+    effect((onCleanup) => {
+      const urls = [this.invitation().giftQrKhr, this.invitation().giftQrUsd].filter(Boolean);
+      this.missingGiftQrs.set([]);
+      if (!this.isBrowser) {
+        return;
+      }
+      let active = true;
+      for (const url of urls) {
+        const image = new Image();
+        image.onerror = () => {
+          if (active) {
+            this.missingGiftQrs.update((missing) => [...missing, url]);
+          }
+        };
+        image.src = url;
+      }
+      onCleanup(() => (active = false));
+    });
+  }
   protected readonly photoMessage = signal('');
   protected readonly remainingPhotoSlots = computed(
     () => MAX_GALLERY_PHOTOS - this.photos().length,
@@ -68,23 +156,7 @@ export class InvitationsPage {
       );
       return;
     }
-    const accepted: File[] = [];
-    const errors: string[] = [];
-
-    for (const file of files) {
-      if (!ACCEPTED_PHOTO_TYPES.includes(file.type)) {
-        errors.push(`${file.name}: choose a JPG, PNG, or WebP image.`);
-      } else if (file.size > MAX_PHOTO_BYTES) {
-        errors.push(`${file.name}: the file must be 8 MB or smaller.`);
-      } else {
-        accepted.push(file);
-      }
-    }
-
-    if (accepted.length > remaining) {
-      errors.push(`The gallery can contain up to ${MAX_GALLERY_PHOTOS} photos.`);
-    }
-    const toAdd = accepted.slice(0, remaining);
+    const { accepted: toAdd, errors } = checkPhotoFiles(files, remaining);
     if (!toAdd.length) {
       this.photoMessage.set(errors.join(' '));
       return;

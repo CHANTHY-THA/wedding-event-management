@@ -1,55 +1,57 @@
 <header class="page-heading">
   <div>
-    <p class="overline">Wedding dashboard</p>
+    <p class="overline">{{ greeting | t }} · {{ 'Wedding dashboard' | t }}</p>
     <h1>{{ coupleNames }}</h1>
     <p class="heading-copy">
       {{ details.date + 'T12:00:00Z' | date: 'd MMMM y' : '+0000' }} · {{ details.venue }},
       {{ details.city }} · {{ scheduleItems().length }}
-      {{ scheduleItems().length === 1 ? 'event' : 'events' }}
+      {{ (scheduleItems().length === 1 ? 'event' : 'events') | t }}
     </p>
   </div>
   <div class="page-actions">
     <span class="pill pill-gold">{{ countdownLabel() }}</span>
-    <a class="button button-secondary" routerLink="/invitations">Send RSVP reminders</a>
+    <a class="button button-secondary" routerLink="/invitations">{{ 'Send RSVP reminders' | t }}</a>
     <button class="button button-primary" type="button" (click)="isGuestFormOpen.set(true)">
-      + Add guest
+      {{ '+ Add guest' | t }}
     </button>
   </div>
 </header>
 
 <section class="stats-grid" aria-label="RSVP summary">
   <article class="stat-card">
-    <span class="stat-label">Invited</span>
+    <span class="stat-label">{{ 'Invited' | t }}</span>
     <strong class="stat-value">{{ invitedCount() }}</strong>
     <span class="stat-note"
-      >{{ partyCount() }} {{ partyCount() === 1 ? 'family or group' : 'families or groups' }}</span
+      >{{ partyCount() }}
+      {{ (partyCount() === 1 ? 'family or group' : 'families or groups') | t }}</span
     >
   </article>
   <article class="stat-card">
-    <span class="stat-label">Confirmed</span>
+    <span class="stat-label">{{ 'Confirmed' | t }}</span>
     <strong class="stat-value">{{ confirmedCount() }}</strong>
-    <span class="stat-note">{{ percentOfInvited(confirmedCount()) }}% of invited</span>
+    <span class="stat-note">{{ percentOfInvited(confirmedCount()) }}% {{ 'of invited' | t }}</span>
   </article>
   <article class="stat-card">
-    <span class="stat-label">Awaiting reply</span>
+    <span class="stat-label">{{ 'Awaiting reply' | t }}</span>
     <strong class="stat-value">{{ pendingCount() }}</strong>
     <span class="stat-note"
-      >{{ pendingPartyCount() }} {{ pendingPartyCount() === 1 ? 'party' : 'parties' }} to follow
-      up</span
+      >{{ pendingPartyCount() }} {{ (pendingPartyCount() === 1 ? 'party' : 'parties') | t }}
+      {{ 'to follow up' | t }}</span
     >
   </article>
   <article class="stat-card">
-    <span class="stat-label">Declined</span>
+    <span class="stat-label">{{ 'Declined' | t }}</span>
     <strong class="stat-value">{{ declinedCount() }}</strong>
-    <span class="stat-note">{{ percentOfInvited(declinedCount()) }}% of invited</span>
+    <span class="stat-note">{{ percentOfInvited(declinedCount()) }}% {{ 'of invited' | t }}</span>
   </article>
 </section>
 
 <section class="panel rsvp-panel" aria-labelledby="rsvp-progress-title">
   <div class="panel-heading">
-    <h2 id="rsvp-progress-title">RSVP progress</h2>
+    <h2 id="rsvp-progress-title">{{ 'RSVP progress' | t }}</h2>
     <span class="panel-meta"
-      >Reply deadline {{ details.rsvpDeadline + 'T12:00:00Z' | date: 'd MMMM y' : '+0000' }}</span
+      >{{ 'Reply deadline' | t }}
+      {{ details.rsvpDeadline + 'T12:00:00Z' | date: 'd MMMM y' : '+0000' }}</span
     >
   </div>
   <div
@@ -69,17 +71,19 @@
     <span class="segment-declined" [style.width.%]="percentOfInvited(declinedCount())"></span>
   </div>
   <ul class="rsvp-legend" aria-hidden="true">
-    <li><span class="swatch segment-confirmed"></span>Confirmed {{ confirmedCount() }}</li>
-    <li><span class="swatch segment-pending"></span>Awaiting {{ pendingCount() }}</li>
-    <li><span class="swatch segment-declined"></span>Declined {{ declinedCount() }}</li>
+    <li>
+      <span class="swatch segment-confirmed"></span>{{ 'Confirmed' | t }} {{ confirmedCount() }}
+    </li>
+    <li><span class="swatch segment-pending"></span>{{ 'Awaiting' | t }} {{ pendingCount() }}</li>
+    <li><span class="swatch segment-declined"></span>{{ 'Declined' | t }} {{ declinedCount() }}</li>
   </ul>
 </section>
 
 <div class="dashboard-grid">
   <section class="panel" aria-labelledby="schedule-title">
     <div class="panel-heading">
-      <h2 id="schedule-title">Schedule</h2>
-      <a class="text-link" routerLink="/schedule">Open schedule</a>
+      <h2 id="schedule-title">{{ 'Schedule' | t }}</h2>
+      <a class="text-link" routerLink="/schedule">{{ 'Open schedule' | t }}</a>
     </div>
     <ul class="event-list">
       @for (item of scheduleItems(); track item.id) {
@@ -98,28 +102,28 @@
           <span class="row-aside">{{ item.type }}</span>
         </li>
       } @empty {
-        <li class="list-empty">No events yet. Add the first moment from the schedule page.</li>
+        <li class="list-empty">
+          {{ 'No events yet. Add the first moment from the schedule page.' | t }}
+        </li>
       }
     </ul>
   </section>
 
   <section id="budget" class="panel" aria-labelledby="budget-title">
     <div class="panel-heading">
-      <h2 id="budget-title">Budget</h2>
-      <p class="budget-total">
-        <strong>{{ budgetSpent() | currency: 'USD' : 'symbol' : '1.0-0' }}</strong>
-        of {{ budgetTotal | currency: 'USD' : 'symbol' : '1.0-0' }} spent
-      </p>
+      <h2 id="budget-title">{{ 'Budget' | t }}</h2>
+      <a class="text-link" routerLink="/budget">{{ 'Open budget' | t }}</a>
     </div>
+    <p class="budget-total">
+      <strong>{{ budgetSpent() | money }}</strong>
+      {{ 'spent of' | t }} {{ budgetTotal() | money }}
+    </p>
     <ul class="budget-list">
       @for (category of budgetCategories(); track category.name) {
         <li>
           <div class="budget-row">
             <span>{{ category.name }}</span>
-            <span
-              >{{ category.spent | currency: 'USD' : 'symbol' : '1.0-0' }} /
-              {{ category.planned | currency: 'USD' : 'symbol' : '1.0-0' }}</span
-            >
+            <span>{{ category.spent | money }} / {{ category.planned | money }}</span>
           </div>
           <div
             class="progress"
@@ -134,16 +138,19 @@
         </li>
       }
     </ul>
-    <p class="budget-note">
-      Next payment: {{ nextPayment.description }}
-      {{ nextPayment.amount | currency: 'USD' : 'symbol' : '1.0-0' }}, due
-      {{ nextPayment.dueDate + 'T12:00:00Z' | date: 'd MMMM' : '+0000' }}
-    </p>
+    @if (nextPayment(); as payment) {
+      <p class="budget-note">
+        {{ 'Next payment' | t }}: {{ payment.name }} {{ amountDue(payment) | money }},
+        {{ 'due' | t }}
+        {{ payment.dueDate + 'T12:00:00Z' | date: 'd MMMM' : '+0000' }}
+      </p>
+    }
   </section>
 
   <section id="tasks" class="panel" aria-labelledby="tasks-title">
     <div class="panel-heading">
-      <h2 id="tasks-title">Tasks due soon</h2>
+      <h2 id="tasks-title">{{ 'Tasks due soon' | t }}</h2>
+      <a class="text-link" routerLink="/tasks">{{ 'All tasks' | t }}</a>
     </div>
     <ul class="task-list">
       @for (task of tasks(); track task.id) {
@@ -159,14 +166,16 @@
             task.dueDate + 'T12:00:00Z' | date: 'MMM d' : '+0000'
           }}</time>
         </li>
+      } @empty {
+        <li class="list-empty">{{ 'Nothing due this week. Enjoy the calm!' | t }}</li>
       }
     </ul>
   </section>
 
   <section class="panel" aria-labelledby="replies-title">
     <div class="panel-heading">
-      <h2 id="replies-title">Latest replies</h2>
-      <a class="text-link" routerLink="/guests">All guests</a>
+      <h2 id="replies-title">{{ 'Latest replies' | t }}</h2>
+      <a class="text-link" routerLink="/guests">{{ 'All guests' | t }}</a>
     </div>
     <ul class="reply-list">
       @for (reply of latestReplies(); track reply.guest.id) {
@@ -174,20 +183,22 @@
           <span class="avatar" aria-hidden="true">{{ reply.guest.initials }}</span>
           <div class="row-main">
             <strong>{{ reply.guest.name }}</strong>
-            <small>Party of {{ reply.guest.partySize }} · {{ reply.ago }}</small>
+            <small>{{ 'Party of' | t }} {{ reply.guest.partySize }} · {{ reply.ago }}</small>
           </div>
           <span [class]="'rsvp-badge rsvp-' + reply.guest.rsvp.toLowerCase()">{{
-            reply.guest.rsvp
+            reply.guest.rsvp | t
           }}</span>
         </li>
       } @empty {
-        <li class="list-empty">Replies will appear here as guests RSVP.</li>
+        <li class="list-empty">{{ 'Replies will appear here as guests RSVP.' | t }}</li>
       }
     </ul>
   </section>
 </div>
 
-<footer class="page-footer">Interactive preview · changes reset when you refresh the page.</footer>
+<footer class="page-footer">
+  {{ 'Interactive preview · changes reset when you refresh the page.' | t }}
+</footer>
 
 @if (isGuestFormOpen()) {
   <app-guest-form-dialog (closed)="isGuestFormOpen.set(false)" />

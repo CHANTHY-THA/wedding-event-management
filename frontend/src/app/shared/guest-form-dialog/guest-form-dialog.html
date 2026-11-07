@@ -7,11 +7,11 @@
     (click)="$event.stopPropagation()"
   >
     <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
-    <span class="eyebrow">ADD TO YOUR CELEBRATION</span>
-    <h2 id="modal-panel-title">Add a guest</h2>
-    <p class="modal-copy">Invite someone special to celebrate with you.</p>
+    <span class="eyebrow">{{ 'ADD TO YOUR CELEBRATION' | t }}</span>
+    <h2 id="modal-panel-title">{{ 'Add a guest' | t }}</h2>
+    <p class="modal-copy">{{ 'Invite someone special to celebrate with you.' | t }}</p>
     <form (ngSubmit)="submit()">
-      <label class="form-label" for="guest-name">Guest or party name</label>
+      <label class="form-label" for="guest-name">{{ 'Guest or party name' | t }}</label>
       <input
         id="guest-name"
         class="form-input"
@@ -24,7 +24,7 @@
       />
       <div class="form-grid">
         <div>
-          <label class="form-label" for="guest-group">Family or group</label
+          <label class="form-label" for="guest-group">{{ 'Family or group' | t }}</label
           ><input
             id="guest-group"
             class="form-input"
@@ -35,7 +35,7 @@
           />
         </div>
         <div>
-          <label class="form-label" for="guest-side">Wedding side</label
+          <label class="form-label" for="guest-side">{{ 'Wedding side' | t }}</label
           ><select
             id="guest-side"
             class="form-input"
@@ -48,7 +48,7 @@
           </select>
         </div>
         <div>
-          <label class="form-label" for="party-size">Invited guests</label
+          <label class="form-label" for="party-size">{{ 'Invited guests' | t }}</label
           ><input
             id="party-size"
             class="form-input"
@@ -60,7 +60,7 @@
           />
         </div>
         <div>
-          <label class="form-label" for="plus-ones">Plus-ones</label
+          <label class="form-label" for="plus-ones">{{ 'Plus-ones' | t }}</label
           ><input
             id="plus-ones"
             class="form-input"
@@ -72,7 +72,7 @@
           />
         </div>
         <div>
-          <label class="form-label" for="children">Children</label
+          <label class="form-label" for="children">{{ 'Children' | t }}</label
           ><input
             id="children"
             class="form-input"
@@ -84,7 +84,7 @@
           />
         </div>
         <div>
-          <label class="form-label" for="relationship">Relationship</label
+          <label class="form-label" for="relationship">{{ 'Relationship' | t }}</label
           ><input
             id="relationship"
             class="form-input"
@@ -95,7 +95,7 @@
           />
         </div>
         <div>
-          <label class="form-label" for="guest-email">Email</label
+          <label class="form-label" for="guest-email">{{ 'Email' | t }}</label
           ><input
             id="guest-email"
             class="form-input"
@@ -105,7 +105,7 @@
           />
         </div>
         <div>
-          <label class="form-label" for="guest-phone">Phone</label
+          <label class="form-label" for="guest-phone">{{ 'Phone' | t }}</label
           ><input
             id="guest-phone"
             class="form-input"
@@ -115,7 +115,7 @@
           />
         </div>
       </div>
-      <label class="form-label" for="guest-tags">Tags</label>
+      <label class="form-label" for="guest-tags">{{ 'Tags' | t }}</label>
       <input
         id="guest-tags"
         class="form-input"
@@ -126,12 +126,12 @@
       />
       @if (draft().plusOnes + draft().children > draft().partySize) {
         <p class="form-error" role="alert">
-          Plus-ones and children can't exceed the invited guest count.
+          {{ "Plus-ones and children can't exceed the invited guest count." | t }}
         </p>
       }
       <div class="modal-actions">
         <button class="button button-secondary" type="button" (click)="closed.emit()">
-          Cancel
+          {{ 'Cancel' | t }}
         </button>
         <button
           class="button button-primary"
@@ -142,7 +142,7 @@
             draft().plusOnes + draft().children > draft().partySize
           "
         >
-          Add guest
+          {{ 'Add guest' | t }}
         </button>
       </div>
     </form>

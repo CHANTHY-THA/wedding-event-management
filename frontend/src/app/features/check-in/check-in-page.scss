@@ -18,14 +18,30 @@
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
+  transition:
+    background var(--duration-base) ease,
+    border-color var(--duration-fast) ease,
+    color var(--duration-base) ease,
+    transform var(--duration-fast) var(--ease-out);
 }
 
 .checkin-button:hover {
   border-color: var(--color-brand);
 }
 
+.checkin-button:active {
+  transform: scale(0.96);
+}
+
 .checkin-button.checked-in {
   border-color: transparent;
   background: var(--color-success-soft);
   color: var(--color-success-ink);
+  animation: check-pop 320ms var(--ease-out);
+}
+
+@keyframes check-pop {
+  50% {
+    transform: scale(1.06);
+  }
 }

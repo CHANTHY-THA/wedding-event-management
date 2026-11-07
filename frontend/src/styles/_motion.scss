@@ -1,0 +1,118 @@
+// Motion: shared easing, keyframes, page entrances and route transitions.
+// Everything here is switched off by the reduced-motion rule in _base.scss.
+
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --duration-slow: 420ms;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes slide-out-right {
+  to {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+// Page entrance: headings, stat cards and panels rise in one after another.
+.main-inner > .page-heading,
+.main-inner > * > .page-heading {
+  animation: rise-in var(--duration-slow) var(--ease-out) both;
+}
+
+.stats-grid > * {
+  animation: rise-in var(--duration-slow) var(--ease-out) both;
+}
+
+@for $i from 1 through 4 {
+  .stats-grid > :nth-child(#{$i}) {
+    animation-delay: #{40ms + $i * 50ms};
+  }
+}
+
+.main-inner .panel {
+  animation: rise-in var(--duration-slow) var(--ease-out) 220ms both;
+}
+
+// New or re-shown rows fade in, so additions are easy to spot.
+.data-table tbody tr,
+.event-row,
+.task-row,
+.reply-row,
+.upcoming-row {
+  animation: fade-in var(--duration-base) ease both;
+}
+
+// Progress bars fill from the left on first paint and glide when values change.
+.progress > span {
+  transform-origin: left center;
+  animation: grow-x 700ms var(--ease-out) 300ms both;
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+// Route changes: the page area cross-fades while the sidebar stays put.
+.main-inner {
+  view-transition-name: page;
+}
+
+::view-transition-old(page) {
+  animation: fade-out 120ms ease both;
+}
+
+::view-transition-new(page) {
+  animation: fade-in var(--duration-base) ease 60ms both;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-base);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

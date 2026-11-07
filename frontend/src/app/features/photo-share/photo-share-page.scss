@@ -1,0 +1,246 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% -10%, var(--color-gold-soft), transparent 55%), var(--color-bg);
+}
+
+.share-page {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 18px 16px 48px;
+}
+
+.share-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.share-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-brand);
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.share-brand svg {
+  width: 24px;
+  height: 17px;
+  color: var(--color-gold);
+}
+
+.share-hero {
+  margin: 32px 0 20px;
+  text-align: center;
+  animation: rise-in 600ms var(--ease-out) both;
+}
+
+.share-kicker {
+  margin: 0 0 6px;
+  color: var(--color-gold-ink);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.share-hero h1 {
+  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 9vw, 52px);
+  font-weight: 600;
+  line-height: 1.05;
+}
+
+.share-date {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.share-card {
+  padding: 22px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: 0 12px 32px rgb(29 38 35 / 6%);
+  animation: rise-in 600ms var(--ease-out) 120ms both;
+}
+
+.share-card h2,
+.share-invalid h1 {
+  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.share-copy {
+  margin: 0 0 14px;
+  color: var(--color-muted);
+}
+
+.share-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.share-input {
+  width: 100%;
+  height: 46px;
+  margin-bottom: 14px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: 16px; // 16px stops phones from zooming into the field
+}
+
+.share-input:focus {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-brand-soft);
+  outline: 0;
+}
+
+.share-upload-button {
+  position: relative;
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: var(--radius-md);
+  background: var(--color-brand);
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition:
+    background var(--duration-fast) ease,
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.share-upload-button:hover {
+  background: var(--color-brand-hover);
+}
+
+.share-upload-button:active {
+  transform: scale(0.98);
+}
+
+.share-upload-button:focus-within {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+.share-upload-button svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.share-hint {
+  margin: 8px 0 0;
+  color: var(--color-muted);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.share-success,
+.share-error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  animation: rise-in var(--duration-base) var(--ease-out) both;
+}
+
+.share-success {
+  background: var(--color-success-soft);
+  color: var(--color-success-ink);
+  font-weight: 600;
+}
+
+.share-error {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.share-gallery {
+  margin-top: 28px;
+}
+
+.share-gallery-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.share-gallery-heading h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.share-gallery-heading span {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.share-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.share-grid figure {
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  animation: pop-in 400ms var(--ease-out) both;
+}
+
+.share-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.share-grid figcaption {
+  overflow: hidden;
+  padding: 6px 10px;
+  color: var(--color-ink-soft);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 28px 12px;
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.share-invalid {
+  margin-top: 40px;
+  text-align: center;
+}

@@ -1,0 +1,4 @@
+node_modules/
+# Local PGlite database files
+.data/
+.env
