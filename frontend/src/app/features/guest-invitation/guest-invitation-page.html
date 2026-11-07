@@ -86,52 +86,100 @@
   @if (guest(); as openingGuest) {
     @if (!isOpened()) {
       <section class="opening" aria-labelledby="opening-title">
-        <!-- Same card, photo and frame as the cover below, with the guest's name and the open button. -->
-        <div class="invite-hero opening-cover">
-          <div class="hero-media">
-            @if (coverPhoto()) {
-              <img class="hero-photo" [src]="coverPhoto()" alt="" />
+        @if (template() === 'watercolor') {
+          <div class="watercolor-opening">
+            <div class="watercolor-language"><app-language-toggle /></div>
+            <div class="watercolor-emblem">
+              <svg class="watercolor-emblem-frame" viewBox="0 0 180 230" aria-hidden="true">
+                <path
+                  d="M90 5c7 12 16 15 24 11 2 11 10 16 20 12 0 12 6 19 17 20-5 11-2 20 8 26-9 8-11 17-4 27-11 5-15 14-11 25-12 2-18 10-17 22-12-2-20 4-23 16-10-6-20-4-27 6-7-10-17-12-27-6-3-12-11-18-23-16 1-12-5-20-17-22 4-11 0-20-11-25 7-10 5-19-4-27 10-6 13-15 8-26 11-1 17-8 17-20 10 4 18-1 20-12 8 4 17 1 24-11z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.25"
+                />
+                <path
+                  d="M90 15c7 11 15 14 23 10 2 10 9 15 18 12 0 11 6 18 15 19-4 10-2 18 7 24-8 7-10 15-4 24-10 5-13 13-10 23-10 2-16 9-15 20-11-2-18 4-21 14-9-5-18-3-23 6-6-9-15-11-24-6-3-10-10-16-21-14 1-11-5-18-15-20 3-10 0-18-10-23 6-9 4-17-4-24 9-6 11-14 7-24 9-1 15-8 15-19 9 3 16-2 18-12 8 4 16 1 24-10z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width=".7"
+                />
+                <g fill="currentColor">
+                  <circle cx="90" cy="8" r="2" />
+                  <circle cx="90" cy="222" r="2" />
+                  <circle cx="10" cy="115" r="2" />
+                  <circle cx="170" cy="115" r="2" />
+                </g>
+              </svg>
+              <div class="watercolor-emblem-names">
+                <span>{{ isKhmer() ? settings().nameOne : details.partnerOne }}</span>
+                <span aria-hidden="true">&amp;</span>
+                <span>{{ isKhmer() ? settings().nameTwo : details.partnerTwo }}</span>
+              </div>
+            </div>
+            <h1 id="opening-title" class="watercolor-opening-title">
+              {{ 'Wedding Celebration' | t }}
+            </h1>
+            <p class="watercolor-opening-subtitle">{{ 'You are warmly invited' | t }}</p>
+            <div class="watercolor-name-plaque">
+              {{ openingGuest.name }}
+            </div>
+            <button class="watercolor-open-button" type="button" (click)="openInvitation()">
+              {{ 'Open invitation' | t }}
+            </button>
+            @if (hasMusic()) {
+              <p class="watercolor-opening-hint">
+                {{ 'Music will play when you open the invitation' | t }}
+              </p>
             }
           </div>
-          <div class="hero-frame">
-            <div class="hero-top">
-              <p class="hero-title">{{ 'Wedding Celebration' | t }}</p>
-              <p class="hero-script">The Wedding Day</p>
-              <ng-container [ngTemplateOutlet]="ornament" />
-            </div>
-            <div class="hero-bottom">
-              <h2 id="opening-title" class="hero-names">
-                <span>{{ isKhmer() ? settings().nameOne : details.partnerOne }}</span>
-                <svg class="hero-heart" viewBox="0 0 24 22" aria-label="and">
-                  <path
-                    d="M12 21 2.8 11.6A5.6 5.6 0 0 1 12 4.1a5.6 5.6 0 0 1 9.2 7.5z"
-                    fill="url(#opening-heart-gold)"
-                  />
-                  <defs>
-                    <linearGradient id="opening-heart-gold" x1="0" x2="1" y1="0" y2="1">
-                      <stop offset="0" stop-color="#f1d58e" />
-                      <stop offset="1" stop-color="#b8862f" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <span>{{ isKhmer() ? settings().nameTwo : details.partnerTwo }}</span>
-              </h2>
-              <p class="hero-save opening-to">{{ 'Dear' | t }}</p>
-              <p class="opening-guest">{{ openingGuest.name }}</p>
-              <button class="gold-button opening-button" type="button" (click)="openInvitation()">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M3 7h18v12H3zM3 8l9 6 9-6" />
-                </svg>
-                {{ 'Open invitation' | t }}
-              </button>
-              @if (hasMusic()) {
-                <p class="opening-hint">
-                  ♪ {{ 'Music will play when you open the invitation' | t }}
-                </p>
+        } @else {
+          <!-- Same card, photo and frame as the cover below, with the guest's name and the open button. -->
+          <div class="invite-hero opening-cover">
+            <div class="hero-media">
+              @if (coverPhoto()) {
+                <img class="hero-photo" [src]="coverPhoto()" alt="" />
               }
             </div>
+            <div class="hero-frame">
+              <div class="hero-top">
+                <p class="hero-title">{{ 'Wedding Celebration' | t }}</p>
+                <p class="hero-script">The Wedding Day</p>
+                <ng-container [ngTemplateOutlet]="ornament" />
+              </div>
+              <div class="hero-bottom">
+                <h2 id="opening-title" class="hero-names">
+                  <span>{{ isKhmer() ? settings().nameOne : details.partnerOne }}</span>
+                  <svg class="hero-heart" viewBox="0 0 24 22" aria-label="and">
+                    <path
+                      d="M12 21 2.8 11.6A5.6 5.6 0 0 1 12 4.1a5.6 5.6 0 0 1 9.2 7.5z"
+                      fill="url(#opening-heart-gold)"
+                    />
+                    <defs>
+                      <linearGradient id="opening-heart-gold" x1="0" x2="1" y1="0" y2="1">
+                        <stop offset="0" stop-color="#f1d58e" />
+                        <stop offset="1" stop-color="#b8862f" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <span>{{ isKhmer() ? settings().nameTwo : details.partnerTwo }}</span>
+                </h2>
+                <p class="hero-save opening-to">{{ 'Dear' | t }}</p>
+                <p class="opening-guest">{{ openingGuest.name }}</p>
+                <button class="gold-button opening-button" type="button" (click)="openInvitation()">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 7h18v12H3zM3 8l9 6 9-6" />
+                  </svg>
+                  {{ 'Open invitation' | t }}
+                </button>
+                @if (hasMusic()) {
+                  <p class="opening-hint">
+                    ♪ {{ 'Music will play when you open the invitation' | t }}
+                  </p>
+                }
+              </div>
+            </div>
           </div>
-        </div>
+        }
       </section>
     }
   }
@@ -156,7 +204,7 @@
   @if (guest(); as invitedGuest) {
     <!-- 1. Cover -->
     <!-- Split cover: the photo on one side, a paper panel with the names and date on the other. -->
-    <section class="invite-hero" aria-labelledby="invite-names">
+    <section id="invitation-home" class="invite-hero" aria-labelledby="invite-names">
       <div class="hero-media">
         @if (coverPhoto()) {
           <img class="hero-photo" [src]="coverPhoto()" alt="" />
@@ -222,18 +270,43 @@
           }}
         </p>
 
-        <div class="countdown-badge">
-          <ng-container [ngTemplateOutlet]="cartouche" />
-          <p>{{ 'Counting down to our special day' | t }}</p>
-        </div>
-        <div class="countdown" role="timer" aria-live="off">
-          @for (part of countdown(); track part.label) {
-            <div class="countdown-item">
-              <strong class="countdown-tile">{{ part.text }}</strong>
-              <span>{{ part.label | t }}</span>
+        @if (template() === 'watercolor') {
+          <div class="wedding-calendar" [attr.aria-label]="'Wedding date calendar' | t">
+            <h3>{{ weddingCalendar().title }}</h3>
+            <div class="wedding-calendar-grid">
+              @for (weekday of weddingCalendar().weekdays; track $index) {
+                <span class="wedding-calendar-weekday">{{ weekday }}</span>
+              }
+              @for (day of weddingCalendar().days; track $index) {
+                @if (day; as calendarDay) {
+                  <span
+                    class="wedding-calendar-day"
+                    [class.is-wedding-day]="calendarDay.selected"
+                    [attr.aria-label]="
+                      calendarDay.selected ? ('Wedding date' | t) + ': ' + calendarDay.label : null
+                    "
+                    >{{ calendarDay.label }}</span
+                  >
+                } @else {
+                  <span class="wedding-calendar-day is-empty" aria-hidden="true"></span>
+                }
+              }
             </div>
-          }
-        </div>
+          </div>
+        } @else {
+          <div class="countdown-badge">
+            <ng-container [ngTemplateOutlet]="cartouche" />
+            <p>{{ 'Counting down to our special day' | t }}</p>
+          </div>
+          <div class="countdown" role="timer" aria-live="off">
+            @for (part of countdown(); track part.label) {
+              <div class="countdown-item">
+                <strong class="countdown-tile">{{ part.text }}</strong>
+                <span>{{ part.label | t }}</span>
+              </div>
+            }
+          </div>
+        }
       </section>
 
       <!-- 3. Photos -->
@@ -552,6 +625,46 @@
         <p class="invite-signoff">{{ details.partnerOne }} &amp; {{ details.partnerTwo }}</p>
       </section>
     </div>
+
+    @if (template() === 'watercolor') {
+      <nav class="watercolor-nav" [attr.aria-label]="'Invitation sections' | t">
+        <a href="#invitation-home" [attr.aria-label]="'Home' | t" [title]="'Home' | t">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z" />
+          </svg>
+        </a>
+        <a
+          href="#program-title"
+          [attr.aria-label]="'Wedding programme' | t"
+          [title]="'Wedding programme' | t"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 4h14v17H5zM8 2v4M16 2v4M5 9h14" />
+          </svg>
+        </a>
+        @if (photos().length) {
+          <a
+            href="#story-title"
+            [attr.aria-label]="'Our wedding album' | t"
+            [title]="'Our wedding album' | t"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4" />
+              <circle cx="9" cy="9" r="1.5" />
+            </svg>
+          </a>
+        }
+        <a
+          href="#rsvp-title"
+          [attr.aria-label]="'Will you join us?' | t"
+          [title]="'Will you join us?' | t"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 11.5a8.4 8.4 0 0 1-8.8 8.4 9 9 0 0 1-4-.9L3 21l1.5-4.4a8 8 0 1 1 16.5-5.1z" />
+          </svg>
+        </a>
+      </nav>
+    }
 
     @if (settings().musicUrl) {
       <audio

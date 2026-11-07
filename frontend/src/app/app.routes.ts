@@ -1,8 +1,52 @@
 import { Routes } from '@angular/router';
 import { authGuard, roleGuard, signedOutGuard } from './core/auth.guard';
-import { DashboardLayout } from './layout/dashboard-layout/dashboard-layout';
 
 export const routes: Routes = [
+  {
+    path: 'events/create',
+    title: 'Create an event · PlanEssential',
+    canActivate: [authGuard],
+    canActivateChild: [roleGuard],
+    children: [
+      {
+        path: '',
+        title: 'Create an event · PlanEssential',
+        data: { page: 'events' },
+        loadComponent: () =>
+          import('./features/events/event-create-page').then((m) => m.EventCreatePage),
+      },
+    ],
+  },
+  {
+    path: 'events',
+    title: 'Your events · PlanEssential',
+    canActivate: [authGuard],
+    canActivateChild: [roleGuard],
+    children: [
+      {
+        path: '',
+        title: 'Your events · PlanEssential',
+        data: { page: 'events' },
+        loadComponent: () =>
+          import('./features/events/events-page').then((m) => m.EventsPage),
+      },
+    ],
+  },
+  {
+    path: 'event/:eventId',
+    title: 'Wedding dashboard · PlanEssential',
+    canActivate: [authGuard],
+    canActivateChild: [roleGuard],
+    children: [
+      {
+        path: '',
+        title: 'Wedding dashboard · PlanEssential',
+        data: { page: 'dashboard' },
+        loadComponent: () =>
+          import('./features/events/event-dashboard-page').then((m) => m.EventDashboardPage),
+      },
+    ],
+  },
   {
     path: 'invite/:token',
     title: 'You are invited',
@@ -25,13 +69,13 @@ export const routes: Routes = [
   },
   {
     path: '',
-    component: DashboardLayout,
+    loadComponent: () =>
+      import('./layout/dashboard-layout/dashboard-layout').then((m) => m.DashboardLayout),
     canActivate: [authGuard],
     canActivateChild: [roleGuard],
     children: [
       {
-        path: '',
-        pathMatch: 'full',
+        path: 'dashboard',
         title: 'Dashboard · Vows',
         data: { page: 'dashboard' },
         loadComponent: () =>
@@ -108,5 +152,6 @@ export const routes: Routes = [
       },
     ],
   },
-  { path: '**', redirectTo: '' },
+  { path: '', pathMatch: 'full', redirectTo: 'events' },
+  { path: '**', redirectTo: 'events' },
 ];

@@ -1,0 +1,68 @@
+<div class="ticket-backdrop" (click)="closed.emit()">
+  <section
+    class="ticket-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ticket-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button class="ticket-close" type="button" [attr.aria-label]="'Close' | t" (click)="closed.emit()">×</button>
+    <span class="ticket-kicker" aria-hidden="true">
+      <span></span>
+      <svg viewBox="0 0 24 24">
+        <path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM19 14v2m2 2v3h-3m-4 0h2" />
+      </svg>
+      <span></span>
+    </span>
+    <h2 id="ticket-title">{{ 'Digital Ticket' | t }}</h2>
+    <p class="ticket-guest-name">{{ guest().name }}</p>
+
+    <article class="ticket-card">
+      @if (coverPhotoUrl(); as cover) {
+        <img class="ticket-cover" [src]="cover" alt="" (error)="onCoverError()" />
+      } @else {
+        <div class="ticket-cover ticket-cover-placeholder" aria-hidden="true">
+          {{ coupleNames() }}
+        </div>
+      }
+      <div class="ticket-event-copy">
+        <p class="ticket-couple">{{ coupleNames() }}</p>
+        <p class="ticket-event-name">{{ 'Wedding Celebration' | t }}</p>
+        @if (isKhmer()) {
+          <p class="ticket-time">{{ ceremonyTimeText() }}</p>
+        }
+        <p class="ticket-date">
+          {{ englishDateTime() }}
+        </p>
+      </div>
+      <p class="ticket-recipient">{{ 'Dear' | t }}</p>
+      <p class="ticket-card-guest">{{ guest().name }}</p>
+      <div class="ticket-qr">
+        <app-qr-code
+          [value]="invitationUrl()"
+          [size]="100"
+          [alt]="'Invitation QR code for ' + guest().name"
+          (rendered)="onQrRendered($event)"
+        />
+      </div>
+      <p class="ticket-hint">{{ 'Scan to open your invitation' | t }}</p>
+      <p class="ticket-footer">{{ 'Your invitation to celebrate with us' | t }}</p>
+    </article>
+
+    <div class="ticket-actions">
+      <button class="ticket-download" type="button" (click)="downloadTicket()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3" />
+        </svg>
+        {{ 'Download Ticket' | t }}
+      </button>
+      <button class="ticket-share" type="button" (click)="shareInvitation()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+          <path d="m8.7 10.7 6.6-4.4m-6.6 9 6.6 4.1" />
+        </svg>
+        {{ 'Share' | t }}
+      </button>
+    </div>
+  </section>
+</div>

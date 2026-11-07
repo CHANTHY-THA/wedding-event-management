@@ -1,0 +1,274 @@
+<div class="event-dashboard">
+  <header class="dashboard-topbar">
+    <a class="dashboard-brand" routerLink="/events" aria-label="PlanEssential">
+      <svg viewBox="0 0 40 40" aria-hidden="true">
+        <path
+          d="M20 34s-13-7.8-13-17a7.2 7.2 0 0 1 13-4.3A7.2 7.2 0 0 1 33 17c0 9.2-13 17-13 17Z"
+          fill="currentColor"
+        />
+        <path d="M7 8 4 5m31 1-3 3M5 22l-3 1m34-1 2 1" />
+      </svg>
+      <!-- <span>PlanEssential</span> -->
+    </a>
+    <a class="dashboard-events-link" routerLink="/events">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 4h6v6H4zM14 4h6v4h-6zM14 12h6v8h-6zM4 14h6v6H4z" />
+      </svg>
+      {{ 'Events' | t }}
+    </a>
+    <span class="dashboard-profile" [attr.aria-label]="session()?.name ?? 'Planner profile'">
+      {{ (session()?.name ?? 'P').slice(0, 1).toUpperCase() }}
+    </span>
+  </header>
+
+  @if (event(); as currentEvent) {
+    <main class="dashboard-main">
+      <nav class="dashboard-tabs" aria-label="Event navigation">
+        <a class="dashboard-tab active" [routerLink]="['/event', currentEvent.id]">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 4h6v7H4zM14 4h6v4h-6zM14 12h6v8h-6zM4 15h6v5H4z" />
+          </svg>
+          <span>{{ 'Dashboard' | t }}</span>
+        </a>
+        <a class="dashboard-tab" routerLink="/guests">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m7-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm9-5v6m3-3h-6" />
+          </svg>
+          <span>{{ 'Guests' | t }}</span>
+        </a>
+        <a class="dashboard-tab" routerLink="/budget">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="3" width="14" height="18" rx="2" />
+            <path d="M9 8h6m-6 4h6m-6 4h3m-6-13v18" />
+          </svg>
+          <span>{{ 'Expenses' | t }}</span>
+        </a>
+        <a class="dashboard-tab" routerLink="/gifts">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 10h16v10H4zM3 7h18v3H3zm9 0v13m0-13c-1-3-5-4-5-1.5S10 7 12 7zm0 0c1-3 5-4 5-1.5S14 7 12 7z" />
+          </svg>
+          <span>{{ 'Wedding Gift' | t }}</span>
+        </a>
+        <a class="dashboard-tab" routerLink="/templates">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m3 20 4-1 11-11-3-3L4 16l-1 4zm10-13 3 3M14 4l2-2 4 4-2 2M4 20h16" />
+          </svg>
+          <span>{{ 'Template' | t }}</span>
+        </a>
+        <a class="dashboard-tab add-template-tab" routerLink="/templates">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m-7-7h14" /></svg>
+          <span>{{ 'Add Template' | t }}</span>
+        </a>
+      </nav>
+
+      <section class="dashboard-title-row">
+        <div>
+          <p class="dashboard-overline">{{ currentEvent.type | t }}</p>
+          <h1>{{ currentEvent.name }} {{ 'Dashboard' | t }}</h1>
+          <p class="dashboard-event-meta">
+            {{ eventDate(currentEvent) + 'T12:00:00Z' | date: 'MMMM d, y' : '+0000' }}
+            · {{ currentEvent.details.venue }}, {{ currentEvent.details.city }}
+          </p>
+        </div>
+        <a class="update-event-button" routerLink="/invitations">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m14 6 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16l-1 4z" />
+          </svg>
+          {{ 'Update Event Info' | t }}
+        </a>
+      </section>
+
+      <section class="summary-grid" aria-label="Event summary">
+        <article class="summary-card summary-guests">
+          <div class="summary-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m7-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm9-5v6m3-3h-6" />
+            </svg>
+          </div>
+          <span>{{ 'Planned guests' | t }}</span>
+          <strong>{{ invitedCount() }}</strong>
+          <small>{{ invitedCount() }} {{ 'invited' | t }}</small>
+        </article>
+        <article class="summary-card summary-confirmed">
+          <div class="summary-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m7-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm9-3 2 2 4-4" />
+            </svg>
+          </div>
+          <span>{{ 'Confirmed that will attend' | t }}</span>
+          <strong>{{ confirmedCount() }}</strong>
+          <small>{{ confirmedPercent() }}% {{ 'of invited' | t }}</small>
+        </article>
+        <article class="summary-card summary-gifts">
+          <div class="summary-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 10h16v10H4zM3 7h18v3H3zm9 0v13m0-13c-1-3-5-4-5-1.5S10 7 12 7zm0 0c1-3 5-4 5-1.5S14 7 12 7z" />
+            </svg>
+          </div>
+          <span>{{ 'Gift Income' | t }}</span>
+          <strong>{{ giftIncomeUsd() | money }}</strong>
+          <small>
+            {{ totalCashGifts() }} {{ 'cash gifts' | t }} · {{ 'Exchange rate' | t }}:
+            1 USD = {{ exchangeRate() | number }} KHR
+          </small>
+        </article>
+        <article class="summary-card summary-profit">
+          <div class="summary-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 7h18M5 7l4 10h6l4-10M12 4v14m-4 3h8" />
+            </svg>
+          </div>
+          <span>{{ 'Profit and loss' | t }}</span>
+          <strong>{{ profitLoss() | money }}</strong>
+          <small>{{ 'Gift Income' | t }} − {{ 'Total Expenses (Actual)' | t }}</small>
+        </article>
+        <article class="summary-card summary-expenses">
+          <div class="summary-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="4" y="3" width="16" height="18" rx="2" />
+              <path d="M8 8h8m-8 4h8m-8 4h4" />
+            </svg>
+          </div>
+          <span>{{ 'Expense' | t }}</span>
+          <strong>{{ expenseSpent() | money }}</strong>
+          <div class="expense-progress-labels">
+            <small>{{ expenseSpent() | money }}</small>
+            <small>{{ expensePlanned() | money }}</small>
+          </div>
+          <div
+            class="expense-progress"
+            role="progressbar"
+            [attr.aria-label]="'Expense' | t"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            [attr.aria-valuenow]="expensePercent()"
+          >
+            <span [style.width.%]="expensePercent()"></span>
+          </div>
+          <small class="expense-percent">{{ expensePercent() }}%</small>
+        </article>
+      </section>
+
+      <section class="charts-grid" aria-label="Event charts">
+        <article class="chart-card">
+          <h2>{{ 'Guest Status Distribution' | t }}</h2>
+          <div class="guest-chart">
+            <div class="guest-chart-note">
+              {{ 'Confirmed' | t }}: {{ confirmedPercent() }}%
+            </div>
+            <div
+              class="guest-pie"
+              [style.background]="guestStatusBackground()"
+              role="img"
+              [attr.aria-label]="
+                confirmedCount() +
+                ' confirmed, ' +
+                pendingCount() +
+                ' pending, ' +
+                declinedCount() +
+                ' declined'
+              "
+            ></div>
+            <div class="guest-chart-note pending-note">
+              {{ 'Awaiting reply' | t }}: {{ pendingPercent() }}%
+            </div>
+          </div>
+          <ul class="chart-legend">
+            <li><span class="legend-dot green"></span>{{ 'Confirmed' | t }}</li>
+            <li><span class="legend-dot orange"></span>{{ 'Pending' | t }}</li>
+            <li><span class="legend-dot red"></span>{{ 'Declined' | t }}</li>
+          </ul>
+        </article>
+
+        <article class="chart-card">
+          <h2>{{ 'Financial Overview' | t }}</h2>
+          <ul class="financial-legend">
+            @for (bar of financialBars(); track bar.label) {
+              <li><span class="legend-dot" [style.background]="bar.color"></span>{{ bar.label | t }}</li>
+            }
+          </ul>
+          <div class="bar-chart" role="img" [attr.aria-label]="'Financial Overview' | t">
+            @for (bar of financialBars(); track bar.label) {
+              <div class="bar-column">
+                <span class="bar-value">{{ bar.amount | money }}</span>
+                <div class="bar-track">
+                  <span
+                    class="bar"
+                    [style.height.%]="progressWidth(bar.amount)"
+                    [style.background]="bar.color"
+                  ></span>
+                </div>
+                <small>{{ bar.label | t }}</small>
+              </div>
+            }
+          </div>
+        </article>
+
+        <article class="chart-card category-chart-card">
+          <h2>{{ 'Expense Categories' | t }}</h2>
+          <div class="category-chart">
+            <ul class="category-legend">
+              @for (category of expenseCategories(); track category.name; let index = $index) {
+                <li>
+                  <span class="legend-dot" [class]="'category-dot category-' + index % 6"></span>
+                  <span>{{ category.name | t }}</span>
+                  <strong>{{ category.amount | money }}</strong>
+                </li>
+              } @empty {
+                <li class="category-empty">{{ 'No expenses recorded yet.' | t }}</li>
+              }
+            </ul>
+            <div
+              class="category-pie"
+              [style.background]="categoryBackground()"
+              role="img"
+              [attr.aria-label]="'Expense Categories' | t"
+            ></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="details-grid">
+        <article class="details-card">
+          <h2>{{ 'Financial Overview' | t }}</h2>
+          <div class="detail-line income-line">
+            <span>{{ 'Gift Income' | t }}</span>
+            <strong>{{ giftIncomeUsd() | money }}</strong>
+          </div>
+          <div class="detail-line expense-line">
+            <span>{{ 'Total Expenses (Actual)' | t }}</span>
+            <strong>{{ expenseSpent() | money }}</strong>
+          </div>
+          <div class="detail-line profit-line">
+            <span>{{ 'Profit and loss' | t }}</span>
+            <strong>{{ profitLoss() | money }}</strong>
+          </div>
+          <div class="detail-line budget-line">
+            <span>{{ 'Planned budget' | t }}</span>
+            <strong>{{ budgetTotal() | money }}</strong>
+          </div>
+        </article>
+
+        <article class="details-card">
+          <h2>{{ 'Guest Status' | t }}</h2>
+          <div class="detail-line confirmed-line">
+            <span>{{ 'Confirmed' | t }}</span>
+            <strong>{{ confirmedCount() }}</strong>
+          </div>
+          <div class="detail-line pending-line">
+            <span>{{ 'Pending' | t }}</span>
+            <strong>{{ pendingCount() }}</strong>
+          </div>
+          <div class="detail-line declined-line">
+            <span>{{ 'Declined' | t }}</span>
+            <strong>{{ declinedCount() }}</strong>
+          </div>
+          <div class="detail-line gift-count-line">
+            <span>{{ 'Gifts Received' | t }}</span>
+            <strong>{{ totalCashGifts() + totalGiftItems() }}</strong>
+          </div>
+        </article>
+      </section>
+    </main>
+  }
+</div>

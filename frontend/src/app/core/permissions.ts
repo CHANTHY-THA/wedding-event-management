@@ -9,6 +9,7 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 
 /** Pages each role may open. Gifts are sensitive, so planners and staff never see them. */
 export const PAGE_ROLES = {
+  events: ['couple', 'planner'],
   dashboard: ['couple', 'planner'],
   schedule: ['couple', 'planner'],
   guests: ['couple', 'planner'],
@@ -26,7 +27,8 @@ export const PAGE_ROLES = {
 export type PageKey = keyof typeof PAGE_ROLES;
 
 const PAGE_PATHS: Record<PageKey, string> = {
-  dashboard: '/',
+  events: '/events',
+  dashboard: '/dashboard',
   schedule: '/schedule',
   guests: '/guests',
   invitations: '/invitations',

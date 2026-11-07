@@ -22,7 +22,7 @@ import { LanguageToggle } from '../../shared/language-toggle/language-toggle';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { LightboxPhoto, PhotoLightbox } from '../../shared/photo-lightbox/photo-lightbox';
 import { QrCode } from '../../shared/qr-code/qr-code';
-import { englishTime, khmerDate, khmerTime } from '../../shared/utils/khmer-date';
+import { englishTime, khmerDate, khmerTime, toKhmerDigits } from '../../shared/utils/khmer-date';
 import { groupScheduleByDay } from '../../shared/utils/schedule';
 
 interface Petal {
@@ -41,6 +41,23 @@ const PETALS: Petal[] = Array.from({ length: 18 }, (_, index) => ({
   size: 9 + ((index * 7) % 9),
   drift: ((index % 5) - 2) * 30,
 }));
+
+const CALENDAR_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const CALENDAR_WEEKDAYS_KM = ['អា', 'ច', 'អ', 'ពុ', 'ព្រ', 'សុ', 'ស'];
+const CALENDAR_MONTHS_KM = [
+  'មករា',
+  'កុម្ភៈ',
+  'មីនា',
+  'មេសា',
+  'ឧសភា',
+  'មិថុនា',
+  'កក្កដា',
+  'សីហា',
+  'កញ្ញា',
+  'តុលា',
+  'វិច្ឆិកា',
+  'ធ្នូ',
+];
 
 /** Public, token-addressed invitation and RSVP form (`/invite/:token`). */
 @Component({
@@ -117,6 +134,30 @@ export class GuestInvitationPage {
   protected readonly numericDate = computed(() => {
     const [year, month, day] = this.details.date.split('-');
     return `${day} . ${month} . ${year} | ${englishTime(this.settings().ceremonyTime)}`;
+  });
+  protected readonly weddingCalendar = computed(() => {
+    const [year, month, weddingDay] = this.details.date.split('-').map(Number);
+    const firstWeekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
+    const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    const weekCount = Math.ceil((firstWeekday + daysInMonth) / 7);
+    const title = this.isKhmer()
+      ? `ខែ${CALENDAR_MONTHS_KM[month - 1]} ${toKhmerDigits(year)}`
+      : new Intl.DateTimeFormat('en-US', {
+          month: 'long',
+          year: 'numeric',
+          timeZone: 'UTC',
+        }).format(new Date(Date.UTC(year, month - 1, 1)));
+
+    return {
+      title,
+      weekdays: this.isKhmer() ? CALENDAR_WEEKDAYS_KM : CALENDAR_WEEKDAYS,
+      days: Array.from({ length: weekCount * 7 }, (_, index) => {
+        const day = index - firstWeekday + 1;
+        return day < 1 || day > daysInMonth
+          ? null
+          : { label: this.isKhmer() ? toKhmerDigits(day) : String(day), selected: day === weddingDay };
+      }),
+    };
   });
 
   private readonly now = signal(Date.now());
@@ -208,6 +249,11 @@ export class GuestInvitationPage {
   /** Reveals the card and starts the music in the same tap, which browsers allow. */
   protected openInvitation(): void {
     this.isOpened.set(true);
+    if (this.template() === 'watercolor' && this.isBrowser) {
+      requestAnimationFrame(() =>
+        this.document.getElementById('welcome-title')?.scrollIntoView({ behavior: 'smooth' }),
+      );
+    }
     if (this.hasMusic()) {
       void this.playMusic();
     }

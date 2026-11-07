@@ -1,114 +1,457 @@
-<section class="page-heading">
-  <div>
-    <p class="overline">{{ 'EVERYONE WHO MAKES YOUR DAY SPECIAL' | t }}</p>
-    <h1>{{ 'Guest management' | t }}</h1>
-    <p class="heading-copy">
-      {{ 'Organize families, contact details, plus-ones, and guest needs.' | t }}
-    </p>
-  </div>
-  <button class="button button-primary" type="button" (click)="isGuestFormOpen.set(true)">
-    <span>+</span> {{ 'Add a guest' | t }}
-  </button>
-</section>
-<section class="import-panel panel">
-  <div>
-    <span class="eyebrow">{{ 'START FROM A SPREADSHEET' | t }}</span>
-    <h2>{{ 'Import guests from CSV' | t }}</h2>
-    <p>
-      Headers:
-      <code>name, group, side, relationship, email, phone, partySize, plusOnes, children, tags</code
-      >. Separate multiple tags with semicolons.
-    </p>
-    @if (csvMessage()) {
-      <span class="status-message csv-message" role="status">{{ csvMessage() }}</span>
-    }
-  </div>
-  <label class="button button-secondary csv-button">
-    {{ 'Import CSV' | t }}
-    <input
-      class="visually-hidden"
-      type="file"
-      accept=".csv,text/csv"
-      aria-label="Import guest list CSV"
-      (change)="importCsv($event)"
-    />
-  </label>
-</section>
-<section class="panel guest-management-panel">
-  <div class="panel-heading">
+<main class="guests-page">
+  <header class="guests-heading">
     <div>
-      <span class="eyebrow">{{ 'YOUR PEOPLE' | t }}</span>
-      <h2>{{ invitedCount() }} {{ 'invited guests' | t }}</h2>
+      <h1>{{ 'Guest Management' | t }}</h1>
+      <p class="guests-count">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path
+            d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm6-7.5a4 4 0 0 1 0 7.8M20 21v-2a4 4 0 0 0-3-3.87"
+          />
+        </svg>
+        <strong>{{ invitedCount() }}</strong> {{ 'invited guests' | t }}
+        <button class="inline-add-guest" type="button" (click)="openAddForm()">
+          <span aria-hidden="true">+</span> {{ 'Add guests' | t }}
+        </button>
+      </p>
     </div>
-    <app-rsvp-filter-tabs [(value)]="statusFilter" />
-  </div>
-  <label class="search-field guest-search">
-    <span aria-hidden="true">⌕</span>
-    <input
-      type="search"
-      aria-label="Search all guest details"
-      [placeholder]="'Search name, family, relationship, or tag...' | t"
-      [ngModel]="searchTerm()"
-      (ngModelChange)="searchTerm.set($event)"
-    />
-  </label>
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th scope="col">{{ 'GUEST / FAMILY' | t }}</th>
-          <th scope="col">{{ 'SIDE & RELATIONSHIP' | t }}</th>
-          <th scope="col">{{ 'CONTACT' | t }}</th>
-          <th scope="col">{{ 'PARTY' | t }}</th>
-          <th scope="col">{{ 'NEEDS & TAGS' | t }}</th>
-          <th scope="col">{{ 'RSVP' | t }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (guest of filteredGuests(); track guest.id) {
+    <label class="button button-secondary csv-button">
+      {{ 'Import CSV' | t }}
+      <input
+        class="visually-hidden"
+        type="file"
+        accept=".csv,text/csv"
+        aria-label="Import guest list CSV"
+        (change)="importCsv($event)"
+      />
+    </label>
+  </header>
+
+  @if (csvMessage()) {
+    <p class="csv-message" role="status">{{ csvMessage() | t }}</p>
+  }
+
+  <section class="guest-table-panel" aria-label="Guest list">
+    <div class="guest-toolbar">
+      <label class="search-field guest-search">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <circle cx="10.8" cy="10.8" r="6.8" />
+          <path d="m16 16 5 5" />
+        </svg>
+        <input
+          type="search"
+          aria-label="Search all guest details"
+          [placeholder]="'Search...' | t"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="setSearchTerm($event)"
+        />
+      </label>
+
+      <label class="guest-filter">
+        <span class="visually-hidden">{{ 'Filter Group' | t }}</span>
+        <select
+          [ngModel]="groupFilter()"
+          (ngModelChange)="setGroupFilter($event)"
+          [attr.aria-label]="'Filter Group' | t"
+        >
+          <option value="">{{ 'All groups' | t }}</option>
+          @for (group of groups(); track group) {
+            <option [value]="group">{{ group }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="guest-filter">
+        <span class="visually-hidden">{{ 'Filter Tags' | t }}</span>
+        <select
+          [ngModel]="tagFilter()"
+          (ngModelChange)="setTagFilter($event)"
+          [attr.aria-label]="'Filter Tags' | t"
+        >
+          <option value="">{{ 'All tags' | t }}</option>
+          @for (tag of tags(); track tag) {
+            <option [value]="tag">{{ tag }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="guest-filter status-filter">
+        <span class="visually-hidden">{{ 'RSVP status' | t }}</span>
+        <select
+          [ngModel]="statusFilter()"
+          (ngModelChange)="setStatusFilter($event)"
+          [attr.aria-label]="'RSVP status' | t"
+        >
+          <option value="all">{{ 'All statuses' | t }}</option>
+          <option value="Confirmed">{{ 'Confirmed' | t }}</option>
+          <option value="Pending">{{ 'Pending' | t }}</option>
+          <option value="Declined">{{ 'Declined' | t }}</option>
+        </select>
+      </label>
+
+      <button
+        class="reset-filters-button"
+        type="button"
+        [attr.aria-label]="'Reset filters' | t"
+        [title]="'Reset filters' | t"
+        (click)="resetFilters()"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path d="M8 8h12v12H8zM4 16V4h12" />
+        </svg>
+      </button>
+
+      <button class="add-guest-button" type="button" (click)="openAddForm()">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path d="M12 5v14m-7-7h14" />
+        </svg>
+        {{ 'Add New' | t }}
+      </button>
+
+      <button
+        class="button button-danger delete-selected-button"
+        type="button"
+        [disabled]="!selectedCount()"
+        [attr.aria-label]="
+          selectedCount() ? ('Delete selected' | t) + ' (' + selectedCount() + ')' : ('Delete' | t)
+        "
+        (click)="requestDelete()"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6" />
+        </svg>
+        {{ 'Delete' | t }}
+      </button>
+    </div>
+
+    <div class="guest-table-scroll">
+      <table class="data-table guest-table">
+        <thead>
           <tr>
-            <td>
-              <strong>{{ guest.name }}</strong
-              ><small>{{ guest.group }}</small>
-            </td>
-            <td>
-              {{ guest.side + ' side' | t }}<small>{{ guest.relationship || '—' }}</small>
-            </td>
-            <td>
-              {{ guest.email || '—' }}<small>{{ guest.phone || 'No phone added' }}</small>
-            </td>
-            <td>
-              {{ guest.partySize }} {{ 'invited' | t
-              }}<small
-                >{{ guest.plusOnes }} {{ 'plus-ones' | t }} · {{ guest.children }}
-                {{ 'children' | t }}</small
-              >
-            </td>
-            <td>
-              <div class="tag-list">
-                @for (tag of guest.tags; track tag) {
-                  <span class="guest-tag">{{ tag }}</span>
-                } @empty {
-                  <span class="muted-value">{{ 'No tags' | t }}</span>
+            <th scope="col" class="guest-select-column">
+              <input
+                type="checkbox"
+                [checked]="allVisibleSelected()"
+                [attr.aria-label]="'Select all guests on this page' | t"
+                (change)="toggleVisibleSelection($event)"
+              />
+            </th>
+            <th scope="col" class="guest-name-column">{{ 'Name' | t }}</th>
+            <th scope="col" class="guest-nickname-column">{{ 'Nickname Or English Name' | t }}</th>
+            <th scope="col" class="guest-group-column">{{ 'Groups' | t }}</th>
+            <th scope="col" class="guest-tags-column">{{ 'Tags' | t }}</th>
+            <th scope="col" class="guest-status-column">{{ 'Status' | t }}</th>
+            <th scope="col" class="guest-wish-column">{{ 'Wish' | t }}</th>
+            <th scope="col" class="guest-note-column">{{ 'Note' | t }}</th>
+            <th scope="col" class="guest-actions-heading">
+              <span class="visually-hidden">{{ 'Actions' | t }}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (guest of visibleGuests(); track guest.id) {
+            <tr>
+              <td class="guest-select-column">
+                <input
+                  type="checkbox"
+                  [checked]="selectedGuestIds().has(guest.id)"
+                  [attr.aria-label]="'Select ' + guest.name"
+                  (change)="toggleGuestSelection(guest.id, $event)"
+                />
+              </td>
+              <td class="guest-name-column">
+                <div class="guest-identity">
+                  <span class="guest-avatar" aria-hidden="true">{{ guest.initials }}</span>
+                  <strong>{{ guest.name }}</strong>
+                </div>
+              </td>
+              <td class="guest-nickname-column">
+                {{ guest.nickname || ('N/A' | t) }}
+              </td>
+              <td class="guest-group-column">
+                @if (guest.group) {
+                  <span class="guest-group-pill">{{ guest.group }}</span>
+                } @else {
+                  <span class="muted-value">—</span>
                 }
-              </div>
-            </td>
-            <td>
-              <span [class]="'rsvp-badge rsvp-' + guest.rsvp.toLowerCase()">{{
-                guest.rsvp | t
-              }}</span>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td class="empty-state" colspan="6">{{ 'No guests match your filters.' | t }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-</section>
+              </td>
+              <td class="guest-tags-column">
+                <div class="guest-tag-list">
+                  @for (tag of guest.tags; track tag) {
+                    <span class="guest-tag">{{ tag }}</span>
+                  } @empty {
+                    <span class="muted-value">—</span>
+                  }
+                </div>
+              </td>
+              <td class="guest-status-column">
+                <span [class]="'guest-status status-' + guest.rsvp.toLowerCase()">
+                  {{ guest.rsvp | t }}
+                </span>
+              </td>
+              <td class="guest-wish-column">
+                <span class="guest-table-text">{{ guest.wish || ('N/A' | t) }}</span>
+              </td>
+              <td class="guest-note-column">
+                <span class="guest-table-text">{{ guest.note || ('N/A' | t) }}</span>
+              </td>
+              <td class="guest-actions-cell">
+                <button
+                  class="guest-invite-button"
+                  type="button"
+                  [attr.aria-label]="('Invite' | t) + ' ' + guest.name"
+                  [title]="'Invite' | t"
+                  (click)="inviteGuest(guest)"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13" />
+                  </svg>
+                </button>
+                <button
+                  class="guest-invitation-button"
+                  type="button"
+                  [attr.aria-label]="('Show digital ticket for' | t) + ' ' + guest.name"
+                  [title]="'Digital Ticket' | t"
+                  (click)="openTicket(guest)"
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.8"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h3v3h-3zM19 14v2m2 2v3h-3m-4 0h2"
+                    />
+                  </svg>
+                </button>
+                <button
+                  class="guest-invitation-button guest-more-button"
+                  type="button"
+                  [attr.aria-label]="('More actions for' | t) + ' ' + guest.name"
+                  aria-haspopup="true"
+                  [attr.aria-expanded]="activeMenuGuest()?.id === guest.id"
+                  (click)="toggleRowMenu(guest, $event)"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="5" cy="12" r="1" />
+                    <circle cx="12" cy="12" r="1" />
+                    <circle cx="19" cy="12" r="1" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="empty-state" colspan="9">{{ 'No guests match your filters.' | t }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="guest-table-footer">
+      <label class="guest-page-size">
+        {{ 'Rows per page' | t }}
+        <select [value]="pageSize()" (change)="setPageSize($event)">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+      </label>
+      <span>
+        {{ 'Showing' | t }}
+        <strong
+          >{{ filteredGuests().length ? (effectivePage() - 1) * pageSize() + 1 : 0 }}–{{
+            visibleGuests().length ? (effectivePage() - 1) * pageSize() + visibleGuests().length : 0
+          }}</strong
+        >
+        {{ 'of' | t }} <strong>{{ filteredGuests().length }}</strong>
+      </span>
+      <div class="guest-pagination" [attr.aria-label]="'Guest list pagination' | t">
+        <button
+          type="button"
+          [disabled]="effectivePage() === 1"
+          [attr.aria-label]="'First page' | t"
+          (click)="goToPage(1)"
+        >
+          «
+        </button>
+        <button
+          type="button"
+          [disabled]="effectivePage() === 1"
+          [attr.aria-label]="'Previous page' | t"
+          (click)="goToPage(effectivePage() - 1)"
+        >
+          ‹
+        </button>
+        <span>{{ 'Page' | t }} {{ effectivePage() }} {{ 'of' | t }} {{ pageCount() }}</span>
+        <button
+          type="button"
+          [disabled]="effectivePage() === pageCount()"
+          [attr.aria-label]="'Next page' | t"
+          (click)="goToPage(effectivePage() + 1)"
+        >
+          ›
+        </button>
+        <button
+          type="button"
+          [disabled]="effectivePage() === pageCount()"
+          [attr.aria-label]="'Last page' | t"
+          (click)="goToPage(pageCount())"
+        >
+          »
+        </button>
+      </div>
+    </footer>
+  </section>
+</main>
 
 @if (isGuestFormOpen()) {
-  <app-guest-form-dialog (closed)="isGuestFormOpen.set(false)" (added)="resetFilters()" />
+  <app-guest-form-dialog
+    [guest]="editingGuest()"
+    (closed)="isGuestFormOpen.set(false)"
+    (added)="resetFilters()"
+  />
+}
+
+@if (activeMenuGuest(); as menuGuest) {
+  <button
+    class="guest-menu-dismiss"
+    type="button"
+    [attr.aria-label]="'Close guest actions' | t"
+    (click)="closeMenu()"
+  ></button>
+  <div
+    class="guest-row-menu"
+    role="group"
+    [attr.aria-label]="'Guest actions' | t"
+    [style.top.px]="menuPosition()?.top"
+    [style.left.px]="menuPosition()?.left"
+  >
+    <button type="button" (click)="openEditForm(menuGuest)">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#77727a"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.8"
+        aria-hidden="true"
+      >
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+      </svg>
+      {{ 'Edit guest' | t }}
+    </button>
+    <button class="guest-row-menu-delete" type="button" (click)="requestDelete(menuGuest)">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="1.8"
+        aria-hidden="true"
+      >
+        <path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6" />
+      </svg>
+      {{ 'Delete this guest?' | t }}
+    </button>
+  </div>
+}
+
+@if (deletePrompt(); as guestsToDelete) {
+  <div class="modal-backdrop" (click)="deletePrompt.set(null)">
+    <section
+      class="modal-panel guest-delete-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="guest-delete-title"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="guest-delete-title">{{ 'Delete guests?' | t }}</h2>
+      <p class="modal-copy">
+        {{ 'Delete' | t }} {{ guestsToDelete.length }}
+        {{ (guestsToDelete.length === 1 ? 'guest' : 'guests') | t }}?
+        {{ 'This cannot be undone.' | t }}
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" (click)="deletePrompt.set(null)">
+          {{ 'Cancel' | t }}
+        </button>
+        <button type="button" class="button button-danger" (click)="confirmDelete()">
+          {{ 'Delete' | t }}
+        </button>
+      </div>
+    </section>
+  </div>
+}
+
+@if (inviteDialogGuest(); as guestToInvite) {
+  <app-guest-invite-dialog
+    [guest]="guestToInvite"
+    (closed)="inviteDialogGuest.set(null)"
+    (ticketRequested)="ticketGuest.set($event)"
+  />
+}
+
+@if (ticketGuest(); as guestWithTicket) {
+  <app-guest-ticket-dialog [guest]="guestWithTicket" (closed)="ticketGuest.set(null)" />
 }

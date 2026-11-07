@@ -96,6 +96,14 @@
   view-transition-name: page;
 }
 
+.events-page,
+.create-page,
+.event-dashboard,
+.login-page {
+  view-transition-name: page;
+  animation: rise-in var(--duration-slow) var(--ease-out) both;
+}
+
 ::view-transition-old(page) {
   animation: fade-out 120ms ease both;
 }

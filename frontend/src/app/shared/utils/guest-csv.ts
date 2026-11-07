@@ -63,6 +63,11 @@ export function parseGuestCsv(contents: string): GuestCsvResult {
         .split(';')
         .map((tag) => tag.trim())
         .filter(Boolean),
+      ...(headers.includes('nickname') || headers.includes('englishname')
+        ? { nickname: read(row, headers.includes('nickname') ? 'nickname' : 'englishname') }
+        : {}),
+      ...(headers.includes('wish') ? { wish: read(row, 'wish') } : {}),
+      ...(headers.includes('note') ? { note: read(row, 'note') } : {}),
     });
   }
   return { ok: true, guests, skipped };

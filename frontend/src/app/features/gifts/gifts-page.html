@@ -1,159 +1,191 @@
-<section class="page-heading">
-  <div>
-    <p class="overline">{{ 'WITH THANKS TO EVERYONE' | t }}</p>
-    <h1>{{ 'Gifts & envelopes' | t }}</h1>
-    <p class="heading-copy">
-      {{ 'Record who gave what, then keep track of thank-you notes.' | t }}
-    </p>
-  </div>
-  <div class="page-actions">
-    <button class="button button-secondary" type="button" (click)="exportCsv()">
-      {{ 'Export CSV' | t }}
-    </button>
-    <button class="button button-primary" type="button" (click)="openForm(null)">
-      <span>+</span> {{ 'Record gift' | t }}
-    </button>
-  </div>
-</section>
-
-<p class="private-note">
-  <svg class="private-icon" viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3" />
-  </svg>
-  {{ 'Private: only the couple and family helpers can see this page.' | t }}
-</p>
-
-<section class="stats-grid" aria-label="Gift summary">
-  <article class="stat-card">
-    <span class="stat-label">{{ 'Cash in dollars' | t }}</span>
-    <strong class="stat-value">{{ totals().USD | money: 'USD' : 'native' }}</strong>
-    <span class="stat-note">{{ 'Counted separately from riel' | t }}</span>
-  </article>
-  <article class="stat-card">
-    <span class="stat-label">{{ 'Cash in riel' | t }}</span>
-    <strong class="stat-value">{{ totals().KHR | money: 'KHR' : 'native' }}</strong>
-    <span class="stat-note">{{ 'Counted separately from dollars' | t }}</span>
-  </article>
-  <article class="stat-card">
-    <span class="stat-label">{{ 'All cash combined' | t }}</span>
-    <strong class="stat-value">{{ combinedTotal() | money: displayCurrency() : 'native' }}</strong>
-    <span class="stat-note">{{ 'At' | t }} {{ khrPerUsd() | number }} ៛ = $1</span>
-  </article>
-  <article class="stat-card" [class.stat-alert]="unthankedCount() > 0">
-    <span class="stat-label">{{ 'Thank-yous to send' | t }}</span>
-    <strong class="stat-value">{{ unthankedCount() }}</strong>
-    <span class="stat-note"
-      >{{ gifts().length }} {{ 'records' | t }} · {{ giftCount() }} {{ 'gifts in kind' | t }}</span
-    >
-  </article>
-</section>
-
-<section class="panel" aria-labelledby="gift-list-title">
-  <div class="panel-heading">
+<main class="gifts-page">
+  <header class="gifts-heading">
     <div>
-      <span class="eyebrow">{{ 'GIFT BOOK' | t }}</span>
-      <h2 id="gift-list-title">{{ 'Who gave what' | t }}</h2>
+      <p class="gifts-eyebrow">{{ 'WITH THANKS TO EVERYONE' | t }}</p>
+      <h1>{{ 'Wedding Gifts' | t }}</h1>
+      <p class="gifts-subtitle">{{ 'Record who gave what, then keep track of thank-you notes.' | t }}</p>
     </div>
-    <div class="filter-tabs" role="group" aria-label="Filter gifts">
-      @for (option of filterOptions; track option.value) {
-        <button
-          type="button"
-          [class.selected]="filter() === option.value"
-          (click)="filter.set(option.value)"
-        >
-          {{ option.label | t }}
-        </button>
-      }
-    </div>
-  </div>
-  <label class="search-field gift-search">
-    <span aria-hidden="true">⌕</span>
-    <input
-      type="search"
-      [attr.aria-label]="'Search gifts' | t"
-      [placeholder]="'Search giver, gift or notes...' | t"
-      [ngModel]="searchTerm()"
-      (ngModelChange)="searchTerm.set($event)"
-    />
-  </label>
-  <div class="table-wrap">
-    <table class="data-table gift-table">
-      <thead>
-        <tr>
-          <th scope="col">{{ 'FROM' | t }}</th>
-          <th scope="col">{{ 'GIFT' | t }}</th>
-          <th scope="col">{{ 'RECEIVED' | t }}</th>
-          <th scope="col">{{ 'RECORDED BY' | t }}</th>
-          <th scope="col">{{ 'THANK-YOU' | t }}</th>
-          <th scope="col">
-            <span class="visually-hidden">{{ 'Actions' | t }}</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (gift of filteredGifts(); track gift.id) {
-          <tr>
-            <td>
-              <strong>{{ gift.giverName }}</strong
-              ><small>{{ guestGroup(gift) || ('Not on the guest list' | t) }}</small>
-            </td>
-            <td>
-              @if (gift.type === 'Cash') {
-                <span class="gift-amount">{{ gift.amount | money: gift.currency : 'native' }}</span>
-                <small>{{ 'Cash envelope' | t }}</small>
-              } @else {
-                <span class="gift-item">{{ gift.item }}</span>
-                <small>{{ 'Gift' | t }}</small>
-              }
-            </td>
-            <td class="nowrap">{{ gift.receivedAt + 'T12:00:00Z' | date: 'd MMM y' : '+0000' }}</td>
-            <td>{{ gift.recordedBy || '—' }}</td>
-            <td>
-              <button
-                type="button"
-                class="thanks-toggle"
-                [class.sent]="gift.thanked"
-                [attr.aria-pressed]="gift.thanked"
-                [attr.aria-label]="
-                  (gift.thanked ? 'Mark thank-you as not sent for ' : 'Mark thank-you sent for ') +
-                  gift.giverName
-                "
-                (click)="toggleThanked(gift)"
-              >
-                {{ (gift.thanked ? '✓ Sent' : 'Not yet') | t }}
-              </button>
-            </td>
-            <td>
-              <button
-                class="button button-secondary gift-edit"
-                type="button"
-                [attr.aria-label]="'Edit gift from ' + gift.giverName"
-                (click)="openForm(gift)"
-              >
-                {{ 'Edit' | t }}
-              </button>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td class="empty-state" colspan="6">
-              {{
-                (gifts().length
-                  ? 'No gifts match your filters.'
-                  : 'No gifts recorded yet. Record the first envelope as it arrives.'
-                ) | t
-              }}
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-</section>
+    <p class="private-note">
+      <svg class="private-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3" />
+      </svg>
+      {{ 'Private: only the couple and family helpers can see this page.' | t }}
+    </p>
+  </header>
 
-<footer class="page-footer">
-  {{ 'Interactive preview · changes reset when you refresh the page.' | t }}
-</footer>
+  <section class="gifts-summary" aria-label="Gift summary">
+    <article class="gift-summary-card summary-count">
+      <span class="summary-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm6-7.5a4 4 0 0 1 0 7.8M20 21v-2a4 4 0 0 0-3-3.87" /></svg>
+      </span>
+      <strong>{{ gifts().length }}</strong>
+      <span>{{ 'Gifts Received' | t }}</span>
+    </article>
+    <article class="gift-summary-card summary-usd">
+      <span class="summary-icon" aria-hidden="true">$</span>
+      <strong>{{ totals().USD | money: 'USD' : 'native' }}</strong>
+      <span>{{ 'Total Dollar ($)' | t }}</span>
+    </article>
+    <article class="gift-summary-card summary-khr">
+      <span class="summary-icon" aria-hidden="true">៛</span>
+      <strong>{{ totals().KHR | money: 'KHR' : 'native' }}</strong>
+      <span>{{ 'Total Riel (៛)' | t }}</span>
+    </article>
+    <article class="gift-summary-card summary-combined">
+      <span class="summary-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="m3 17 6-6 4 4 8-9m-6 0h6v6" /></svg>
+      </span>
+      <strong>{{ combinedUsdTotal() | money: 'USD' : 'native' }}</strong>
+      <span>
+        {{ 'Total as USD' | t }} · {{ 'Exchange rate' | t }}: 1 USD = {{ khrPerUsd() | number }} KHR
+      </span>
+    </article>
+  </section>
+
+  <section class="gifts-list-section" aria-labelledby="gift-list-title">
+    <div class="gifts-list-heading">
+      <div>
+        <p class="gifts-eyebrow">{{ 'GIFT BOOK' | t }}</p>
+        <h2 id="gift-list-title">{{ 'List of Gifts' | t }}</h2>
+      </div>
+      <span class="gift-record-count">
+        {{ filteredGifts().length }} {{ 'records' | t }}
+      </span>
+    </div>
+
+    <div class="gifts-table-panel">
+      <div class="gift-toolbar">
+        <label class="search-field gift-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="10.8" cy="10.8" r="6.8" />
+            <path d="m16 16 5 5" />
+          </svg>
+          <input
+            type="search"
+            [attr.aria-label]="'Search gifts' | t"
+            [placeholder]="'Search...' | t"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+          />
+        </label>
+
+        <div class="gift-toolbar-actions">
+          <div class="filter-tabs" role="group" [attr.aria-label]="'Filter gifts' | t">
+            @for (option of filterOptions; track option.value) {
+              <button
+                type="button"
+                [class.selected]="filter() === option.value"
+                [attr.aria-pressed]="filter() === option.value"
+                (click)="filter.set(option.value)"
+              >
+                {{ option.label | t }}
+              </button>
+            }
+          </div>
+          <button class="gift-export-button" type="button" (click)="exportCsv()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3" />
+            </svg>
+            {{ 'Export CSV' | t }}
+          </button>
+          <button class="gift-add-button" type="button" (click)="openForm(null)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14m-7-7h14" /></svg>
+            {{ 'Add New' | t }}
+          </button>
+        </div>
+      </div>
+
+      <div class="gift-table-scroll">
+        <table class="data-table gift-table">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'Guest Name' | t }}</th>
+              <th scope="col">{{ 'Gift' | t }}</th>
+              <th scope="col">{{ 'Received' | t }}</th>
+              <th scope="col">{{ 'Recorded by' | t }}</th>
+              <th scope="col">{{ 'Thank-you' | t }}</th>
+              <th scope="col" class="gift-actions-heading">
+                <span class="visually-hidden">{{ 'Actions' | t }}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (gift of filteredGifts(); track gift.id) {
+              <tr>
+                <td>
+                  <div class="gift-giver-cell">
+                    <span class="gift-avatar" aria-hidden="true">
+                      {{ gift.giverName.slice(0, 1).toUpperCase() }}
+                    </span>
+                    <span class="gift-giver-info">
+                      <strong>{{ gift.giverName }}</strong>
+                      <small>{{ guestGroup(gift) || ('Not on the guest list' | t) }}</small>
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  @if (gift.type === 'Cash') {
+                    <strong class="gift-amount">{{ gift.amount | money: gift.currency : 'native' }}</strong>
+                    <small>{{ gift.currency }}</small>
+                  } @else {
+                    <strong class="gift-item">{{ gift.item }}</strong>
+                    <small>{{ 'Gift' | t }}</small>
+                  }
+                </td>
+                <td class="nowrap">{{ gift.receivedAt + 'T12:00:00Z' | date: 'd MMM y' : '+0000' }}</td>
+                <td>{{ gift.recordedBy || '—' }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="thanks-toggle"
+                    [class.sent]="gift.thanked"
+                    [attr.aria-pressed]="gift.thanked"
+                    [attr.aria-label]="
+                      (gift.thanked ? 'Mark thank-you as not sent for ' : 'Mark thank-you sent for ') +
+                      gift.giverName
+                    "
+                    (click)="toggleThanked(gift)"
+                  >
+                    {{ (gift.thanked ? '✓ Sent' : 'Not yet') | t }}
+                  </button>
+                </td>
+                <td class="gift-actions-cell">
+                  <button
+                    class="gift-edit-button"
+                    type="button"
+                    [attr.aria-label]="'Edit gift from ' + gift.giverName"
+                    [title]="'Edit' | t"
+                    (click)="openForm(gift)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="empty-state" colspan="6">
+                  {{
+                    (gifts().length
+                      ? 'No gifts match your filters.'
+                      : 'No gifts recorded yet. Record the first envelope as it arrives.'
+                    ) | t
+                  }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="gift-table-footer">
+        <span>{{ 'Total' | t }}: <strong>{{ filteredGifts().length }} {{ 'records' | t }}</strong></span>
+        <span>{{ filter() === 'all' && !searchTerm() ? gifts().length : filteredGifts().length }} {{ 'shown' | t }}</span>
+      </footer>
+    </div>
+  </section>
+</main>
 
 @if (isFormOpen()) {
   <app-gift-form-dialog [gift]="editingGift()" (closed)="isFormOpen.set(false)" />

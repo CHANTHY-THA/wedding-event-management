@@ -46,20 +46,24 @@ export class DashboardLayout {
   private readonly toast = inject(ToastService);
   private readonly locale = inject(LocaleService);
 
-  protected readonly coupleNames = this.data.coupleNames;
+  protected get coupleNames(): string {
+    return this.data.coupleNames;
+  }
   protected readonly session = this.auth.session;
   protected readonly roleLabel = this.auth.roleLabel;
   protected readonly language = this.locale.language;
   protected readonly currency = this.locale.currency;
+
   private readonly navItems: NavItem[] = [
-    { label: 'Dashboard', page: 'dashboard', icon: ICONS.dashboard, path: '/' },
-    {
-      label: 'Schedule',
-      page: 'schedule',
-      icon: ICONS.schedule,
-      path: '/schedule',
-      count: computed(() => this.data.schedule().length),
-    },
+    { label: 'Events', page: 'events', icon: ICONS.dashboard, path: '/events' },
+    { label: 'Dashboard', page: 'dashboard', icon: ICONS.dashboard, path: '/dashboard' },
+    // {
+    //   label: 'Schedule',
+    //   page: 'schedule',
+    //   icon: ICONS.schedule,
+    //   path: '/schedule',
+    //   count: computed(() => this.data.schedule().length),
+    // },
     {
       label: 'Guests',
       page: 'guests',
@@ -74,7 +78,7 @@ export class DashboardLayout {
       path: '/invitations',
     },
     { label: 'Templates', page: 'templates', icon: ICONS.templates, path: '/templates' },
-    { label: 'Seating', page: 'seating', icon: ICONS.seating, path: '/seating' },
+    // { label: 'Seating', page: 'seating', icon: ICONS.seating, path: '/seating' },
     {
       label: 'Photo gallery',
       page: 'gallery',
@@ -82,7 +86,7 @@ export class DashboardLayout {
       path: '/gallery',
       count: computed(() => this.data.sharedPhotos().length),
     },
-    { label: 'Check-in', page: 'checkIn', icon: ICONS.checkIn, path: '/check-in' },
+    // { label: 'Check-in', page: 'checkIn', icon: ICONS.checkIn, path: '/check-in' },
     {
       label: 'Gifts',
       page: 'gifts',
@@ -97,20 +101,20 @@ export class DashboardLayout {
       path: '/budget',
       count: computed(() => this.data.expenses().length),
     },
-    {
-      label: 'Vendors',
-      page: 'vendors',
-      icon: ICONS.vendors,
-      path: '/vendors',
-      count: computed(() => this.data.vendors().length),
-    },
-    {
-      label: 'Tasks',
-      page: 'tasks',
-      icon: ICONS.tasks,
-      path: '/tasks',
-      count: this.data.openTaskCount,
-    },
+    // {
+    //   label: 'Vendors',
+    //   page: 'vendors',
+    //   icon: ICONS.vendors,
+    //   path: '/vendors',
+    //   count: computed(() => this.data.vendors().length),
+    // },
+    // {
+    //   label: 'Tasks',
+    //   page: 'tasks',
+    //   icon: ICONS.tasks,
+    //   path: '/tasks',
+    //   count: this.data.openTaskCount,
+    // },
   ];
   protected readonly visibleNavItems = computed(() => {
     const role = this.auth.role();

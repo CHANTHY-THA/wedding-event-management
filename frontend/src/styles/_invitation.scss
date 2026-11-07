@@ -12,6 +12,10 @@
   @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 90'><g fill='none' stroke='%23d9b46a' stroke-linecap='round' transform='#{$transform}'><path stroke-width='2.5' d='M8 78V26Q8 8 26 8h52'/><path stroke-width='1.2' d='M16 66V30q0-14 14-14h36'/><path stroke-width='1.6' d='M24 44c9 0 16-7 16-16M44 24c0 9-7 16-16 16'/><circle cx='28' cy='28' r='3' fill='%23d9b46a'/></g></svg>");
 }
 
+@function watercolor-spray($transform) {
+  @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 220'><g transform='#{$transform}' fill='none' stroke='%238d7090' stroke-linecap='round' stroke-width='2'><path d='M10 215Q40 150 85 105T150 20M38 160Q20 145 22 125M63 130Q85 140 102 132M110 72Q92 54 94 35'/><path d='M24 124q-22-12-17-34 18 2 17 34zM101 132q14-26 39-21-5 23-39 21zM94 36q-15-17-4-34 18 8 4 34z'/></g><g fill='%23f0d7e1' stroke='%238d7090' stroke-width='1.5'><path d='M34 75q-15-20 1-30 12 13-1 30zm0 0q20-15 29 1-13 12-29-1zm0 0q15 20-1 30-12-13 1-30zm0 0q-20 15-29-1 13-12 29 1z'/><circle cx='34' cy='75' r='4' fill='%23d6b17c'/><path d='M143 177q-13-17 1-27 11 11-1 27zm0 0q18-13 26 1-11 11-26-1zm0 0q13 18-1 26-11-11 1-26zm0 0q-18 13-26-1 11-11 26 1z'/><circle cx='143' cy='177' r='4' fill='%23d6b17c'/></g></svg>");
+}
+
 app-guest-invitation-page {
   & {
     --gold: #c5a065;
@@ -476,6 +480,77 @@ app-guest-invitation-page {
   .lang-km .countdown-item span {
     font-family: 'Moulpali', 'Battambang', serif;
     font-weight: 400;
+  }
+
+  .wedding-calendar {
+    width: min(460px, 100%);
+    margin: 34px auto 0;
+    padding: clamp(20px, 5vw, 32px);
+    border: 1px solid rgb(197 160 101 / 32%);
+    border-radius: 20px;
+    background: rgb(255 255 255 / 72%);
+    box-shadow: 0 14px 36px rgb(75 81 96 / 10%);
+  }
+
+  .wedding-calendar h3 {
+    margin: 0 0 20px;
+    color: #a9813f;
+    font-family: var(--display);
+    font-size: clamp(20px, 3vw, 26px);
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .wedding-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+    text-align: center;
+  }
+
+  .wedding-calendar-weekday,
+  .wedding-calendar-day {
+    display: grid;
+    min-width: 0;
+    min-height: 38px;
+    place-items: center;
+  }
+
+  .wedding-calendar-weekday {
+    color: #a9813f;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .wedding-calendar-day {
+    position: relative;
+    color: #4a4650;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wedding-calendar-day.is-empty {
+    visibility: hidden;
+  }
+
+  .wedding-calendar-day.is-wedding-day {
+    color: #b63848;
+    font-weight: 800;
+  }
+
+  .wedding-calendar-day.is-wedding-day::before {
+    position: absolute;
+    z-index: 0;
+    color: #d65b69;
+    content: '♡';
+    font-family: Arial, sans-serif;
+    font-size: 38px;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .wedding-calendar-day.is-wedding-day {
+    isolation: isolate;
   }
 
   // Photo gallery: portrait photos two to a row, landscape photos across the full row.
@@ -1531,6 +1606,534 @@ app-guest-invitation-page {
       .invite-hero::before {
         inset: 18px;
       }
+    }
+  }
+
+  // Blush watercolor: a narrow, scrollable invitation sheet with soft floral corners and gold
+  // typography, designed to feel like a digital Khmer wedding card.
+  &:has([data-template='watercolor']) {
+    background:
+      radial-gradient(ellipse at 12% 18%, rgb(245 217 225 / 48%), transparent 34%),
+      radial-gradient(ellipse at 88% 48%, rgb(249 231 204 / 56%), transparent 38%),
+      radial-gradient(ellipse at 10% 86%, rgb(244 216 226 / 42%), transparent 34%),
+      #fbf7f1;
+    color: #594632;
+  }
+
+  [data-template='watercolor'] {
+    --gold: #c99f5e;
+    --gold-deep: #a77a3c;
+    --gold-light: #ead4ac;
+    --gold-gradient: linear-gradient(135deg, #bc9252, #dfc28b 55%, #b68746);
+    --gold-text: linear-gradient(180deg, #d8ad67, #a8752e);
+    --paper: rgb(255 255 255 / 84%);
+    --hero-ink: #594632;
+
+    width: min(100% - 24px, 520px);
+    min-height: 100vh;
+    padding: 10px 0 110px;
+    background:
+      watercolor-spray('') top left / 150px auto no-repeat,
+      watercolor-spray('matrix(-1 0 0 1 180 0)') top right / 150px auto no-repeat,
+      watercolor-spray('matrix(1 0 0 -1 0 220)') bottom left / 160px auto no-repeat,
+      watercolor-spray('matrix(-1 0 0 -1 180 220)') bottom right / 160px auto no-repeat,
+      linear-gradient(180deg, #fffdfd, #fffdfd);
+    box-shadow: 0 0 60px rgb(118 83 63 / 8%);
+    color: #594632;
+  }
+
+  [data-template='watercolor'] .petals span {
+    background: linear-gradient(135deg, #efb6ca, #d892ad);
+  }
+
+  [data-template='watercolor'] .invite-toolbar {
+    position: absolute;
+    z-index: 4;
+    top: 18px;
+    left: 18px;
+    margin: 0;
+  }
+
+  [data-template='watercolor'] .invite-hero {
+    position: relative;
+    display: grid;
+    min-height: min(740px, calc(100svh - 20px));
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    align-content: center;
+    justify-items: center;
+    gap: 18px;
+    padding: 66px 26px 52px;
+    border-radius: 0;
+    background:
+      watercolor-spray('') top left / 135px auto no-repeat,
+      watercolor-spray('matrix(-1 0 0 1 180 0)') top right / 135px auto no-repeat,
+      radial-gradient(ellipse at 10% 12%, rgb(245 212 224 / 72%), transparent 42%),
+      radial-gradient(ellipse at 90% 86%, rgb(249 225 205 / 55%), transparent 45%),
+      #fffdfd;
+    box-shadow: none;
+    text-align: center;
+  }
+
+  [data-template='watercolor'] .invite-hero::before {
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgb(201 159 94 / 36%);
+    content: '';
+    pointer-events: none;
+  }
+
+  [data-template='watercolor'] .hero-frame {
+    display: contents;
+  }
+
+  [data-template='watercolor'] .hero-top {
+    order: 1;
+  }
+
+  [data-template='watercolor'] .hero-media {
+    order: 2;
+    width: min(68%, 250px);
+    aspect-ratio: 4 / 3;
+    border: 7px solid #fff;
+    outline: 1px solid rgb(201 159 94 / 70%);
+    box-shadow: 0 14px 28px rgb(86 61 46 / 18%);
+    transform: rotate(-2deg);
+  }
+
+  [data-template='watercolor'] .hero-media::after {
+    display: none;
+  }
+
+  [data-template='watercolor'] .hero-bottom {
+    order: 3;
+  }
+
+  [data-template='watercolor'] .hero-top::before {
+    display: block;
+    width: 92px;
+    height: 118px;
+    margin: 0 auto 10px;
+    border: 3px double #d5b273;
+    border-radius: 48% 48% 44% 44%;
+    color: #bf985c;
+    content: '❦';
+    font-family: Georgia, serif;
+    font-size: 46px;
+    line-height: 112px;
+    text-shadow: 0 3px 5px rgb(133 98 49 / 20%);
+  }
+
+  [data-template='watercolor'] .hero-title,
+  [data-template='watercolor'] .section-title {
+    background: var(--gold-text);
+    background-clip: text;
+  }
+
+  [data-template='watercolor'] .hero-script,
+  [data-template='watercolor'] .hero-save,
+  [data-template='watercolor'] .hero-numeric,
+  [data-template='watercolor'] .hero-place svg {
+    color: var(--gold-deep);
+  }
+
+  [data-template='watercolor'] .hero-names {
+    color: #5e4931;
+  }
+
+  [data-template='watercolor'] .hero-numeric::before,
+  [data-template='watercolor'] .hero-numeric::after {
+    background: var(--gold-light);
+  }
+
+  [data-template='watercolor'] .invite-paper {
+    border-radius: 0;
+    background:
+      watercolor-spray('matrix(1 0 0 -1 0 220)') bottom left / 155px auto no-repeat,
+      watercolor-spray('matrix(-1 0 0 -1 180 220)') bottom right / 155px auto no-repeat,
+      radial-gradient(ellipse at 8% 10%, rgb(246 219 228 / 60%), transparent 35%),
+      radial-gradient(ellipse at 94% 46%, rgb(250 229 211 / 46%), transparent 38%),
+      #fffdfd;
+    box-shadow: none;
+  }
+
+  [data-template='watercolor'] .invite-paper .invite-section {
+    padding: 48px 26px;
+  }
+
+  [data-template='watercolor'] .section-title {
+    font-size: clamp(24px, 6vw, 32px);
+  }
+
+  [data-template='watercolor'] .invite-message {
+    color: #694f36;
+    font-size: 17px;
+    line-height: 1.9;
+  }
+
+  [data-template='watercolor'].lang-km .invite-message {
+    color: #694f36;
+    font-size: 17px;
+  }
+
+  [data-template='watercolor'] .countdown-badge {
+    margin-top: 20px;
+  }
+
+  [data-template='watercolor'] .countdown-item {
+    gap: 6px;
+  }
+
+  [data-template='watercolor'] .countdown-tile {
+    border: 1px solid #dfc28b;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #dfc28b, #b88d50);
+  }
+
+  [data-template='watercolor'] .invitation-gallery figure {
+    border: 7px solid #fff;
+    border-radius: 4px;
+    box-shadow: 0 10px 20px rgb(86 61 46 / 18%);
+    transform: rotate(-1deg);
+  }
+
+  [data-template='watercolor'] .invitation-gallery figure:nth-child(even) {
+    transform: rotate(1.5deg);
+  }
+
+  [data-template='watercolor'] .event-card {
+    border: 1px solid #e8d5b5;
+    border-radius: 20px;
+    background: rgb(255 255 255 / 82%);
+    box-shadow: 0 12px 28px rgb(105 76 48 / 10%);
+    color: #594632;
+  }
+
+  [data-template='watercolor'] .event-photo {
+    display: none;
+  }
+
+  [data-template='watercolor'] .event-card::before {
+    display: none;
+  }
+
+  [data-template='watercolor'] .event-row h3,
+  [data-template='watercolor'] .timeline-item time,
+  [data-template='watercolor'] .timeline-item strong {
+    color: var(--gold-deep);
+  }
+
+  [data-template='watercolor'] .event-row p {
+    text-shadow: none;
+  }
+
+  [data-template='watercolor'] .gold-tile {
+    border: 1px solid #e4c990;
+    border-radius: 50%;
+    background: #fffaf0;
+    box-shadow: none;
+    color: var(--gold-deep);
+  }
+
+  [data-template='watercolor'] .gold-button {
+    background: linear-gradient(135deg, #b88d50, #dfc28b, #b88d50);
+    color: #fff;
+  }
+
+  [data-template='watercolor'] .rsvp-card {
+    border-color: #e8d5b5;
+    border-radius: 18px;
+    background: #fff;
+  }
+
+  [data-template='watercolor'] .gift-card {
+    border: 1px solid #e8d5b5;
+    border-radius: 20px;
+    background: #fffaf2;
+    box-shadow: 0 12px 28px rgb(105 76 48 / 10%);
+    color: #594632;
+  }
+
+  [data-template='watercolor'] .gift-card::before {
+    display: none;
+  }
+
+  [data-template='watercolor'] .gift-tabs button {
+    border-color: #e8d5b5;
+    background: #fff;
+    color: var(--gold-deep);
+  }
+
+  [data-template='watercolor'] .gift-tabs button.selected {
+    background: var(--gold-gradient);
+    color: #fff;
+  }
+
+  [data-template='watercolor'] .gift-hint,
+  [data-template='watercolor'] .gift-khqr {
+    color: var(--gold-deep);
+    text-shadow: none;
+  }
+
+  [data-template='watercolor'] .gift-qr {
+    border-color: #eadfcf;
+    background: #fff;
+    backdrop-filter: none;
+  }
+
+  [data-template='watercolor'] .invite-signoff {
+    color: var(--gold-deep);
+  }
+
+  [data-template='watercolor'] .watercolor-nav {
+    position: fixed;
+    z-index: 5;
+    right: 50%;
+    bottom: max(14px, env(safe-area-inset-bottom, 0px));
+    display: flex;
+    width: min(360px, calc(100vw - 32px));
+    justify-content: space-around;
+    padding: 8px;
+    border: 1px solid rgb(224 210 191 / 80%);
+    border-radius: 999px;
+    background: rgb(255 255 255 / 94%);
+    box-shadow: 0 8px 26px rgb(90 65 45 / 18%);
+    transform: translateX(50%);
+    backdrop-filter: blur(12px);
+  }
+
+  [data-template='watercolor'] .watercolor-nav a {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--gold-deep);
+  }
+
+  [data-template='watercolor'] .watercolor-nav a:focus-visible {
+    outline: 2px solid var(--gold-deep);
+    outline-offset: 2px;
+  }
+
+  [data-template='watercolor'] .watercolor-nav svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+  }
+
+  [data-template='watercolor'] .music-button {
+    bottom: max(88px, calc(74px + env(safe-area-inset-bottom, 0px)));
+    width: 48px;
+    height: 48px;
+  }
+
+  [data-template='watercolor'] .opening {
+    background:
+      radial-gradient(ellipse at 12% 18%, rgb(245 217 225 / 56%), transparent 38%),
+      radial-gradient(ellipse at 88% 48%, rgb(249 231 204 / 56%), transparent 38%),
+      #fbf7f1;
+  }
+
+  [data-template='watercolor'] .opening-cover {
+    width: min(100%, 520px);
+    border-radius: 0;
+  }
+
+  [data-template='watercolor'] .watercolor-opening {
+    position: relative;
+    display: flex;
+    width: min(100%, 484px);
+    min-height: min(780px, calc(100svh - 32px));
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    overflow: hidden;
+    padding: 82px 34px 60px;
+    background:
+      watercolor-spray('') top left / 145px auto no-repeat,
+      watercolor-spray('matrix(-1 0 0 1 180 0)') top right / 145px auto no-repeat,
+      watercolor-spray('matrix(1 0 0 -1 0 220)') bottom left / 150px auto no-repeat,
+      watercolor-spray('matrix(-1 0 0 -1 180 220)') bottom right / 150px auto no-repeat,
+      radial-gradient(ellipse at 2% 12%, rgb(245 214 224 / 80%), transparent 36%),
+      radial-gradient(ellipse at 98% 90%, rgb(248 222 202 / 62%), transparent 40%),
+      #fffdfd;
+    box-shadow: 0 18px 48px rgb(102 74 52 / 10%);
+    color: #594632;
+    text-align: center;
+  }
+
+  [data-template='watercolor'] .watercolor-opening::before {
+    position: absolute;
+    inset: 14px;
+    border: 1px solid rgb(201 159 94 / 26%);
+    content: '';
+    pointer-events: none;
+  }
+
+  [data-template='watercolor'] .watercolor-language {
+    position: absolute;
+    z-index: 1;
+    top: 20px;
+    left: 18px;
+  }
+
+  [data-template='watercolor'] .watercolor-emblem {
+    display: grid;
+    width: 124px;
+    height: 164px;
+    place-items: center;
+    border: 3px double #d4b16f;
+    border-radius: 48% 48% 44% 44%;
+    color: #c39b58;
+    font-family: Georgia, serif;
+    font-size: 80px;
+    text-shadow: 0 4px 8px rgb(133 98 49 / 22%);
+  }
+
+  [data-template='watercolor'] .watercolor-opening-title {
+    margin: 0;
+    padding: 0.25em 0.2em;
+    background: var(--gold-text);
+    background-clip: text;
+    color: transparent;
+    font-family: 'Moulpali', 'Moul', serif;
+    font-size: clamp(24px, 5vw, 34px);
+    font-weight: 400;
+    line-height: 1.65;
+  }
+
+  [data-template='watercolor'] .watercolor-opening-subtitle {
+    margin: 4px 0 0;
+    color: var(--gold-deep);
+    font-family: 'Moulpali', 'Moul', serif;
+    font-size: 19px;
+  }
+
+  [data-template='watercolor'] .watercolor-name-plaque {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-height: 100px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 15px 20px;
+    border: 3px double #d2a864;
+    border-radius: 10px;
+    background: rgb(255 255 255 / 72%);
+    box-shadow: inset 0 0 0 5px rgb(210 168 100 / 8%);
+    color: #594632;
+    font-family: 'Moul', 'Battambang', serif;
+    font-size: 19px;
+    font-weight: 400;
+    line-height: 1.55;
+  }
+
+  [data-template='watercolor'] .watercolor-name-ampersand {
+    color: var(--gold-deep);
+    font-family: Georgia, serif;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  [data-template='watercolor'] .watercolor-opening-guest {
+    margin: 0;
+    color: #8d765b;
+    font-size: 14px;
+  }
+
+  [data-template='watercolor'] .watercolor-open-button {
+    min-width: 250px;
+    min-height: 50px;
+    padding: 8px 26px;
+    border: 2px solid #c29a5c;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #c99f64, #e1c18b, #bd9254);
+    box-shadow: 0 8px 18px rgb(101 72 39 / 30%);
+    color: #fff;
+    cursor: pointer;
+    font-family: 'Moulpali', 'Moul', serif;
+    font-size: 17px;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  [data-template='watercolor'] .watercolor-open-button:hover {
+    box-shadow: 0 11px 22px rgb(101 72 39 / 34%);
+    transform: translateY(-2px);
+  }
+
+  [data-template='watercolor'] .watercolor-open-button:focus-visible {
+    outline: 3px solid #8e6938;
+    outline-offset: 3px;
+  }
+
+  [data-template='watercolor'] .watercolor-opening-hint {
+    margin: -8px 0 0;
+    color: #8d765b;
+    font-size: 12px;
+  }
+
+  [data-template='watercolor'].lang-km .watercolor-opening-title,
+  [data-template='watercolor'].lang-km .watercolor-opening-subtitle,
+  [data-template='watercolor'].lang-km .watercolor-open-button {
+    font-family: 'Moulpali', 'Moul', serif;
+  }
+
+  [data-template='watercolor'] .opening .hero-bottom {
+    order: 4;
+  }
+
+  [data-template='watercolor'] .opening .hero-media {
+    order: 2;
+  }
+
+  [data-template='watercolor'] .opening-guest {
+    color: #594632;
+  }
+
+  @media (max-width: 720px) {
+    [data-template='watercolor'] {
+      width: 100%;
+      padding-top: 8px;
+    }
+
+    [data-template='watercolor'] .invite-hero {
+      min-height: min(740px, calc(100svh - 8px));
+      padding: 66px 18px 38px;
+    }
+
+    [data-template='watercolor'] .invite-paper .invite-section {
+      padding: 40px 18px;
+    }
+
+    [data-template='watercolor'] .event-card {
+      padding: 18px;
+    }
+
+    [data-template='watercolor'] .event-details {
+      gap: 20px;
+      padding: 0;
+    }
+
+    [data-template='watercolor'] .opening {
+      padding: 0;
+    }
+
+    [data-template='watercolor'] .watercolor-opening {
+      width: 100%;
+      min-height: 100svh;
+      padding: 82px 28px 54px;
+    }
+
+    [data-template='watercolor'] .watercolor-name-plaque {
+      font-size: 17px;
     }
   }
 

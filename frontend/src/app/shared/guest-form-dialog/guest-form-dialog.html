@@ -7,9 +7,16 @@
     (click)="$event.stopPropagation()"
   >
     <button class="modal-close" type="button" aria-label="Close" (click)="closed.emit()">×</button>
-    <span class="eyebrow">{{ 'ADD TO YOUR CELEBRATION' | t }}</span>
-    <h2 id="modal-panel-title">{{ 'Add a guest' | t }}</h2>
-    <p class="modal-copy">{{ 'Invite someone special to celebrate with you.' | t }}</p>
+    <span class="eyebrow">{{ (isEditing() ? 'EDIT GUEST' : 'ADD TO YOUR CELEBRATION') | t }}</span>
+    <h2 id="modal-panel-title">{{ (isEditing() ? 'Edit guest' : 'Add a guest') | t }}</h2>
+    <p class="modal-copy">
+      {{
+        (isEditing()
+          ? 'Update this guest and invitation details.'
+          : 'Invite someone special to celebrate with you.'
+        ) | t
+      }}
+    </p>
     <form (ngSubmit)="submit()">
       <label class="form-label" for="guest-name">{{ 'Guest or party name' | t }}</label>
       <input
@@ -95,6 +102,17 @@
           />
         </div>
         <div>
+          <label class="form-label" for="guest-nickname">{{ 'Nickname Or English Name' | t }}</label
+          ><input
+            id="guest-nickname"
+            class="form-input"
+            type="text"
+            [value]="draft().nickname ?? ''"
+            (input)="updateField('nickname', $event)"
+            maxlength="80"
+          />
+        </div>
+        <div>
           <label class="form-label" for="guest-email">{{ 'Email' | t }}</label
           ><input
             id="guest-email"
@@ -124,6 +142,24 @@
         (input)="updateField('tags', $event)"
         placeholder="VIP, dietary needs, transport..."
       />
+      <label class="form-label" for="guest-wish">{{ 'Wish' | t }}</label>
+      <input
+        id="guest-wish"
+        class="form-input"
+        type="text"
+        [value]="draft().wish ?? ''"
+        (input)="updateField('wish', $event)"
+        maxlength="240"
+      />
+      <label class="form-label" for="guest-note">{{ 'Note' | t }}</label>
+      <input
+        id="guest-note"
+        class="form-input"
+        type="text"
+        [value]="draft().note ?? ''"
+        (input)="updateField('note', $event)"
+        maxlength="240"
+      />
       @if (draft().plusOnes + draft().children > draft().partySize) {
         <p class="form-error" role="alert">
           {{ "Plus-ones and children can't exceed the invited guest count." | t }}
@@ -142,7 +178,7 @@
             draft().plusOnes + draft().children > draft().partySize
           "
         >
-          {{ 'Add guest' | t }}
+          {{ (isEditing() ? 'Save changes' : 'Add guest') | t }}
         </button>
       </div>
     </form>

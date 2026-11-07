@@ -12,12 +12,15 @@ export interface Guest {
   children: number;
   side: 'Bride' | 'Groom' | 'Shared';
   relationship: string;
+  nickname?: string;
   email: string;
   phone: string;
   tags: string[];
   rsvp: RsvpStatus;
   checkedIn: boolean;
   mealChoice: string;
+  wish?: string;
+  note?: string;
   /** ISO timestamp of the latest RSVP response, if any. */
   respondedAt?: string;
   /** Seating table the party sits at, or null while unseated. */
@@ -32,9 +35,12 @@ export interface NewGuest {
   children: number;
   side: Guest['side'];
   relationship: string;
+  nickname?: string;
   email: string;
   phone: string;
   tags: string[];
+  wish?: string;
+  note?: string;
 }
 
 export interface GuestRsvp {
@@ -83,6 +89,34 @@ export interface WeddingDetails {
   venue: string;
   city: string;
   rsvpDeadline: string;
+}
+
+export interface WeddingEventRecord {
+  id: string;
+  name: string;
+  type: string;
+  time: string;
+  details: WeddingDetails;
+  coverPhotoUrl: string;
+  venueAddress: string;
+  mapUrl: string;
+  archived: boolean;
+  managers: string[];
+}
+
+export interface NewWeddingEvent {
+  name: string;
+  type: string;
+  partnerOne: string;
+  partnerTwo: string;
+  date: string;
+  time: string;
+  venue: string;
+  city: string;
+  venueAddress: string;
+  mapUrl: string;
+  coverPhotoUrl: string;
+  rsvpDeadline?: string;
 }
 
 export interface BudgetCategory {

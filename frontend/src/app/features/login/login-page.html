@@ -1,95 +1,115 @@
-<main class="login-shell">
-  <section class="login-welcome" aria-hidden="true">
-    <div class="login-brand">
-      <svg class="brand-mark" viewBox="0 0 26 18">
-        <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.6" />
-        <circle cx="17" cy="9" r="7" fill="none" stroke="currentColor" stroke-width="1.6" />
+<main class="login-page">
+  <section class="login-card" aria-labelledby="login-title">
+    <a class="login-brand" routerLink="/" aria-label="PlanEssential">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+        <path
+          d="M24 41S7 31.7 7 19.8a9.4 9.4 0 0 1 17-5.6 9.4 9.4 0 0 1 17 5.6C41 31.7 24 41 24 41Z"
+          fill="currentColor"
+        />
+        <path
+          d="m13 8-3-3m25 2-3 3M5 22l-4 1m42-1 4 1M24 5V1"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-width="2"
+        />
       </svg>
-      Vows
-    </div>
-    <div class="login-welcome-copy">
-      <p class="login-welcome-eyebrow">{{ 'The wedding of' | t }}</p>
-      <p class="login-couple">{{ coupleNames }}</p>
-      <p class="login-date">
-        {{ details.date + 'T12:00:00Z' | date: 'd MMMM y' : '+0000' }} · {{ details.venue }}
-      </p>
-    </div>
-    <svg class="login-rings" viewBox="0 0 260 180">
-      <circle cx="95" cy="90" r="70" />
-      <circle cx="165" cy="90" r="70" />
-    </svg>
-  </section>
+      <span>PlanEssential</span>
+    </a>
 
-  <section class="login-panel" aria-labelledby="login-title">
-    <app-language-toggle class="login-lang" />
-    <div class="login-card">
-      <span class="eyebrow">{{ 'Planner access' | t }}</span>
-      <h1 id="login-title">{{ 'Welcome back' | t }}</h1>
-      <p class="login-copy">
-        {{ 'Sign in to manage guests, the schedule, budget and check-in.' | t }}
-      </p>
+    <h1 id="login-title">{{ 'Login Account' | t }}</h1>
+    <p class="login-copy">{{ 'Secure and easy access to your account.' | t }}</p>
 
-      <form (ngSubmit)="submit()" novalidate>
-        <label class="form-label" for="login-email">{{ 'Email' | t }}</label>
+    <div class="social-login-options">
+      <!-- <button class="social-login-button telegram-login" type="button" (click)="notifyProvider('Telegram')">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="currentColor" />
+          <path d="m6.3 11.6 10-3.9c.5-.2 1 .1.8.8l-1.7 8c-.1.6-.5.7-1 .4l-2.8-2.1-1.4 1.3c-.2.2-.4.3-.6.3l.2-3 5.5-5c.2-.2-.1-.3-.3-.2l-6.8 4.3-2.9-.9c-.6-.2-.6-.6.9-1.1Z" fill="#3988c9" />
+        </svg>
+        {{ 'Continue with Telegram' | t }}
+      </button> -->
+      <button class="social-login-button google-login" type="button" (click)="notifyProvider('Google')">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285f4" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.8 3-4.4 3-7.3Z" />
+          <path fill="#34a853" d="M12 22c2.7 0 4.9-.9 6.6-2.5l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22Z" />
+          <path fill="#fbbc05" d="M6.4 13.9a6 6 0 0 1 0-3.8V7.5H3.1a10 10 0 0 0 0 9Z" />
+          <path fill="#ea4335" d="M12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.9A9.6 9.6 0 0 0 12 2a10 10 0 0 0-8.9 5.5l3.3 2.6C7.2 7.8 9.4 6 12 6Z" />
+        </svg>
+        {{ 'Continue with Google' | t }}
+      </button>
+    </div>
+
+    <div class="login-divider"><span>{{ 'Or' | t }}</span></div>
+
+    <form class="login-fields" (ngSubmit)="submit()" novalidate>
+      <label class="form-label" for="login-email">{{ 'Phone or Email' | t }}</label>
+      <input
+        id="login-email"
+        class="form-input"
+        type="text"
+        name="email"
+        autocomplete="username"
+        [placeholder]="'Please enter phone number or email' | t"
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+        required
+      />
+
+      <label class="form-label password-label" for="login-password">{{ 'Password' | t }}</label>
+      <div class="password-field">
         <input
-          id="login-email"
+          id="login-password"
           class="form-input"
-          type="email"
-          name="email"
-          autocomplete="username"
-          placeholder="you@example.com"
-          [ngModel]="email()"
-          (ngModelChange)="email.set($event)"
+          [type]="showPassword() ? 'text' : 'password'"
+          name="password"
+          [placeholder]="'Enter password' | t"
+          autocomplete="current-password"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
           required
         />
-        <label class="form-label" for="login-password">{{ 'Password' | t }}</label>
-        <div class="password-field">
-          <input
-            id="login-password"
-            class="form-input"
-            [type]="showPassword() ? 'text' : 'password'"
-            name="password"
-            autocomplete="current-password"
-            [ngModel]="password()"
-            (ngModelChange)="password.set($event)"
-            required
-          />
-          <button
-            class="password-toggle"
-            type="button"
-            [attr.aria-pressed]="showPassword()"
-            (click)="showPassword.set(!showPassword())"
-          >
-            {{ (showPassword() ? 'Hide' : 'Show') | t }}
-          </button>
-        </div>
-        @if (errorMessage()) {
-          <p class="form-error" role="alert">{{ errorMessage() | t }}</p>
-        }
-        <button class="button button-primary login-submit" type="submit" [disabled]="submitting()">
-          @if (submitting()) {
-            <span class="spinner" aria-hidden="true"></span> {{ 'Signing in…' | t }}
+        <button
+          class="password-toggle"
+          type="button"
+          [attr.aria-label]="(showPassword() ? 'Hide password' : 'Show password') | t"
+          [attr.aria-pressed]="showPassword()"
+          (click)="showPassword.set(!showPassword())"
+        >
+          @if (showPassword()) {
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.7 10.7 0 0 1 12 5c5.5 0 9 7 9 7a15 15 0 0 1-3.2 4.1M6.2 6.2C3.9 7.8 3 12 3 12s3.5 7 9 7a9.8 9.8 0 0 0 3-.5" />
+            </svg>
           } @else {
-            {{ 'Sign in' | t }}
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M2.5 12s3.4-7 9.5-7 9.5 7 9.5 7-3.4 7-9.5 7-9.5-7-9.5-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
           }
         </button>
-      </form>
+      </div>
 
-      <section class="demo-accounts" aria-labelledby="demo-title">
-        <h2 id="demo-title">{{ 'Try a demo account' | t }}</h2>
-        <div class="demo-grid">
-          @for (account of demoAccounts; track account.email) {
-            <button
-              type="button"
-              class="demo-account"
-              (click)="useDemoAccount(account.email, account.password)"
-            >
-              <strong>{{ account.roleLabel | t }}</strong>
-              <small>{{ account.email }}</small>
-            </button>
-          }
-        </div>
-      </section>
-    </div>
+      @if (errorMessage()) {
+        <p class="form-error" role="alert">{{ errorMessage() | t }}</p>
+      }
+
+      <button class="forgot-password" type="button" (click)="notifyUnavailable('Password recovery')">
+        {{ 'Forgot your password?' | t }}
+      </button>
+
+      <button class="login-submit" type="submit" [disabled]="submitting()">
+        @if (submitting()) {
+          <span class="spinner" aria-hidden="true"></span> {{ 'Login…' | t }}
+        } @else {
+          {{ 'Login' | t }}
+        }
+      </button>
+    </form>
+
+    <p class="signup-prompt">
+      {{ "Don't have an account?" | t }}
+      <button type="button" (click)="notifyUnavailable('Account registration')">
+        {{ 'Sign up' | t }}
+      </button>
+    </p>
   </section>
 </main>

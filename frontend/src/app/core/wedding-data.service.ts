@@ -28,14 +28,32 @@ import {
   NewGuest,
   NewScheduleItem,
   NewVendor,
+  NewWeddingEvent,
   NewWeddingTask,
   ScheduleItem,
   SeatingTable,
   SharedPhoto,
   Vendor,
+  WeddingDetails,
+  WeddingEventRecord,
   WeddingPhoto,
   WeddingTask,
 } from './wedding.models';
+
+interface WeddingWorkspace {
+  guests: Guest[];
+  schedule: ScheduleItem[];
+  photos: WeddingPhoto[];
+  invitation: InvitationSettings;
+  budgetTotal: number;
+  expenses: BudgetExpense[];
+  vendors: Vendor[];
+  tables: SeatingTable[];
+  gifts: GiftRecord[];
+  galleryOpen: boolean;
+  sharedPhotos: SharedPhoto[];
+  tasks: WeddingTask[];
+}
 
 /** Next free numeric id for a list of records. */
 function nextId(records: { id: number }[]): number {
@@ -48,6 +66,26 @@ export const MAX_SHARED_UPLOAD = 10;
 
 @Injectable({ providedIn: 'root' })
 export class WeddingDataService {
+  readonly events = signal<WeddingEventRecord[]>([
+    {
+      id: 'seed-wedding',
+      name: `${WEDDING_DETAILS.partnerOne} & ${WEDDING_DETAILS.partnerTwo}`,
+      type: 'Wedding',
+      time: '17:00',
+      details: structuredClone(WEDDING_DETAILS),
+      coverPhotoUrl: '/images/cover.jpg',
+      venueAddress: WEDDING_DETAILS.venue,
+      mapUrl: '',
+      archived: false,
+      managers: [],
+    },
+  ]);
+  readonly activeEventId = signal('seed-wedding');
+  readonly activeEvent = computed(
+    () => this.events().find((event) => event.id === this.activeEventId()) ?? null,
+  );
+  private readonly workspaceStates = new Map<string, WeddingWorkspace>();
+
   readonly guests = signal<Guest[]>(structuredClone(SEED_GUESTS));
   readonly schedule = signal<ScheduleItem[]>(structuredClone(SEED_SCHEDULE));
   readonly photos = signal<WeddingPhoto[]>(structuredClone(SEED_PHOTOS));
@@ -58,8 +96,12 @@ export class WeddingDataService {
     this.photos().filter((photo) => !this.missingPhotoUrls().has(photo.url)),
   );
   readonly meals = WEDDING_MEALS;
-  readonly details = WEDDING_DETAILS;
-  readonly coupleNames = `${WEDDING_DETAILS.partnerOne} & ${WEDDING_DETAILS.partnerTwo}`;
+  get details(): WeddingDetails {
+    return this.activeEvent()?.details ?? WEDDING_DETAILS;
+  }
+  get coupleNames(): string {
+    return `${this.details.partnerOne} & ${this.details.partnerTwo}`;
+  }
   readonly invitation = signal<InvitationSettings>(structuredClone(SEED_INVITATION));
 
   readonly budgetTotal = signal(BUDGET_TOTAL);
@@ -125,6 +167,7 @@ export class WeddingDataService {
   );
 
   constructor() {
+    this.workspaceStates.set(this.activeEventId(), this.captureWorkspace());
     if (!isPlatformBrowser(inject(PLATFORM_ID))) {
       return;
     }
@@ -143,6 +186,262 @@ export class WeddingDataService {
     });
   }
 
+  createEvent(details: NewWeddingEvent): WeddingEventRecord {
+    const name = details.name.trim();
+    const type = details.type.trim();
+    const partnerOne = details.partnerOne.trim();
+    const partnerTwo = details.partnerTwo.trim();
+    const venue = details.venue.trim();
+    const city = details.city.trim();
+    if (
+      !name ||
+      !type ||
+      !partnerOne ||
+      !partnerTwo ||
+      !venue ||
+      !city ||
+      !details.date ||
+      !details.time
+    ) {
+      throw new Error('All event fields are required.');
+    }
+
+    const event: WeddingEventRecord = {
+      id: crypto.randomUUID(),
+      name,
+      type,
+      time: details.time,
+      details: {
+        partnerOne,
+        partnerTwo,
+        date: details.date,
+        venue,
+        city,
+        rsvpDeadline: details.rsvpDeadline || details.date,
+      },
+      coverPhotoUrl: details.coverPhotoUrl,
+      venueAddress: details.venueAddress.trim(),
+      mapUrl: details.mapUrl.trim(),
+      archived: false,
+      managers: [],
+    };
+    this.events.update((events) => [...events, event]);
+    this.workspaceStates.set(event.id, this.emptyWorkspace(event.details));
+    this.activateEvent(event.id);
+    return event;
+  }
+
+  updateEvent(id: string, details: NewWeddingEvent): boolean {
+    const current = this.events().find((event) => event.id === id);
+    if (!current) {
+      return false;
+    }
+
+    const name = details.name.trim();
+    const type = details.type.trim();
+    const partnerOne = details.partnerOne.trim();
+    const partnerTwo = details.partnerTwo.trim();
+    const venue = details.venue.trim();
+    const city = details.city.trim();
+    if (
+      !name ||
+      !type ||
+      !partnerOne ||
+      !partnerTwo ||
+      !venue ||
+      !city ||
+      !details.date ||
+      !details.time
+    ) {
+      throw new Error('All event fields are required.');
+    }
+
+    const updated: WeddingEventRecord = {
+      ...current,
+      name,
+      type,
+      time: details.time,
+      details: {
+        partnerOne,
+        partnerTwo,
+        date: details.date,
+        venue,
+        city,
+        rsvpDeadline: details.rsvpDeadline || details.date,
+      },
+      coverPhotoUrl: details.coverPhotoUrl,
+      venueAddress: details.venueAddress.trim(),
+      mapUrl: details.mapUrl.trim(),
+    };
+    this.events.update((events) => events.map((event) => (event.id === id ? updated : event)));
+    if (id === this.activeEventId()) {
+      this.invitation.update((invitation) => ({
+        ...invitation,
+        nameOne: partnerOne,
+        nameTwo: partnerTwo,
+        coverPhotoUrl: details.coverPhotoUrl,
+        ceremonyTime: details.time,
+        venueAddress: details.venueAddress.trim(),
+        mapUrl: details.mapUrl.trim(),
+      }));
+    }
+    return true;
+  }
+
+  addEventManager(id: string, email: string): boolean {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      return false;
+    }
+    const event = this.events().find((entry) => entry.id === id);
+    if (!event || event.managers.includes(normalizedEmail)) {
+      return false;
+    }
+    this.events.update((events) =>
+      events.map((entry) =>
+        entry.id === id ? { ...entry, managers: [...entry.managers, normalizedEmail] } : entry,
+      ),
+    );
+    return true;
+  }
+
+  removeEventManager(id: string, email: string): boolean {
+    const event = this.events().find((entry) => entry.id === id);
+    if (!event?.managers.includes(email)) {
+      return false;
+    }
+    this.events.update((events) =>
+      events.map((entry) =>
+        entry.id === id
+          ? { ...entry, managers: entry.managers.filter((manager) => manager !== email) }
+          : entry,
+      ),
+    );
+    return true;
+  }
+
+  activateEvent(id: string): boolean {
+    const event = this.events().find((entry) => entry.id === id && !entry.archived);
+    if (!event) {
+      return false;
+    }
+    if (id === this.activeEventId()) {
+      return true;
+    }
+
+    this.workspaceStates.set(this.activeEventId(), this.captureWorkspace());
+    this.activeEventId.set(id);
+    this.applyWorkspace(this.workspaceStates.get(id) ?? this.emptyWorkspace(event.details));
+    return true;
+  }
+
+  archiveEvent(id: string): boolean {
+    const openEvents = this.events().filter((event) => !event.archived);
+    if (openEvents.length <= 1 || !openEvents.some((event) => event.id === id)) {
+      return false;
+    }
+
+    this.events.update((events) =>
+      events.map((event) => (event.id === id ? { ...event, archived: true } : event)),
+    );
+    if (id === this.activeEventId()) {
+      const nextEvent = openEvents.find((event) => event.id !== id);
+      if (nextEvent) {
+        this.activateEvent(nextEvent.id);
+      }
+    }
+    return true;
+  }
+
+  restoreEvent(id: string): boolean {
+    if (!this.events().some((event) => event.id === id && event.archived)) {
+      return false;
+    }
+    this.events.update((events) =>
+      events.map((event) => (event.id === id ? { ...event, archived: false } : event)),
+    );
+    return true;
+  }
+
+  deleteEvent(id: string): boolean {
+    const event = this.events().find((entry) => entry.id === id);
+    if (!event) {
+      return false;
+    }
+    const remainingActive = this.events().filter((entry) => !entry.archived && entry.id !== id);
+
+    if (id === this.activeEventId()) {
+      const nextEvent = remainingActive[0];
+      this.workspaceStates.set(id, this.captureWorkspace());
+      if (nextEvent) {
+        this.activeEventId.set(nextEvent.id);
+        this.applyWorkspace(
+          this.workspaceStates.get(nextEvent.id) ?? this.emptyWorkspace(nextEvent.details),
+        );
+      } else {
+        this.activeEventId.set('');
+        this.applyWorkspace(this.emptyWorkspace(WEDDING_DETAILS));
+      }
+    }
+    this.events.update((events) => events.filter((entry) => entry.id !== id));
+    this.workspaceStates.delete(id);
+    return true;
+  }
+
+  private captureWorkspace(): WeddingWorkspace {
+    return {
+      guests: this.guests(),
+      schedule: this.schedule(),
+      photos: this.photos(),
+      invitation: this.invitation(),
+      budgetTotal: this.budgetTotal(),
+      expenses: this.expenses(),
+      vendors: this.vendors(),
+      tables: this.tables(),
+      gifts: this.gifts(),
+      galleryOpen: this.galleryOpen(),
+      sharedPhotos: this.sharedPhotos(),
+      tasks: this.tasks(),
+    };
+  }
+
+  private emptyWorkspace(details: WeddingDetails): WeddingWorkspace {
+    return {
+      guests: [],
+      schedule: [],
+      photos: [],
+      invitation: {
+        ...structuredClone(SEED_INVITATION),
+        nameOne: details.partnerOne,
+        nameTwo: details.partnerTwo,
+        coverPhotoUrl: '/images/cover.jpg',
+      },
+      budgetTotal: 0,
+      expenses: [],
+      vendors: [],
+      tables: [],
+      gifts: [],
+      galleryOpen: true,
+      sharedPhotos: [],
+      tasks: [],
+    };
+  }
+
+  private applyWorkspace(workspace: WeddingWorkspace): void {
+    this.guests.set(workspace.guests);
+    this.schedule.set(workspace.schedule);
+    this.photos.set(workspace.photos);
+    this.invitation.set(workspace.invitation);
+    this.budgetTotal.set(workspace.budgetTotal);
+    this.expenses.set(workspace.expenses);
+    this.vendors.set(workspace.vendors);
+    this.tables.set(workspace.tables);
+    this.gifts.set(workspace.gifts);
+    this.galleryOpen.set(workspace.galleryOpen);
+    this.sharedPhotos.set(workspace.sharedPhotos);
+    this.tasks.set(workspace.tasks);
+  }
+
   /** Hides a photo whose file could not be loaded. */
   markPhotoMissing(url: string): void {
     this.missingPhotoUrls.update((urls) => new Set(urls).add(url));
@@ -153,6 +452,7 @@ export class WeddingDataService {
       ...details,
       id: Math.max(0, ...this.guests().map((entry) => entry.id)) + 1,
       invitationToken: crypto.randomUUID().replaceAll('-', ''),
+      nickname: details.nickname?.trim() ?? '',
       initials: details.name
         .split(/\s+/)
         .slice(0, 2)
@@ -163,6 +463,8 @@ export class WeddingDataService {
       attendingCount: 0,
       checkedIn: false,
       mealChoice: '',
+      wish: details.wish?.trim() ?? '',
+      note: details.note?.trim() ?? '',
       tableId: null,
     };
     this.guests.update((guests) => [guest, ...guests]);
@@ -173,6 +475,42 @@ export class WeddingDataService {
     for (const guest of guests) {
       this.addGuest(guest);
     }
+  }
+
+  updateGuest(updated: Guest): void {
+    this.guests.update((guests) =>
+      guests.map((guest) => (guest.id === updated.id ? { ...updated } : guest)),
+    );
+    this.gifts.update((gifts) =>
+      gifts.map((gift) =>
+        gift.guestId === updated.id ? { ...gift, giverName: updated.name } : gift,
+      ),
+    );
+  }
+
+  resetInvitationToken(id: number): string | null {
+    const guest = this.guests().find((entry) => entry.id === id);
+    if (!guest) {
+      return null;
+    }
+
+    const invitationToken = crypto.randomUUID().replaceAll('-', '');
+    this.guests.update((guests) =>
+      guests.map((entry) => (entry.id === id ? { ...entry, invitationToken } : entry)),
+    );
+    return invitationToken;
+  }
+
+  removeGuests(ids: ReadonlySet<number>): void {
+    if (!ids.size) {
+      return;
+    }
+    this.guests.update((guests) => guests.filter((guest) => !ids.has(guest.id)));
+    this.gifts.update((gifts) =>
+      gifts.map((gift) =>
+        gift.guestId !== null && ids.has(gift.guestId) ? { ...gift, guestId: null } : gift,
+      ),
+    );
   }
 
   updateRsvp(token: string, response: GuestRsvp): boolean {

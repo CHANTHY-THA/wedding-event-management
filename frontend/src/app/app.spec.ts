@@ -47,8 +47,148 @@ describe('App', () => {
   const statValue = (root: HTMLElement, index: number) =>
     root.querySelector(`.stat-card:nth-child(${index}) .stat-value`)?.textContent?.trim();
 
+  it('should create, archive, and restore an independent wedding event', async () => {
+    const wedding = TestBed.inject(WeddingDataService);
+    const originalGuests = wedding.guests().length;
+    const { root, router, settle, dispatch } = await render('/events');
+    expect(root.querySelector('h1')?.textContent).toContain('Your events');
+    expect(root.querySelectorAll('.event-card')).toHaveLength(1);
+
+    (root.querySelector('.events-heading .create-event-button') as HTMLButtonElement).click();
+    await settle();
+    expect(router.url).toBe('/events/create');
+    const fields = root.querySelectorAll('.create-form-grid input');
+    const values = [
+      'Alex & Jamie',
+      'Alex',
+      'Jamie',
+      '2027-06-12',
+      '15:00',
+      'Garden Hall',
+      'Phnom Penh',
+    ];
+    fields.forEach((field, index) => {
+      (field as HTMLInputElement).value = values[index];
+      dispatch(field, 'input');
+    });
+    await settle();
+    (root.querySelector('.submit-event-button') as HTMLButtonElement).click();
+    await settle();
+
+    expect(router.url).toMatch(/^\/event\//);
+    expect(root.querySelector('h1')?.textContent).toContain('Alex & Jamie');
+    expect(wedding.details.partnerOne).toBe('Alex');
+    expect(wedding.guests()).toHaveLength(0);
+    expect(wedding.schedule()).toHaveLength(0);
+
+    await router.navigateByUrl('/events');
+    await settle();
+    expect(root.querySelectorAll('.event-card')).toHaveLength(2);
+    (root.querySelector('.event-card-link') as HTMLAnchorElement).click();
+    await settle();
+    expect(router.url).toBe(`/event/${wedding.activeEventId()}`);
+    expect(root.querySelector('h1')?.textContent).toContain('Simeng & Chanthy');
+    await router.navigateByUrl('/events');
+    await settle();
+    (root.querySelectorAll('.event-menu-button')[1] as HTMLButtonElement).click();
+    await settle();
+    (root.querySelector('[data-action="archive"]') as HTMLButtonElement).click();
+    await settle();
+
+    expect(wedding.details.partnerOne).toBe('Simeng');
+    expect(wedding.guests()).toHaveLength(originalGuests);
+    expect(root.querySelectorAll('.event-card')).toHaveLength(1);
+
+    (root.querySelector('.archive-filter-button') as HTMLButtonElement).click();
+    await settle();
+    expect(root.querySelector('.event-card h2')?.textContent).toContain('Alex & Jamie');
+    (root.querySelector('.event-card .manage-event-button') as HTMLButtonElement).click();
+    await settle();
+    expect(root.querySelectorAll('.event-card')).toHaveLength(2);
+  });
+
+  it('should open the account menu and sign out from the events header', async () => {
+    const { root, router, settle } = await render('/events');
+    root.querySelector<HTMLButtonElement>('.profile-avatar')!.click();
+    await settle();
+
+    expect(root.querySelector('.account-menu-identity strong')?.textContent).toContain(
+      'Simeng & Chanthy',
+    );
+    expect(root.querySelector('.account-menu-language')).toBeTruthy();
+    expect(root.querySelector('.account-menu-logout')?.textContent).toContain('Logout');
+
+    root.querySelector<HTMLButtonElement>('.account-menu-logout')!.click();
+    await settle();
+    expect(router.url).toBe('/login');
+    expect(TestBed.inject(AuthService).isAuthenticated()).toBe(false);
+  });
+
+  it('should manage event actions from the three-dot menu', async () => {
+    const wedding = TestBed.inject(WeddingDataService);
+    const event = wedding.createEvent({
+      name: 'Taylor & Morgan',
+      type: 'Wedding',
+      partnerOne: 'Taylor',
+      partnerTwo: 'Morgan',
+      date: '2027-08-14',
+      time: '16:00',
+      venue: 'Rose Garden',
+      city: 'Phnom Penh',
+      venueAddress: '',
+      mapUrl: '',
+      coverPhotoUrl: '',
+    });
+    const { root, router, settle, dispatch } = await render('/events');
+    const eventCard = () =>
+      [...root.querySelectorAll<HTMLElement>('.event-card')].find((card) =>
+        card.textContent?.includes(event.name),
+      )!;
+
+    eventCard().querySelector<HTMLButtonElement>('.event-menu-button')!.click();
+    await settle();
+    expect(
+      [...root.querySelectorAll<HTMLButtonElement>('.event-menu-option')].map((button) =>
+        button.textContent?.trim(),
+      ),
+    ).toEqual(['Edit', 'Add managers', 'Archive', 'Delete']);
+
+    root.querySelector<HTMLButtonElement>('[data-action="managers"]')!.click();
+    await settle();
+    const managerInput = root.querySelector<HTMLInputElement>('.manager-form input')!;
+    managerInput.value = 'planner@example.com';
+    dispatch(managerInput, 'input');
+    root.querySelector<HTMLButtonElement>('.dialog-primary-button')!.click();
+    await settle();
+    expect(wedding.events().find((entry) => entry.id === event.id)?.managers).toEqual([
+      'planner@example.com',
+    ]);
+
+    eventCard().querySelector<HTMLButtonElement>('.event-menu-button')!.click();
+    await settle();
+    root.querySelector<HTMLButtonElement>('[data-action="edit"]')!.click();
+    await settle();
+    expect(router.url).toBe(`/events/create?edit=${event.id}`);
+    const nameInput = root.querySelector<HTMLInputElement>('.create-form-grid input')!;
+    nameInput.value = 'Taylor & Morgan Celebration';
+    dispatch(nameInput, 'input');
+    root.querySelector<HTMLButtonElement>('.submit-event-button')!.click();
+    await settle();
+    expect(wedding.events().find((entry) => entry.id === event.id)?.name).toBe(
+      'Taylor & Morgan Celebration',
+    );
+
+    eventCard().querySelector<HTMLButtonElement>('.event-menu-button')!.click();
+    await settle();
+    root.querySelector<HTMLButtonElement>('[data-action="delete"]')!.click();
+    await settle();
+    root.querySelector<HTMLButtonElement>('.dialog-danger-button')!.click();
+    await settle();
+    expect(wedding.events().some((entry) => entry.id === event.id)).toBe(false);
+  });
+
   it('should render the dashboard from live data', async () => {
-    const { root } = await render('/');
+    const { root } = await render('/dashboard');
     expect(root.querySelector('h1')?.textContent).toContain('Simeng & Chanthy');
     expect(TestBed.inject(Title).getTitle()).toBe('Dashboard · Vows');
     expect(statValue(root, 1)).toBe('17');
@@ -60,7 +200,7 @@ describe('App', () => {
   });
 
   it('should tick off a task', async () => {
-    const { root, settle, dispatch } = await render('/');
+    const { root, settle, dispatch } = await render('/dashboard');
     const checkbox = root.querySelector('#tasks input[type="checkbox"]') as HTMLInputElement;
 
     checkbox.checked = true;
@@ -82,7 +222,7 @@ describe('App', () => {
   });
 
   it('should add a new guest party', async () => {
-    const { root, settle, dispatch } = await render('/');
+    const { root, settle, dispatch } = await render('/dashboard');
 
     (root.querySelector('.page-actions .button-primary') as HTMLButtonElement).click();
     await settle();
@@ -102,8 +242,8 @@ describe('App', () => {
   });
 
   it('should add an event to the run of show', async () => {
-    const { root, router, settle, dispatch } = await render('/');
-    (root.querySelector('.main-nav a[href="/schedule"]') as HTMLAnchorElement).click();
+    const { root, router, settle, dispatch } = await render('/dashboard');
+    await router.navigateByUrl('/schedule');
     await settle();
     expect(router.url).toBe('/schedule');
     expect(TestBed.inject(Title).getTitle()).toBe('Event schedule · Vows');
@@ -223,7 +363,7 @@ describe('App', () => {
     expect(root.textContent).toContain('Your response has been recorded');
     expect(wedding.findGuestByToken('a7d4e2c9f0614b83')?.mealChoice).toBe('Vegan');
 
-    await router.navigateByUrl('/');
+    await router.navigateByUrl('/dashboard');
     await settle();
     expect(statValue(root, 2)).toBe('9');
 
@@ -235,7 +375,7 @@ describe('App', () => {
   });
 
   it('should add, pay off and filter budget items', async () => {
-    const { root, router, settle, dispatch } = await render('/');
+    const { root, router, settle, dispatch } = await render('/dashboard');
     (root.querySelector('.main-nav a[href="/budget"]') as HTMLAnchorElement).click();
     await settle();
     expect(router.url).toBe('/budget');
@@ -288,14 +428,14 @@ describe('App', () => {
     );
     expect(rows).toEqual(['Hair & makeup']);
 
-    await router.navigateByUrl('/');
+    await router.navigateByUrl('/dashboard');
     await settle();
     expect(root.querySelector('#budget .budget-total')?.textContent).toContain('$19,600');
   });
 
   it('should add, complete and filter checklist tasks', async () => {
-    const { root, router, settle, dispatch } = await render('/');
-    (root.querySelector('.main-nav a[href="/tasks"]') as HTMLAnchorElement).click();
+    const { root, router, settle, dispatch } = await render('/dashboard');
+    await router.navigateByUrl('/tasks');
     await settle();
     expect(router.url).toBe('/tasks');
     expect(TestBed.inject(Title).getTitle()).toBe('Planning checklist · Vows');
@@ -549,9 +689,33 @@ describe('App', () => {
     expect(root.querySelector('.preview-ribbon')?.textContent).toContain('Preview');
   });
 
+  it('should select the blush watercolor design and show its section navigation', async () => {
+    const { root, router, settle } = await render('/templates');
+    const card = [...root.querySelectorAll('.template-card')].find((entry) =>
+      entry.querySelector('h2')?.textContent?.includes('Blush watercolor gold'),
+    )!;
+    expect(card.querySelector('.template-price')?.textContent).toContain('Free');
+
+    (card.querySelector('.button-primary') as HTMLButtonElement).click();
+    await settle();
+    expect(card.classList).toContain('is-active');
+
+    await router.navigateByUrl('/invite/a7d4e2c9f0614b83');
+    await settle();
+    expect(root.querySelector('main.invite')?.getAttribute('data-template')).toBe('watercolor');
+    expect(root.querySelector('.watercolor-opening')).toBeTruthy();
+    (root.querySelector('.watercolor-open-button') as HTMLButtonElement).click();
+    await settle();
+    expect(root.querySelector('.watercolor-opening')).toBeNull();
+    expect(root.querySelector('.wedding-calendar')).toBeTruthy();
+    expect(root.querySelector('.wedding-calendar-day.is-wedding-day')).toBeTruthy();
+    expect(root.querySelectorAll('.watercolor-nav a').length).toBeGreaterThanOrEqual(3);
+    expect(root.querySelector('.watercolor-nav a[href="#program-title"]')).toBeTruthy();
+  });
+
   it('should record a riel envelope and track the thank-you', async () => {
-    const { root, router, settle, dispatch } = await render('/');
-    (root.querySelector('.main-nav a[href="/gifts"]') as HTMLAnchorElement).click();
+    const { root, router, settle, dispatch } = await render('/dashboard');
+    await router.navigateByUrl('/gifts');
     await settle();
     expect(router.url).toBe('/gifts');
     expect(statValue(root, 2)).toBe('400,000 ៛');
@@ -713,7 +877,7 @@ describe('App', () => {
     });
 
     it('should let the couple hide photos and close uploads', async () => {
-      const { root, router, settle } = await render('/');
+      const { root, router, settle } = await render('/dashboard');
       (root.querySelector('.main-nav a[href="/gallery"]') as HTMLAnchorElement).click();
       await settle();
       expect(router.url).toBe('/gallery');
@@ -751,7 +915,7 @@ describe('App', () => {
       await signInAs('staff@vows.local', 'vows-staff');
       const { root, router, settle } = await render('/gifts');
       expect(router.url).toBe('/check-in');
-      expect(navLabels(root)).toEqual(['Check-in']);
+      expect(navLabels(root)).toEqual([]);
 
       await router.navigateByUrl('/budget');
       await settle();
@@ -760,18 +924,17 @@ describe('App', () => {
 
     it('should give family helpers the gift book but not the budget', async () => {
       await signInAs('helper@vows.local', 'vows-helper');
-      const { root, router } = await render('/');
+      const { root, router } = await render('/dashboard');
       expect(router.url).toBe('/gifts');
-      expect(navLabels(root)).toEqual(['Gifts', 'Tasks']);
+      expect(navLabels(root)).toEqual([]);
     });
 
     it('should keep gifts private from planners', async () => {
       await signInAs('planner@vows.local', 'vows-planner');
       const { root, router } = await render('/gifts');
-      expect(router.url).toBe('/');
+      expect(router.url).toBe('/events');
       expect(navLabels(root)).not.toContain('Gifts');
-      expect(navLabels(root)).toContain('Vendors');
-      expect(navLabels(root)).toContain('Templates');
+      expect(root.querySelector('h1')?.textContent).toContain('Your events');
     });
   });
 
@@ -799,11 +962,14 @@ describe('App', () => {
 
       expect(router.url).toBe('/login?returnUrl=%2Fguests');
       expect(root.querySelector('.sidebar')).toBeNull();
-      expect(root.querySelector('h1')?.textContent).toContain('Welcome back');
+      expect(root.querySelector('h1')?.textContent).toContain('Login Account');
+      expect(root.querySelector('.login-brand')?.textContent).toContain('PlanEssential');
+      expect(root.querySelectorAll('.social-login-button')).toHaveLength(2);
+      expect(root.querySelector('#login-email')).toBeTruthy();
     });
 
     it('should reject a wrong password', async () => {
-      const { root, router, settle, dispatch } = await render('/');
+      const { root, router, settle, dispatch } = await render('/dashboard');
       fillLogin(root, 'admin@vows.local', 'wrong', dispatch);
       (root.querySelector('.login-submit') as HTMLButtonElement).click();
       await settle();

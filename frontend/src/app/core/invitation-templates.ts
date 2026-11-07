@@ -1,10 +1,16 @@
-export type InvitationTemplateId = 'split' | 'overlay' | 'floral' | 'royal';
+export type InvitationTemplateId = 'split' | 'overlay' | 'floral' | 'royal' | 'watercolor';
 
 /**
  * Designs this app can draw (their styles are in styles/_invitation.scss). Names, prices and
  * what a wedding owns come from the API, so prices can change without a new release.
  */
-export const TEMPLATE_IDS: InvitationTemplateId[] = ['split', 'overlay', 'floral', 'royal'];
+export const TEMPLATE_IDS: InvitationTemplateId[] = [
+  'split',
+  'overlay',
+  'floral',
+  'royal',
+  'watercolor',
+];
 
 /** Free to every wedding, and what guests see until the couple picks another. */
 export const FREE_TEMPLATE_ID: InvitationTemplateId = 'split';

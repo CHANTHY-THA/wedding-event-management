@@ -45,6 +45,13 @@ const CATALOGUE: Omit<StoreTemplate, 'owned'>[] = [
     priceCents: 2549,
     listPriceCents: 2999,
   },
+  {
+    id: 'watercolor',
+    name: 'Blush watercolor gold',
+    description: 'Blush watercolor paper, delicate florals and Khmer-inspired gold details.',
+    priceCents: 0,
+    listPriceCents: 0,
+  },
 ];
 
 /**
@@ -101,7 +108,7 @@ export class FakeApi {
     }
     if (route === 'PUT /api/weddings/current/template') {
       const id = body['templateId'] as InvitationTemplateId;
-      if (!this.owned.has(id)) {
+      if (!this.templateOwned(id)) {
         return fail(403, 'Buy this template before using it.');
       }
       this.activeTemplateId = id;
@@ -128,9 +135,16 @@ export class FakeApi {
 
   private catalogue() {
     return {
-      templates: CATALOGUE.map((template) => ({ ...template, owned: this.owned.has(template.id) })),
+      templates: CATALOGUE.map((template) => ({
+        ...template,
+        owned: this.templateOwned(template.id),
+      })),
       activeTemplateId: this.activeTemplateId,
     };
+  }
+
+  private templateOwned(id: InvitationTemplateId) {
+    return CATALOGUE.find((template) => template.id === id)?.priceCents === 0 || this.owned.has(id);
   }
 
   private createOrder(templateId: InvitationTemplateId) {
@@ -138,7 +152,7 @@ export class FakeApi {
     if (!template) {
       return fail(404, 'That template is not available.');
     }
-    if (this.owned.has(templateId)) {
+    if (this.templateOwned(templateId)) {
       return fail(409, 'You already own this template.');
     }
     const id = this.orders.size + 1;

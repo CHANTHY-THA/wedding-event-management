@@ -24,16 +24,10 @@ export class GiftsPage {
 
   protected readonly gifts = this.data.gifts;
   protected readonly totals = computed(() => cashTotals(this.gifts()));
-  /** All cash in the display currency, converting the other currency at today's rate. */
-  protected readonly combinedTotal = computed(() => {
-    const target = this.locale.currency();
+  protected readonly combinedUsdTotal = computed(() => {
     const totals = this.totals();
-    return (
-      this.locale.convert(totals.USD, 'USD', target) +
-      this.locale.convert(totals.KHR, 'KHR', target)
-    );
+    return totals.USD + this.locale.convert(totals.KHR, 'KHR', 'USD');
   });
-  protected readonly displayCurrency = this.locale.currency;
   protected readonly khrPerUsd = this.locale.khrPerUsd;
   protected readonly giftCount = computed(
     () => this.gifts().filter((gift) => gift.type === 'Gift').length,

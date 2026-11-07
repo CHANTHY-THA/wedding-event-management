@@ -1,18 +1,15 @@
-import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
-import { ROLE_LABELS, homePathFor } from '../../core/permissions';
-import { LanguageToggle } from '../../shared/language-toggle/language-toggle';
+import { homePathFor } from '../../core/permissions';
 import { ToastService } from '../../core/toast.service';
 import { WeddingDataService } from '../../core/wedding-data.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
-import { DEMO_ACCOUNTS } from './demo-accounts';
 
 @Component({
   selector: 'app-login-page',
-  imports: [TranslatePipe, DatePipe, FormsModule, LanguageToggle],
+  imports: [TranslatePipe, FormsModule, RouterLink],
   templateUrl: './login-page.html',
   styleUrl: './login-page.scss',
 })
@@ -23,23 +20,18 @@ export class LoginPage {
   private readonly toast = inject(ToastService);
   private readonly data = inject(WeddingDataService);
 
-  protected readonly coupleNames = this.data.coupleNames;
-  protected readonly details = this.data.details;
   protected readonly showPassword = signal(false);
-  /** One sign-in shortcut per role, so each permission level is easy to try in this preview. */
-  protected readonly demoAccounts = DEMO_ACCOUNTS.map((account) => ({
-    ...account,
-    roleLabel: ROLE_LABELS[account.role],
-  }));
   protected readonly email = signal('');
   protected readonly password = signal('');
   protected readonly errorMessage = signal('');
   protected readonly submitting = signal(false);
 
-  protected useDemoAccount(email: string, password: string): void {
-    this.email.set(email);
-    this.password.set(password);
-    this.errorMessage.set('');
+  protected notifyProvider(provider: string): void {
+    this.toast.show(`${provider} sign-in is not configured yet.`, 'info');
+  }
+
+  protected notifyUnavailable(feature: string): void {
+    this.toast.show(`${feature} is not available yet.`, 'info');
   }
 
   protected async submit(): Promise<void> {
@@ -48,6 +40,10 @@ export class LoginPage {
     }
     if (!this.email().trim() || !this.password()) {
       this.errorMessage.set('Enter your email and password.');
+      return;
+    }
+    if (!this.email().includes('@')) {
+      this.errorMessage.set('Phone sign-in is not available yet. Use your account email.');
       return;
     }
 

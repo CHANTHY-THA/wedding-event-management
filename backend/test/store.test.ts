@@ -28,9 +28,10 @@ describe('template store', () => {
       'overlay',
       'floral',
       'royal',
+      'watercolor',
     ]);
     expect(body.templates[3]).toMatchObject({ id: 'royal', priceCents: 2549, listPriceCents: 2999, owned: false });
-    expect(await owned(agent)).toEqual(['split']);
+    expect(await owned(agent)).toEqual(['split', 'watercolor']);
   });
 
   it('buys a template, then shows it on the guests’ invitation pages', async () => {
@@ -53,7 +54,7 @@ describe('template store', () => {
 
     const paid = await agent.post(`/api/orders/${created.body.id}/simulate-payment`).send({}).expect(200);
     expect(paid.body).toMatchObject({ status: 'paid', qrString: null, paidAt: expect.any(String) });
-    expect(await owned(agent)).toEqual(['split', 'royal']);
+    expect(await owned(agent)).toEqual(['split', 'royal', 'watercolor']);
 
     await agent.put('/api/weddings/current/template').send({ templateId: 'royal' }).expect(200);
     const invitation = await request(api.app).get('/api/public/invitations/a7d4e2c9f0614b83').expect(200);
@@ -101,7 +102,7 @@ describe('template store', () => {
 
     const checked = await agent.get(`/api/orders/${order.id}`).expect(200);
     expect(checked.body.status).toBe('review');
-    expect(await owned(agent)).toEqual(['split']);
+    expect(await owned(agent)).toEqual(['split', 'watercolor']);
     const [event] = await api.db.query<{ kind: string }>(
       'SELECT kind FROM payment_events WHERE order_id = $1 ORDER BY id DESC LIMIT 1',
       [order.id],

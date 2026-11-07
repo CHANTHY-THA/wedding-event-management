@@ -1,0 +1,86 @@
+<div class="invite-link-backdrop" (click)="closed.emit()">
+  <section
+    class="invite-link-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="invite-link-title"
+    (click)="$event.stopPropagation()"
+  >
+    <button
+      class="invite-link-close"
+      type="button"
+      [attr.aria-label]="'Close' | t"
+      (click)="closed.emit()"
+    >
+      ×
+    </button>
+    <div class="invite-link-ornament" aria-hidden="true">
+      <span></span>
+      <svg viewBox="0 0 24 24">
+        <path d="m22 2-7 20-4-9-9-4 20-7ZM22 2 11 13" />
+      </svg>
+      <span></span>
+    </div>
+    <h2 id="invite-link-title">{{ 'Invite link' | t }}</h2>
+    <p class="invite-link-guest">{{ guest().name }}</p>
+
+    <div class="invite-link-copy-row">
+      <svg class="invite-link-chain" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 13a5 5 0 0 0 7.07 0l3-3A5 5 0 0 0 13 2.93l-1.72 1.71m2.72 6.36a5 5 0 0 0-7.07 0l-3 3A5 5 0 0 0 11 21.07l1.71-1.71" />
+      </svg>
+      <span class="invite-link-url" [title]="invitationUrl()">{{ displayedUrl() }}</span>
+      <button class="invite-copy-link-button" type="button" (click)="copyLink(false)">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="8" y="8" width="13" height="13" rx="2" />
+          <path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3" />
+        </svg>
+        {{ 'Copy only link' | t }}
+      </button>
+    </div>
+
+    @if (confirmingReset()) {
+      <div class="invite-reset-confirm" role="alert">
+        <p>{{ 'Resetting the invite invalidates the previous link.' | t }}</p>
+        <div>
+          <button type="button" (click)="confirmingReset.set(false)">{{ 'Cancel' | t }}</button>
+          <button class="invite-reset-confirm-button" type="button" (click)="resetInvitation()">
+            {{ 'Reset invite' | t }}
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="invite-actions-grid">
+        <button class="invite-action-card" type="button" (click)="copyLink(true)">
+          <span class="invite-action-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 5h16v12H9l-5 4V5Z" />
+              <path d="M8 9h8m-8 4h5" />
+            </svg>
+          </span>
+          <span>{{ 'Copy message involved' | t }}</span>
+        </button>
+        <button class="invite-action-card" type="button" (click)="openTicket()">
+          <span class="invite-action-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3" />
+            </svg>
+          </span>
+          <span>{{ 'Download Ticket' | t }}</span>
+        </button>
+        <button
+          class="invite-action-card"
+          type="button"
+          (click)="confirmingReset.set(true)"
+        >
+          <span class="invite-action-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 7v5h-5M4 17v-5h5" />
+              <path d="M5.64 9A7 7 0 0 1 17.5 6.5L20 12M4 12l2.5 5.5A7 7 0 0 0 18.36 15" />
+            </svg>
+          </span>
+          <span>{{ 'Reset Invite' | t }}</span>
+        </button>
+      </div>
+    }
+  </section>
+</div>
